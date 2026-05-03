@@ -11,7 +11,13 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { useMemo, useState, type JSX, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type JSX,
+  type ReactNode,
+} from "react";
 
 import {
   reviewFilterTopics,
@@ -40,9 +46,45 @@ const REVIEW_TAB_MESSAGE: Record<
 const reviewTooltip =
   "pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150";
 
+const REVIEW_TAB_FADE_MS = 220;
+
 export function ReviewsSection(): JSX.Element {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<ReviewTabId>(REVIEW_TAB_IDS[0]);
+  /** Tab used for list content; trails `activeTab` while cross-fading. */
+  const [displayTab, setDisplayTab] = useState<ReviewTabId>(activeTab);
+  const [listFadeIn, setListFadeIn] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const onChange = () => setReduceMotion(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const fadeMs = reduceMotion ? 0 : REVIEW_TAB_FADE_MS;
+
+  useEffect(() => {
+    if (activeTab === displayTab) {
+      setListFadeIn(true);
+      return;
+    }
+    if (fadeMs === 0) {
+      setDisplayTab(activeTab);
+      setListFadeIn(true);
+      return;
+    }
+    setListFadeIn(false);
+    const id = window.setTimeout(() => {
+      setDisplayTab(activeTab);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setListFadeIn(true));
+      });
+    }, fadeMs);
+    return () => window.clearTimeout(id);
+  }, [activeTab, displayTab, fadeMs]);
 
   const [starSelections, toggleStarSelection] = useBooleanMap({
     5: true,
@@ -64,12 +106,12 @@ export function ReviewsSection(): JSX.Element {
     () =>
       applyReviewFilters(
         sampleReviews,
-        activeTab,
+        displayTab,
         starSelections,
         topicSelections,
         hasTopicFacets,
       ),
-    [activeTab, starSelections, topicSelections, hasTopicFacets],
+    [displayTab, starSelections, topicSelections, hasTopicFacets],
   );
 
   const histogramMax = Math.max(
@@ -193,29 +235,36 @@ export function ReviewsSection(): JSX.Element {
             </div>
           </div>
 
-          {filtered.length === 0 ? (
-            <p className="border-t border-dashed border-[#D1D1D1] pt-10 font-sans text-[14px] text-neutral-600">
-              {t("reviews.emptyFilters")}
-            </p>
-          ) : (
-            <ul aria-busy={false}>
-              {filtered.map((review, index) => (
-                <li
-                  key={review.id}
-                  className={cn(
-                    /* Figma: separators are between items only — no rule above the first review */
-                    index > 0 && "border-t border-dashed border-[#D1D1D1]",
-                    /* Consistent vertical padding; lighter top on first row under pills */
-                    "pb-8 pt-8 first:pt-6",
-                  )}
-                >
-                  <ReviewCard review={review} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <div
+            className={cn(
+              "opacity-100 motion-safe:transition-opacity motion-safe:duration-200 motion-safe:ease-out",
+              !listFadeIn && "motion-safe:opacity-0",
+            )}
+          >
+            {filtered.length === 0 ? (
+              <p className="border-t border-dashed border-[#D1D1D1] pt-10 font-sans text-[14px] text-neutral-600">
+                {t("reviews.emptyFilters")}
+              </p>
+            ) : (
+              <ul aria-busy={false}>
+                {filtered.map((review, index) => (
+                  <li
+                    key={review.id}
+                    className={cn(
+                      /* Figma: separators are between items only — no rule above the first review */
+                      index > 0 && "border-t border-dashed border-[#D1D1D1]",
+                      /* Consistent vertical padding; lighter top on first row under pills */
+                      "pb-8 pt-8 first:pt-6",
+                    )}
+                  >
+                    <ReviewCard review={review} />
+                  </li>
+                ))}
+              </ul>
+            )}
 
-          {filtered.length > 0 ? <Pagination /> : null}
+            {filtered.length > 0 ? <Pagination /> : null}
+          </div>
         </div>
       </div>
     </section>
