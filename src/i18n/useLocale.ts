@@ -23,13 +23,13 @@ export function useLocale() {
   )
 
   const t = useCallback(
-    (key: MessageKey): string => translate<string>(key),
+    (key: MessageKey): string => translate(key) as string,
     [translate],
   )
 
   const tf = useCallback(
     (key: MessageKey, vars: Record<string, string | number>): string =>
-      translate<string>(key, vars),
+      translate(key, vars) as string,
     [translate],
   )
 
