@@ -1,6 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, type JSX } from 'react'
 
-import { PRODUCT_ENDPOINT } from '../api/product'
+import { TASK_PRODUCT_SLUG, fetchProductBySlug } from '../api/product'
 import { CartDrawer } from '../components/CartDrawer'
 import { ProductBuyingSection } from '../components/ProductBuyingSection'
 import { ProductGallery } from '../components/ProductGallery'
@@ -23,11 +24,43 @@ export function ProductDetailPage(): JSX.Element {
   const loading = useProductStore((state) => state.loading)
   const errorMessage = useProductStore((state) => state.error)
   const selections = useProductStore((state) => state.selectedVariations)
-  const hydrate = useProductStore((state) => state.fetchProduct)
+  const ingestProduct = useProductStore((state) => state.ingestProduct)
+  const ingestError = useProductStore((state) => state.ingestError)
+  const setLoadingFlag = useProductStore((state) => state.setLoadingFlag)
 
+  const slug = TASK_PRODUCT_SLUG
+  const productQuery = useQuery({
+    queryKey: ['easyorders-product', slug],
+    queryFn: () => fetchProductBySlug(slug),
+    staleTime: 60_000,
+  })
+
+  /** Keep Zustand in sync with React Query without a flash of “error” while data awaits ingest. */
   useEffect(() => {
-    hydrate(PRODUCT_ENDPOINT)
-  }, [hydrate])
+    if (productQuery.data) {
+      ingestProduct(productQuery.data)
+      return
+    }
+    if (productQuery.isError) {
+      const msg =
+        productQuery.error instanceof Error
+          ? productQuery.error.message
+          : 'Something went wrong while loading product'
+      ingestError(msg)
+      return
+    }
+    if (productQuery.isPending) {
+      setLoadingFlag(true)
+    }
+  }, [
+    productQuery.data,
+    productQuery.isError,
+    productQuery.isPending,
+    productQuery.error,
+    ingestProduct,
+    ingestError,
+    setLoadingFlag,
+  ])
 
   const gallery = useMemo(() => {
     if (!product) return []
@@ -52,7 +85,10 @@ export function ProductDetailPage(): JSX.Element {
   } else if (!product || errorMessage) {
     bodyContent = (
       <Reveal>
-        <ErrorPanels message={errorMessage ?? 'We could not find that product anymore.'} />
+        <ErrorPanels
+          message={errorMessage ?? 'We could not find that product anymore.'}
+          onRetry={() => void productQuery.refetch()}
+        />
       </Reveal>
     )
   } else {
@@ -159,9 +195,13 @@ function LoadingPanels(): JSX.Element {
   )
 }
 
-function ErrorPanels({ message }: { message: string }): JSX.Element {
-  const retry = useProductStore((store) => store.fetchProduct)
-
+function ErrorPanels({
+  message,
+  onRetry,
+}: {
+  message: string
+  onRetry: () => void
+}): JSX.Element {
   return (
     <div className="space-y-[18px] py-32 text-neutral-950">
       <div className="space-y-[22px] border border-black px-14 py-[46px] text-center lg:text-left">
@@ -171,7 +211,7 @@ function ErrorPanels({ message }: { message: string }): JSX.Element {
         </p>
         <button
           type="button"
-          onClick={() => retry(PRODUCT_ENDPOINT)}
+          onClick={onRetry}
           className="inline-flex rounded-full border border-transparent bg-black px-16 py-4 text-[12px] font-semibold uppercase tracking-[0.43em] text-white"
         >
           Retry retrieval

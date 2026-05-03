@@ -29,7 +29,7 @@ const linkColumns = [
 /** One compound strip: underline belongs to wrapper; zero gap; no browser focus box on the input */
 function NewsletterField(): JSX.Element {
   return (
-    <div className="max-w-[min(100%,_420px)] font-sans">
+    <div className="w-full max-w-full font-sans md:max-w-[80%] xl:max-w-[55%]">
       <form
         aria-label="Newsletter signup"
         className="w-full"
@@ -38,7 +38,7 @@ function NewsletterField(): JSX.Element {
         <label htmlFor="jl-footer-email" className="sr-only">
           Email address — get latest offers to your inbox
         </label>
-        <div className="flex w-full flex-nowrap items-end gap-0 border-b border-solid border-neutral-950 pb-0 transition-colors duration-150 ease-out focus-within:border-black">
+        <div className="flex w-full flex-nowrap items-center gap-0 border-b border-solid border-neutral-950 pb-0 transition-colors duration-150 ease-out focus-within:border-black">
           <input
             id="jl-footer-email"
             data-jl-newsletter-input=""

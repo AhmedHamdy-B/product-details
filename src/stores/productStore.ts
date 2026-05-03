@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
 import type { Product, ProductVariant } from '../types/product'
-import { PRODUCT_ENDPOINT, fetchProductByUrl } from '../api/product'
+import { fetchProductBySlug } from '../api/product'
 import { resolveCatalogAndPayable } from '../lib/pricing'
 import {
   buildGallery as buildGalleryUrls,
@@ -17,7 +17,12 @@ export type ProductStore = {
   selectedVariations: Record<string, string>
   selectedVariant: ProductVariant | null
 
-  fetchProduct: (endpoint?: string) => Promise<void>
+  /** Loads the product for the given catalogue slug (matches ElegantSoft readme contract). */
+  fetchProduct: (slug: string) => Promise<void>
+  /** Used by React Query sync in `ProductDetailPage`; also invoked on successful `fetchProduct`. */
+  ingestProduct: (product: Product) => void
+  ingestError: (message: string) => void
+  setLoadingFlag: (loading: boolean) => void
   setSelectedVariation: (variationType: string, value: string) => void
   clearSelectedVariations: () => void
   hydrateSelectionFromVariant: (variant: ProductVariant) => void
@@ -49,36 +54,51 @@ export const useProductStore = create<ProductStore>()(
     selectedVariations: {},
     selectedVariant: null,
 
-    fetchProduct: async (endpoint = PRODUCT_ENDPOINT) => {
+    fetchProduct: async (slug: string) => {
       set((draft) => {
         draft.loading = true
         draft.error = null
       })
       try {
-        const data = await fetchProductByUrl(endpoint)
-        set((draft) => {
-          draft.product = data
-          draft.loading = false
-          draft.selectedVariations = {}
-          const first = data.variants[0]
-          if (first) {
-            for (const vp of first.variation_props) {
-              draft.selectedVariations[variationKey(vp.variation)] = vp.variation_prop
-            }
-          }
-          applySelection(draft)
-        })
+        const data = await fetchProductBySlug(slug)
+        get().ingestProduct(data)
       } catch (e) {
         const message =
           e instanceof Error ? e.message : 'Something went wrong while loading product'
-        set((draft) => {
-          draft.loading = false
-          draft.error = message
-          draft.product = null
-          draft.selectedVariations = {}
-          draft.selectedVariant = null
-        })
+        get().ingestError(message)
       }
+    },
+
+    ingestProduct: (data) => {
+      set((draft) => {
+        draft.product = data
+        draft.loading = false
+        draft.error = null
+        draft.selectedVariations = {}
+        const first = data.variants[0]
+        if (first) {
+          for (const vp of first.variation_props) {
+            draft.selectedVariations[variationKey(vp.variation)] = vp.variation_prop
+          }
+        }
+        applySelection(draft)
+      })
+    },
+
+    ingestError: (message) => {
+      set((draft) => {
+        draft.loading = false
+        draft.error = message
+        draft.product = null
+        draft.selectedVariations = {}
+        draft.selectedVariant = null
+      })
+    },
+
+    setLoadingFlag: (loading) => {
+      set((draft) => {
+        draft.loading = loading
+      })
     },
 
     setSelectedVariation: (variationType, value) => {

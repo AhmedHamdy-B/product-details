@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 
 import type { Product, Variation } from "../types/product";
 import { formatMoney } from "../lib/money";
@@ -9,6 +9,7 @@ import {
 } from "../lib/variants";
 import { STORE_STAR_HEX } from "./Stars";
 import { cn } from "../lib/cn";
+import { getMaxBasketQuantity } from "../lib/qty";
 import { useProductStore } from "../stores/productStore";
 import { useCartStore } from "../stores/cartStore";
 /** Figma PDP header defaults when API omits social-proof fields */
@@ -48,6 +49,45 @@ function VariationHeading({ label, value }: { label: string; value: string }) {
   );
 }
 
+function StockStatusLabel({
+  trackStock,
+  variantQty,
+}: {
+  trackStock: boolean;
+  variantQty?: number;
+}): JSX.Element {
+  if (!trackStock) {
+    return (
+      <p className="mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]">
+        In stock
+      </p>
+    );
+  }
+
+  const qty = variantQty ?? 0;
+  if (qty <= 0) {
+    return (
+      <p className="mt-3 text-[14px] font-semibold leading-snug text-red-700">
+        Out of stock
+      </p>
+    );
+  }
+
+  const low = qty <= 3;
+  return (
+    <p
+      className={
+        low
+          ? "mt-3 text-[14px] font-semibold leading-snug text-amber-800"
+          : "mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]"
+      }
+    >
+      {low ? "Low stock — " : "In stock — "}
+      {qty} available
+    </p>
+  );
+}
+
 type BuyingProps = {
   product: Product;
 };
@@ -72,6 +112,16 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
+  const [quantity, setQuantity] = useState(1);
+
+  const maxBasketQty = useMemo(
+    () => getMaxBasketQuantity(product, selectedVariant?.quantity),
+    [product, selectedVariant?.quantity],
+  );
+
+  useEffect(() => {
+    setQuantity((q) => Math.min(Math.max(1, q), maxBasketQty));
+  }, [maxBasketQty, selectedVariant?.id]);
 
   const heroImageSelection = (): string => {
     const colorKey = variationKeyNormalize("color");
@@ -107,7 +157,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
       selections: { ...selectedVariations },
       variantId: selectedVariant.id,
       unitPrice: payable,
-      quantity: 1,
+      quantity,
     });
   };
 
@@ -123,6 +173,23 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         <h1 className="mt-1 font-sans text-[24px] font-bold leading-[1.25] tracking-[-0.02em] text-black sm:text-[28px]">
           {product.name}
         </h1>
+
+        {product.categories?.length ? (
+          <ul className="mt-3 flex flex-wrap gap-2" aria-label="Product categories">
+            {product.categories.map((category) => (
+              <li key={category.id}>
+                <span className="inline-flex rounded-full border border-[#D1D1D1] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
+                  {category.name}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <StockStatusLabel
+          trackStock={product.track_stock}
+          variantQty={selectedVariant?.quantity}
+        />
 
         <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
@@ -206,6 +273,56 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           {validationMessage}
         </p>
       )}
+
+      <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
+        <div className="flex items-center gap-3">
+          <span
+            id="pdp-qty-label"
+            className="text-[13px] font-semibold tracking-tight text-black"
+          >
+            Quantity
+          </span>
+          <div
+            className="flex items-center gap-3 border border-black px-[10px] py-[8px] text-black"
+            role="group"
+            aria-labelledby="pdp-qty-label"
+          >
+            <button
+              type="button"
+              aria-label="Decrease quantity"
+              disabled={quantity <= 1}
+              className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
+              onClick={() =>
+                setQuantity((q) => Math.max(1, q - 1))
+              }
+            >
+              −
+            </button>
+            <span className="min-w-[28px] text-center text-[17px] font-semibold tabular-nums">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              disabled={
+                quantity >= maxBasketQty ||
+                Boolean(
+                  product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
+                )
+              }
+              className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
+              onClick={() =>
+                setQuantity((q) => Math.min(maxBasketQty, q + 1))
+              }
+            >
+              +
+            </button>
+          </div>
+          <span className="sr-only">
+            Maximum {maxBasketQty} for this selection
+          </span>
+        </div>
+      </div>
 
       <div className="flex gap-4 pt-4">
         <button

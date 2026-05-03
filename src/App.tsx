@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { JSX } from 'react'
 
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { GoToTopButton } from './components/GoToTopButton'
 import { ProductDetailPage } from './pages/ProductDetailPage'
 
@@ -17,7 +18,9 @@ const queryClient = new QueryClient({
 export default function App(): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
-      <ProductDetailPage />
+      <ErrorBoundary>
+        <ProductDetailPage />
+      </ErrorBoundary>
       <GoToTopButton />
     </QueryClientProvider>
   )
