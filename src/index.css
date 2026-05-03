@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-jl-white text-jl-black antialiased font-sans;
+  }
+}
+
+@layer components {
+  /** Beat @tailwindcss/forms focus ring — compound footer field should stay underline-only */
+  [data-jl-newsletter-input]:focus,
+  [data-jl-newsletter-input]:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /** Forms plugin adds email input padding-bottom; strip it so border-b hugs the row */
+  [data-jl-newsletter-input] {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    vertical-align: bottom;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-scroll-fade {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+  }
+}
