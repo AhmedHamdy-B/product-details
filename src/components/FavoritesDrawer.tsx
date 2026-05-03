@@ -7,9 +7,11 @@ import {
 } from "@headlessui/react";
 import { Heart, X } from "lucide-react";
 
+import { useLocale } from "../i18n/useLocale";
 import { useFavoritesStore } from "../stores/favoritesStore";
 
 export function FavoritesDrawer(): JSX.Element {
+  const { t } = useLocale();
   const open = useFavoritesStore((s) => s.drawerOpen);
   const close = useFavoritesStore((s) => s.closeDrawer);
   const items = useFavoritesStore((s) => s.items);
@@ -18,18 +20,18 @@ export function FavoritesDrawer(): JSX.Element {
   return (
     <Dialog open={open} onClose={() => close()} className="relative z-[75]">
       <DialogBackdrop transition className="fixed inset-0 bg-black/40" />
-      <div className="fixed inset-0 z-[80] flex justify-end">
+      <div className="fixed inset-0 z-[80] flex justify-end rtl:justify-start">
         <DialogPanel
           transition
-          className="flex h-full w-full max-w-xl flex-col gap-6 border-l border-neutral-900 bg-white px-6 py-8 shadow-2xl data-[closed]:translate-x-6 data-[closed]:opacity-0"
+          className="flex h-full w-full max-w-xl flex-col gap-6 border-s border-neutral-900 bg-white px-6 py-8 shadow-2xl data-[closed]:ltr:translate-x-6 data-[closed]:rtl:-translate-x-6 data-[closed]:opacity-0"
         >
           <div className="flex items-center justify-between gap-4">
             <DialogTitle className="font-sans text-[22px] font-bold tracking-[-0.02em] text-black">
-              Favourites
+              {t("fav.title")}
             </DialogTitle>
             <button
               type="button"
-              aria-label="Close Favourite Items"
+              aria-label={t("fav.close")}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black text-black transition hover:bg-neutral-100"
               onClick={close}
             >
@@ -38,12 +40,9 @@ export function FavoritesDrawer(): JSX.Element {
           </div>
 
           {items.length === 0 ? (
-            <p className="text-[15px] leading-relaxed text-neutral-600">
-              Save pieces you love by tapping the heart on a product&apos;s
-              gallery.
-            </p>
+            <p className="text-[15px] leading-relaxed text-neutral-600">{t("fav.empty")}</p>
           ) : (
-            <ul className="flex flex-1 flex-col gap-0 overflow-y-auto pr-1">
+            <ul className="flex flex-1 flex-col gap-0 overflow-y-auto pe-1">
               {items.map((item) => (
                 <li
                   key={item.productId}
@@ -72,7 +71,7 @@ export function FavoritesDrawer(): JSX.Element {
                         fill="currentColor"
                         aria-hidden
                       />
-                      Remove from favourites
+                      {t("fav.remove")}
                     </button>
                   </div>
                 </li>

@@ -1,4 +1,6 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component, type ErrorInfo, type JSX, type ReactNode } from 'react'
+
+import { useLocale } from '../i18n/useLocale'
 
 type Props = {
   children: ReactNode
@@ -7,6 +9,49 @@ type Props = {
 type State = {
   hasError: boolean
   message: string | null
+}
+
+function ErrorFallbackUI({
+  message,
+  onRetry,
+  onReload,
+}: {
+  message: string | null
+  onRetry: () => void
+  onReload: () => void
+}): JSX.Element {
+  const { t } = useLocale()
+
+  return (
+    <div className="min-h-[50vh] bg-jl-white px-6 py-20 text-neutral-950">
+      <div
+        className="mx-auto max-w-lg space-y-4 rounded-lg border border-neutral-900/15 bg-white p-8 shadow-sm"
+        role="alert"
+        aria-live="assertive"
+      >
+        <h1 className="font-serif text-2xl font-medium tracking-tight">{t('fatal.title')}</h1>
+        <p className="text-[15px] leading-relaxed text-neutral-600">
+          {message ?? t('fatal.genericMessage')}
+        </p>
+        <div className="flex flex-wrap gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-full bg-black px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+          >
+            {t('fatal.tryAgain')}
+          </button>
+          <button
+            type="button"
+            onClick={onReload}
+            className="rounded-full border border-neutral-900/30 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900 transition hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+          >
+            {t('fatal.reload')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -30,34 +75,11 @@ export class ErrorBoundary extends Component<Props, State> {
   override render(): ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[50vh] bg-jl-white px-6 py-20 text-neutral-950">
-          <div
-            className="mx-auto max-w-lg space-y-4 rounded-lg border border-neutral-900/15 bg-white p-8 shadow-sm"
-            role="alert"
-            aria-live="assertive"
-          >
-            <h1 className="font-serif text-2xl font-medium tracking-tight">Something broke in the UI</h1>
-            <p className="text-[15px] leading-relaxed text-neutral-600">
-              {this.state.message ?? 'An unexpected error occurred. You can retry or reload the page.'}
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <button
-                type="button"
-                onClick={this.handleRetry}
-                className="rounded-full bg-black px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-              >
-                Try again
-              </button>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="rounded-full border border-neutral-900/30 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900 transition hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-              >
-                Reload
-              </button>
-            </div>
-          </div>
-        </div>
+        <ErrorFallbackUI
+          message={this.state.message}
+          onRetry={this.handleRetry}
+          onReload={() => window.location.reload()}
+        />
       )
     }
 

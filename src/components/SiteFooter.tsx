@@ -1,42 +1,58 @@
 import type { JSX } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { SiFacebook, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
 
 import johnLewisLogo from "../assets/john_lewis.png";
 import { cn } from "../lib/cn";
+import { useLocale } from "../i18n/useLocale";
+import type { MessageKey } from "../i18n/messages";
 import { PageContainer } from "./PageContainer";
 
-const linkColumns = [
+const footerColumns: ReadonlyArray<{
+  headingKey: MessageKey;
+  links: ReadonlyArray<MessageKey>;
+}> = [
   {
-    heading: "Shop",
-    links: ["My account", "Login", "Wishlist", "Cart"],
-  },
-  {
-    heading: "Information",
+    headingKey: "footer.col.shop",
     links: [
-      "Shipping Policy",
-      "Returns & Refunds",
-      "Cookies Policy",
-      "Frequently asked",
+      "footer.link.myAccount",
+      "footer.link.login",
+      "footer.link.wishlist",
+      "footer.link.cart",
     ],
   },
   {
-    heading: "Company",
-    links: ["About us", "Privacy Policy", "Terms & Conditions", "Contact Us"],
+    headingKey: "footer.col.information",
+    links: [
+      "footer.link.shippingPolicy",
+      "footer.link.returnsRefunds",
+      "footer.link.cookiesPolicy",
+      "footer.link.frequentlyAsked",
+    ],
+  },
+  {
+    headingKey: "footer.col.company",
+    links: [
+      "footer.link.aboutUs",
+      "footer.link.privacyPolicy",
+      "footer.link.termsConditions",
+      "footer.link.contactUs",
+    ],
   },
 ] as const;
 
-/** One compound strip: underline belongs to wrapper; zero gap; no browser focus box on the input */
 function NewsletterField(): JSX.Element {
+  const { t } = useLocale();
   return (
     <div className="w-full max-w-full font-sans md:max-w-[80%] xl:max-w-[55%]">
       <form
-        aria-label="Newsletter signup"
+        aria-label={t("footer.newsletterAria")}
         className="w-full"
         onSubmit={(event) => event.preventDefault()}
       >
         <label htmlFor="jl-footer-email" className="sr-only">
-          Email address — get latest offers to your inbox
+          {t("footer.newsletterLabel")}
         </label>
         <div className="flex w-full flex-nowrap items-center gap-0 border-b border-solid border-neutral-950 pb-0 transition-colors duration-150 ease-out focus-within:border-black">
           <input
@@ -46,7 +62,7 @@ function NewsletterField(): JSX.Element {
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="Get latest offers to your inbox"
+            placeholder={t("footer.newsletterPlaceholder")}
             className="
               min-h-0 min-w-0 flex-1
               rounded-none bg-transparent px-0 !pb-0 pt-[7px] text-[13px] font-normal !leading-[1.3]
@@ -69,9 +85,9 @@ function NewsletterField(): JSX.Element {
           />
           <button
             type="submit"
-            aria-label="Submit newsletter signup"
+            aria-label={t("footer.newsletterSubmit")}
             className="
-              ml-1 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer
+              ms-1 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer
               items-center justify-center rounded-xl
               bg-black text-white outline-none ring-0
               transition-colors hover:bg-neutral-900
@@ -88,7 +104,113 @@ function NewsletterField(): JSX.Element {
 
 function FooterNewsletterArrow(): JSX.Element {
   return (
-    <ArrowRight size={12} strokeWidth={1.35} className="shrink-0" aria-hidden />
+    <ArrowRight
+      size={12}
+      strokeWidth={1.35}
+      className="shrink-0 rtl:rotate-180"
+      aria-hidden
+    />
+  );
+}
+
+/** Compact US stripes + canton for English option */
+function USFlagSvg({ className }: { className?: string }): JSX.Element {
+  const w = 30;
+  const h = 20;
+  return (
+    <svg className={className} viewBox={`0 0 ${w} ${h}`} aria-hidden>
+      <rect width={w} height={h} fill="#B22234" />
+      <path
+        fill="#fff"
+        d="M0 2 h30 V4 H0z M0 6 h30 V8 H0z M0 10 h30 V12 H0z M0 14 h30 V16 H0z M0 18 h30 V20 H0z"
+      />
+      <rect width={12} height={11} fill="#3C3B6E" x={0} y={0} />
+    </svg>
+  );
+}
+
+/** Egypt stripes — distinguishes Arabic locale in the picker */
+function EgyptFlagSvg({ className }: { className?: string }): JSX.Element {
+  return (
+    <svg className={className} viewBox="0 0 90 60" aria-hidden>
+      <rect fill="#CE1126" width="90" height="20" />
+      <rect fill="#FFF" width="90" height="20" y="20" />
+      <rect fill="#000" width="90" height="20" y="40" />
+    </svg>
+  );
+}
+
+function LanguageMenu(): JSX.Element {
+  const { locale, setLocale, t } = useLocale();
+  const currentLabel =
+    locale === "ar" ? t("footer.localeArabicShort") : t("footer.localeEnglishShort");
+
+  return (
+    <Menu as="div" className="relative inline-block text-start">
+      <MenuButton
+        type="button"
+        aria-label={t("footer.langMenu")}
+        className="inline-flex h-10 items-center gap-2 px-2 text-[12px] font-medium text-black transition hover:underline hover:underline-offset-4"
+      >
+        {locale === "ar" ? (
+          <EgyptFlagSvg className="h-[13px] w-[20px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
+        ) : (
+          <USFlagSvg className="h-[13px] w-[20px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
+        )}
+        <span>{currentLabel}</span>
+        <ChevronDownTiny />
+      </MenuButton>
+
+      <MenuItems
+        transition
+        modal={false}
+        anchor="bottom end"
+        className={cn(
+          "z-[100] mt-1 w-44 rounded-md border border-neutral-200 bg-white py-1 shadow-lg [--anchor-gap:4px]",
+          "outline-none ring-1 ring-black/5 transition [--anchor-gap:4px]",
+          "data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:duration-150 data-[enter]:duration-150",
+        )}
+      >
+        <MenuItem>
+          {({ close, focus }) => (
+            <button
+              type="button"
+              onClick={() => {
+                setLocale("en");
+                close();
+              }}
+              className={cn(
+                "flex w-full items-center gap-2 px-3 py-2 text-start text-[12px]",
+                locale === "en" ? "bg-neutral-100 font-semibold text-black" : "text-neutral-800",
+                focus && "outline-none bg-neutral-50",
+              )}
+            >
+              <USFlagSvg className="h-[11px] w-[17px] shrink-0 rounded-sm ring-[0.5px] ring-black/10" />
+              {t("footer.langEnglish")}
+            </button>
+          )}
+        </MenuItem>
+        <MenuItem>
+          {({ close, focus }) => (
+            <button
+              type="button"
+              onClick={() => {
+                setLocale("ar");
+                close();
+              }}
+              className={cn(
+                "flex w-full items-center gap-2 px-3 py-2 text-start text-[12px]",
+                locale === "ar" ? "bg-neutral-100 font-semibold text-black" : "text-neutral-800",
+                focus && "outline-none bg-neutral-50",
+              )}
+            >
+              <EgyptFlagSvg className="h-[11px] w-[17px] shrink-0 rounded-sm ring-[0.5px] ring-black/10" />
+              {t("footer.langArabic")}
+            </button>
+          )}
+        </MenuItem>
+      </MenuItems>
+    </Menu>
   );
 }
 
@@ -97,7 +219,14 @@ type SiteFooterProps = {
 };
 
 export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
+  const { locale, t } = useLocale();
   const currentYear = new Date().getFullYear();
+
+  /** © line: keep brand English; localize surrounding word order lightly */
+  const copyrightLine =
+    locale === "ar"
+      ? `حقوق النشر © ${t("footer.copyrightBrand")} 2001 – ${currentYear}`
+      : `© ${t("footer.copyrightBrand")}\u00a02001\u00a0–\u00a0${currentYear}`;
 
   return (
     <footer
@@ -116,7 +245,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
                 width={320}
                 height={80}
                 decoding="async"
-                className="block h-[36px] w-auto max-w-full object-contain object-left md:h-[40px]"
+                className="block h-[36px] w-auto max-w-full object-contain object-start md:h-[40px]"
               />
             </div>
 
@@ -138,36 +267,34 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
             </div>
           </div>
 
-          {linkColumns.map((column) => (
+          {footerColumns.map((column) => (
             <nav
-              key={column.heading}
-              aria-label={column.heading}
+              key={column.headingKey}
+              aria-label={t(column.headingKey)}
               className="min-w-0 lg:col-span-2"
             >
-              <FooterLinkColumn heading={column.heading} links={column.links} />
+              <FooterLinkColumn
+                heading={t(column.headingKey)}
+                links={column.links.map((lk) => t(lk))}
+              />
             </nav>
           ))}
         </div>
 
-        <div className="mt-10 border-t border-dashed border-[#c7c7c7] pt-10 flex flex-col gap-5 sm:mt-[42px] sm:pt-[42px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:gap-8">
+        <div className="mt-10 flex flex-col gap-5 border-t border-dashed border-[#c7c7c7] pt-10 sm:mt-[42px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-[42px] md:gap-8">
           <p className="order-2 text-[12px] font-normal leading-[1.5] text-black sm:order-1">
-            © John Lewis plc&nbsp;2001&nbsp;–&nbsp;{currentYear}
+            {copyrightLine}
           </p>
 
           <div className="order-1 flex flex-wrap items-center gap-6 sm:order-2 sm:justify-end sm:gap-8">
+            <LanguageMenu />
             <button
               type="button"
-              className="inline-flex h-10 items-center gap-2 px-2 text-[12px] font-medium text-black transition hover:underline hover:underline-offset-4"
+              className="inline-flex h-10 items-center gap-1 px-2 text-[12px] font-medium text-black opacity-85 transition hover:underline hover:underline-offset-4"
+              disabled
+              aria-disabled
             >
-              <USFlagSvg className="h-[13px] w-[20px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
-              <span>English</span>
-              <ChevronDownTiny />
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-10 items-center gap-1 px-2 text-[12px] font-medium text-black transition hover:underline hover:underline-offset-4"
-            >
-              <span>USD</span>
+              <span>{t("footer.currencyUsd")}</span>
               <ChevronDownTiny />
             </button>
           </div>
@@ -186,15 +313,13 @@ function FooterLinkColumn({
 }): JSX.Element {
   return (
     <div>
-      <p className="text-[13px] font-bold leading-tight text-black">
-        {heading}
-      </p>
+      <p className="text-[13px] font-bold leading-tight text-black">{heading}</p>
       <ul className="mt-3 space-y-2 text-[13px] font-normal leading-normal text-black">
         {links.map((label) => (
           <li key={label}>
             <button
               type="button"
-              className="w-full py-px text-left text-black transition hover:opacity-70 hover:underline hover:underline-offset-[5px]"
+              className="w-full py-px text-start text-black transition hover:opacity-70 hover:underline hover:underline-offset-[5px]"
             >
               {label}
             </button>
@@ -234,21 +359,5 @@ function ChevronDownTiny(): JSX.Element {
       className="shrink-0"
       aria-hidden
     />
-  );
-}
-
-/** Compact US stripes + canton for footer locale control (matches Figma ref) */
-function USFlagSvg({ className }: { className?: string }): JSX.Element {
-  const w = 30;
-  const h = 20;
-  return (
-    <svg className={className} viewBox={`0 0 ${w} ${h}`} aria-hidden>
-      <rect width={w} height={h} fill="#B22234" />
-      <path
-        fill="#fff"
-        d="M0 2 h30 V4 H0z M0 6 h30 V8 H0z M0 10 h30 V12 H0z M0 14 h30 V16 H0z M0 18 h30 V20 H0z"
-      />
-      <rect width={12} height={11} fill="#3C3B6E" x={0} y={0} />
-    </svg>
   );
 }

@@ -16,14 +16,17 @@ import {
 } from "../lib/variants";
 import { STORE_STAR_HEX } from "./Stars";
 import { cn } from "../lib/cn";
+import { useLocale } from "../i18n/useLocale";
+import type { Locale } from "../i18n/messages";
 import { getMaxBasketQuantity } from "../lib/qty";
 import { useProductStore } from "../stores/productStore";
 import { useCartStore } from "../stores/cartStore";
 /** Figma PDP header defaults when API omits social-proof fields */
 const HEADER_DEFAULTS = { sold_count: 1238, rating_avg: 4.5 } as const;
 
-function formatSold(count: number) {
-  return new Intl.NumberFormat("en-GB").format(Math.max(0, Math.round(count)));
+function formatSold(count: number, locale: Locale): string {
+  const loc = locale === "ar" ? "ar-SA" : "en-GB";
+  return new Intl.NumberFormat(loc).format(Math.max(0, Math.round(count)));
 }
 
 function humanizeVariationLabel(name: string) {
@@ -40,9 +43,13 @@ function titleCasePhrase(raw: string) {
 }
 
 /** Color names use title case; size options stay uppercase like the selectable chips. */
-function formatSelectionLabel(selection: string, variation: Variation): string {
+function formatSelectionLabel(
+  selection: string,
+  variation: Variation,
+  chooseLabel: string,
+): string {
   const raw = selection.replace(/-/g, " ").trim();
-  if (!raw) return "Choose";
+  if (!raw) return chooseLabel;
   if (variation.type === "image") return titleCasePhrase(raw);
   return raw.toUpperCase();
 }
@@ -63,10 +70,13 @@ function StockStatusLabel({
   trackStock: boolean;
   variantQty?: number;
 }): JSX.Element {
+  const { t, locale } = useLocale();
+  const numLoc = locale === "ar" ? "ar-SA" : "en-GB";
+
   if (!trackStock) {
     return (
       <p className="mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]">
-        In stock
+        {t("pdp.stockInStock")}
       </p>
     );
   }
@@ -75,12 +85,15 @@ function StockStatusLabel({
   if (qty <= 0) {
     return (
       <p className="mt-3 text-[14px] font-semibold leading-snug text-red-700">
-        Out of stock
+        {t("pdp.stockOut")}
       </p>
     );
   }
 
   const low = qty <= 3;
+  const qtyFmt = qty.toLocaleString(numLoc);
+  const prefix = low ? t("pdp.stockLowPrefix") : t("pdp.stockInStockPrefix");
+
   return (
     <p
       className={
@@ -89,8 +102,8 @@ function StockStatusLabel({
           : "mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]"
       }
     >
-      {low ? "Low stock — " : "In stock — "}
-      {qty} available
+      {prefix}
+      {qtyFmt} {t("pdp.availableSuffix")}
     </p>
   );
 }
@@ -108,6 +121,7 @@ function PurchaseQuantityStepper({
   trackStockUnavailable: boolean;
   purchaseQtyRef: MutableRefObject<number>;
 }): JSX.Element {
+  const { t, tf } = useLocale();
   const [quantity, setQuantity] = useState(1);
   const lineQty = Math.min(Math.max(1, quantity), maxBasketQty);
 
@@ -122,7 +136,7 @@ function PurchaseQuantityStepper({
           id="pdp-qty-label"
           className="text-[13px] font-semibold tracking-tight text-black"
         >
-          Quantity
+          {t("pdp.quantity")}
         </span>
         <div
           className="flex items-center gap-3 border border-black px-[10px] py-[8px] text-black"
@@ -131,7 +145,7 @@ function PurchaseQuantityStepper({
         >
           <button
             type="button"
-            aria-label="Decrease quantity"
+            aria-label={t("pdp.decQty")}
             disabled={lineQty <= 1}
             className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -143,7 +157,7 @@ function PurchaseQuantityStepper({
           </span>
           <button
             type="button"
-            aria-label="Increase quantity"
+            aria-label={t("pdp.incQty")}
             disabled={
               lineQty >= maxBasketQty || trackStockUnavailable
             }
@@ -155,15 +169,14 @@ function PurchaseQuantityStepper({
             +
           </button>
         </div>
-        <span className="sr-only">
-          Maximum {maxBasketQty} for this selection
-        </span>
+        <span className="sr-only">{tf("pdp.qtyMaxHint", { n: maxBasketQty })}</span>
       </div>
     </div>
   );
 }
 
 export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
+  const { t, locale } = useLocale();
   const selectedVariations = useProductStore(
     (state) => state.selectedVariations,
   );
@@ -204,14 +217,14 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
 
   const handleAddToCart = () => {
     if (!combosAvailable || !selectedVariant) {
-      setValidationMessage("Select every variation before continuing.");
+      setValidationMessage(t("pdp.validationIncomplete"));
       return;
     }
 
     const stockIssues =
       product.track_stock && (selectedVariant.quantity ?? 0) <= 0;
     if (stockIssues) {
-      setValidationMessage("This pairing is awaiting restock.");
+      setValidationMessage(t("pdp.validationRestock"));
       return;
     }
 
@@ -243,7 +256,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         </h1>
 
         {product.categories?.length ? (
-          <ul className="mt-3 flex flex-wrap gap-2" aria-label="Product categories">
+          <ul className="mt-3 flex flex-wrap gap-2" aria-label={t("pdp.categoriesAria")}>
             {product.categories.map((category) => (
               <li key={category.id}>
                 <span className="inline-flex rounded-full border border-[#D1D1D1] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
@@ -272,7 +285,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           </div>
           <div className="flex shrink-0 items-center gap-[6px] text-[14px] leading-none">
             <span className="font-normal whitespace-nowrap text-[#999999]">
-              {formatSold(soldCount)} Sold
+              {formatSold(soldCount, locale)} {t("pdp.soldSuffix")}
             </span>
             <span className="text-[12px] text-[#CCCCCC]" aria-hidden>
               •
@@ -303,6 +316,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
                   selectedVariations[variationKeyNormalize(variation.name)] ??
                     "",
                   variation,
+                  t("pdp.chooseOption"),
                 )}
               />
               {variationKeyNormalize(variation.name) ===
@@ -360,7 +374,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           onClick={handleAddToCart}
           className="min-h-[52px] min-w-0 flex-[3] rounded-lg bg-black px-5 text-[15px] font-bold leading-tight text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Add To Cart
+          {t("pdp.addToCart")}
         </button>
 
         <button
@@ -368,7 +382,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           onClick={() => openDrawer()}
           className="min-h-[52px] min-w-0 flex-[2] rounded-lg border border-[#D1D1D1] bg-white px-5 text-[15px] font-normal leading-tight text-black transition hover:border-[#B0B0B0]"
         >
-          Checkout Now
+          {t("pdp.checkoutNow")}
         </button>
       </div>
 
@@ -495,25 +509,26 @@ function SizeButtons({
 
 const descriptionCopyClass =
   "text-[14px] leading-[1.65] text-[#666666] [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" +
-  " [&_ul]:my-2 [&_ul]:list-none [&_ul]:space-y-2 [&_ul]:pl-0 [&_ul]:leading-[1.65]" +
-  " [&_li]:relative [&_li]:my-0 [&_li]:py-0 [&_li]:pl-[18px]" +
-  " [&_li]:before:pointer-events-none [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[10px]" +
+  " [&_ul]:my-2 [&_ul]:list-none [&_ul]:space-y-2 [&_ul]:ps-0 [&_ul]:leading-[1.65]" +
+  " [&_li]:relative [&_li]:my-0 [&_li]:py-0 [&_li]:ps-[18px]" +
+  " [&_li]:before:pointer-events-none [&_li]:before:absolute [&_li]:before:start-0 [&_li]:before:top-[10px]" +
   " [&_li]:before:h-[5px] [&_li]:before:w-[5px] [&_li]:before:rounded-full [&_li]:before:bg-[#CCCCCC]" +
-  " [&_ol]:my-2 [&_ol]:list-none [&_ol]:space-y-2 [&_ol]:pl-0 [&_ol]:leading-[1.65]" +
-  " [&_ol>li]:relative [&_ol>li]:pl-[18px]" +
-  " [&_ol>li]:before:pointer-events-none [&_ol>li]:before:absolute [&_ol>li]:before:left-0 [&_ol>li]:before:top-[10px]" +
+  " [&_ol]:my-2 [&_ol]:list-none [&_ol]:space-y-2 [&_ol]:ps-0 [&_ol]:leading-[1.65]" +
+  " [&_ol>li]:relative [&_ol>li]:ps-[18px]" +
+  " [&_ol>li]:before:pointer-events-none [&_ol>li]:before:absolute [&_ol>li]:before:start-0 [&_ol>li]:before:top-[10px]" +
   " [&_ol>li]:before:h-[5px] [&_ol>li]:before:w-[5px] [&_ol>li]:before:rounded-full [&_ol>li]:before:bg-[#CCCCCC]" +
   " [&_strong]:font-semibold [&_strong]:text-[#555555]" +
   " [&_a]:font-bold [&_a]:text-black";
 
 function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
+  const { t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   if (!html) return <></>;
 
   return (
     <section className="mb-10">
       <h2 className="text-[15px] font-bold leading-tight tracking-[-0.01em] text-black">
-        Description:
+        {t("pdp.descriptionHeading")}
       </h2>
       <div className="relative mt-2">
         <div
@@ -526,7 +541,7 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
             onClick={() => setExpanded(true)}
             className="mt-3 inline-flex text-[14px] font-bold leading-none tracking-[-0.01em] text-black underline decoration-black underline-offset-4 hover:text-neutral-800"
           >
-            See&nbsp;More....
+            {t("pdp.seeMore")}
           </button>
         ) : (
           <button
@@ -534,18 +549,13 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
             onClick={() => setExpanded(false)}
             className="mt-4 inline-flex text-[14px] font-bold leading-none tracking-[-0.01em] text-black underline decoration-black underline-offset-4 hover:text-neutral-800"
           >
-            Show&nbsp;less
+            {t("pdp.showLess")}
           </button>
         )}
       </div>
     </section>
   );
 }
-
-const DELIVERY_POINTS = [
-  "£3.95 click & collect from store",
-  "Next-day delivery (£6.95)",
-] as const;
 
 /** PDP size guide — EU-style labels with approximate UK pairing and fit meaning */
 const SIZE_GUIDE_ROWS: ReadonlyArray<{
@@ -619,6 +629,7 @@ function pdpPopoverRevealClass(extra: string) {
 }
 
 function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
+  const { t } = useLocale();
   const revealTail =
     "group-hover/sizeguide:pointer-events-auto group-hover/sizeguide:visible group-hover/sizeguide:translate-y-0 group-hover/sizeguide:scale-100 group-hover/sizeguide:opacity-100 group-focus-within/sizeguide:pointer-events-auto group-focus-within/sizeguide:visible group-focus-within/sizeguide:translate-y-0 group-focus-within/sizeguide:scale-100 group-focus-within/sizeguide:opacity-100";
 
@@ -627,43 +638,40 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
       <button
         type="button"
         className={cn(
-          "bg-transparent px-0 py-0 text-right font-sans text-[13px] font-semibold tracking-normal text-black",
+          "bg-transparent px-0 py-0 text-end font-sans text-[13px] font-semibold tracking-normal text-black",
           "underline decoration-black decoration-1 underline-offset-[6px]",
           "transition hover:text-neutral-700 hover:decoration-neutral-700",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
         )}
         aria-describedby="size-guide-tooltip-panel"
       >
-        View size chart
+        {t("pdp.sizeChart")}
       </button>
 
       <div
         id="size-guide-tooltip-panel"
         role="tooltip"
         className={cn(
-          pdpPopoverRevealClass("right-0 w-[min(calc(100vw-2rem),380px)]"),
+          pdpPopoverRevealClass("end-0 w-[min(calc(100vw-2rem),380px)]"),
           revealTail,
         )}
       >
         <div className={pdpPopoverPanelClass}>
           <div
-            className="absolute -top-[5px] right-6 left-auto h-2.5 w-2.5 rotate-45 border-l border-t border-neutral-200/95 bg-white"
+            className="absolute -top-[5px] end-6 h-2.5 w-2.5 rotate-45 border-s border-t border-neutral-200/95 bg-white"
             aria-hidden
           />
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-900">
-            Size guide
+            {t("pdp.sizeGuideBadge")}
           </p>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-500">
-            Tag numbers follow continental EU lasts. Half-sizes bridge UK
-            fittings; lace styles tighten for narrow feet.
-          </p>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-500">{t("pdp.sizeGuideBody")}</p>
           <div className="mt-3 max-h-[min(50vh,320px)] overflow-y-auto rounded-lg border border-neutral-100">
-            <table className="w-full border-collapse text-left text-[11px] text-neutral-700">
+            <table className="w-full border-collapse text-start text-[11px] text-neutral-700">
               <thead className="sticky top-0 z-[1] border-b border-neutral-200 bg-neutral-50 font-semibold text-neutral-900">
                 <tr>
-                  <th className="px-2 py-2.5 sm:px-3">Size tag</th>
-                  <th className="px-2 py-2.5 sm:px-3">UK (approx.)</th>
-                  <th className="px-2 py-2.5 pr-3 sm:px-3">Meaning</th>
+                  <th className="px-2 py-2.5 sm:px-3">{t("pdp.sizeColTag")}</th>
+                  <th className="px-2 py-2.5 sm:px-3">{t("pdp.sizeColUk")}</th>
+                  <th className="px-2 py-2.5 pe-3 sm:px-3">{t("pdp.sizeColMeaning")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -678,7 +686,7 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
                     <td className="whitespace-nowrap px-2 py-2 tabular-nums sm:px-3">
                       {row.ukApprox}
                     </td>
-                    <td className="px-2 py-2 pr-3 leading-snug sm:px-3">
+                    <td className="px-2 py-2 pe-3 leading-snug sm:px-3">
                       {row.meaning}
                     </td>
                   </tr>
@@ -687,8 +695,7 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
             </table>
           </div>
           <p className="mt-3 border-t border-neutral-100 pt-2.5 text-[11px] leading-relaxed text-neutral-500">
-            Measure barefoot at evening; standing weight on paper. Sizes vary by
-            maker—swap in store if between rows.
+            {t("pdp.sizeFootnote")}
           </p>
         </div>
       </div>
@@ -697,6 +704,8 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
 }
 
 function DeliveryTermsTooltip(): JSX.Element {
+  const { t } = useLocale();
+  const deliveryBullets = [t("pdp.deliveryBullets.point1"), t("pdp.deliveryBullets.point2")] as const;
   const revealTail =
     "group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100";
 
@@ -705,34 +714,34 @@ function DeliveryTermsTooltip(): JSX.Element {
       <button
         type="button"
         className={cn(
-          "bg-transparent px-0 py-0 text-left font-sans text-[13px] font-medium leading-snug tracking-normal text-[#707070]",
+          "bg-transparent px-0 py-0 text-start font-sans text-[13px] font-medium leading-snug tracking-normal text-[#707070]",
           "underline decoration-[#707070] decoration-1 underline-offset-[3px]",
           "transition hover:text-[#555555] hover:decoration-[#555555]",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
         )}
         aria-describedby="delivery-tooltip-panel"
       >
-        Delivery T&amp;C
+        {t("pdp.deliveryTc")}
       </button>
 
       <div
         id="delivery-tooltip-panel"
         role="tooltip"
         className={cn(
-          pdpPopoverRevealClass("left-0 w-[min(calc(100vw-2rem),288px)]"),
+          pdpPopoverRevealClass("start-0 w-[min(calc(100vw-2rem),288px)]"),
           revealTail,
         )}
       >
         <div className={pdpPopoverPanelClass}>
           <div
-            className="absolute -top-[5px] left-4 h-2.5 w-2.5 rotate-45 border-l border-t border-neutral-200/95 bg-white"
+            className="absolute -top-[5px] start-4 h-2.5 w-2.5 rotate-45 border-s border-t border-neutral-200/95 bg-white"
             aria-hidden
           />
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-900">
-            Delivery info
+            {t("pdp.deliveryHeading")}
           </p>
           <ul className="mt-2.5 space-y-2 text-[13px] leading-snug text-neutral-600">
-            {DELIVERY_POINTS.map((line) => (
+            {deliveryBullets.map((line) => (
               <li key={line} className="flex gap-2">
                 <span
                   className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-neutral-400"
@@ -743,7 +752,7 @@ function DeliveryTermsTooltip(): JSX.Element {
             ))}
           </ul>
           <p className="mt-3 border-t border-neutral-100 pt-2.5 text-[11px] leading-relaxed text-neutral-500">
-            Taxes and delivery options are confirmed at checkout.
+            {t("pdp.deliveryBullets.note")}
           </p>
         </div>
       </div>

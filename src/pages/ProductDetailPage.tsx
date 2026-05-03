@@ -18,8 +18,11 @@ import type { Product } from '../types/product'
 import { FavoritesDrawer } from '../components/FavoritesDrawer'
 import { useProductStore } from '../stores/productStore'
 import { useFavoritesStore } from '../stores/favoritesStore'
+import { useLocale } from '../i18n/useLocale'
+import type { MessageKey } from '../i18n/messages'
 
 export function ProductDetailPage(): JSX.Element {
+  const { t } = useLocale()
   const product = useProductStore((state) => state.product)
   const loading = useProductStore((state) => state.loading)
   const errorMessage = useProductStore((state) => state.error)
@@ -72,7 +75,7 @@ export function ProductDetailPage(): JSX.Element {
   )
   const toggleFavoriteProduct = useFavoritesStore((s) => s.toggleProduct)
 
-  const crumbs = useMemo(() => buildCrumbs(product), [product])
+  const crumbs = useMemo(() => buildCrumbs(product, t), [product, t])
 
   let bodyContent: JSX.Element
 
@@ -86,7 +89,7 @@ export function ProductDetailPage(): JSX.Element {
     bodyContent = (
       <Reveal>
         <ErrorPanels
-          message={errorMessage ?? 'We could not find that product anymore.'}
+          message={errorMessage ?? t('error.productNotFound')}
           onRetry={() => void productQuery.refetch()}
         />
       </Reveal>
@@ -123,7 +126,7 @@ export function ProductDetailPage(): JSX.Element {
           <Reveal>
             <ProductRails
               variant="related"
-              headline="Related Product"
+              headline={t('rails.relatedProduct')}
               items={relatedShowcase}
               anchorId="related"
             />
@@ -137,7 +140,7 @@ export function ProductDetailPage(): JSX.Element {
             <ProductRails
               variant="related"
               popularWeek
-              headline="Popular this week"
+              headline={t('rails.popularThisWeek')}
               items={popularShowcase}
               anchorId="popular-week"
             />
@@ -172,14 +175,17 @@ export function ProductDetailPage(): JSX.Element {
   )
 }
 
-function buildCrumbs(product: Product | null): string[] {
-  const trail = ['Homepage', 'Women', 'Fashion']
+function buildCrumbs(
+  product: Product | null,
+  t: (key: MessageKey) => string,
+): string[] {
+  const trail = [t('crumb.homepage'), t('crumb.women')]
   const categorySlug = product?.categories?.find((category) =>
     Boolean(category.slug),
   )
 
-  const dynamicBranch = categorySlug?.name ?? "Women's Sneakers Lab"
-  return [...trail.slice(0, 2), dynamicBranch, product?.name ?? 'Product detail'].filter(Boolean)
+  const dynamicBranch = categorySlug?.name ?? t('crumb.sneakersFallback')
+  return [...trail, dynamicBranch, product?.name ?? t('crumb.productDetailFallback')].filter(Boolean)
 }
 
 function LoadingPanels(): JSX.Element {
@@ -206,19 +212,18 @@ function ErrorPanels({
   message: string
   onRetry: () => void
 }): JSX.Element {
+  const { t } = useLocale()
   return (
     <div className="space-y-[18px] py-32 text-neutral-950">
-      <div className="space-y-[22px] border border-black px-14 py-[46px] text-center lg:text-left">
+      <div className="space-y-[22px] border border-black px-14 py-[46px] text-center lg:text-start">
         <h2 className="font-serif text-[38px] font-medium">{message}</h2>
-        <p className="text-[15px] leading-relaxed text-neutral-600">
-          The Easy Orders reference feed may be unreachable. Confirm connectivity in devtools networking or retry.
-        </p>
+        <p className="text-[15px] leading-relaxed text-neutral-600">{t('error.feedUnreachableBody')}</p>
         <button
           type="button"
           onClick={onRetry}
           className="inline-flex rounded-full border border-transparent bg-black px-16 py-4 text-[12px] font-semibold uppercase tracking-[0.43em] text-white"
         >
-          Retry retrieval
+          {t('error.retryButton')}
         </button>
       </div>
     </div>

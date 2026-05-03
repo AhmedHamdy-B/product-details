@@ -1,10 +1,12 @@
 import { CircleCheck, CreditCard } from 'lucide-react'
 import { useEffect } from 'react'
 
+import { useLocale } from '../i18n/useLocale'
 import { useCartStore } from '../stores/cartStore'
 import { cn } from '../lib/cn'
 
 export function ToastBanner() {
+  const { t, tf } = useLocale()
   const toast = useCartStore((state) => state.toast)
   const dismiss = useCartStore((state) => state.dismissToast)
   const openDrawer = useCartStore((state) => state.openDrawer)
@@ -18,8 +20,11 @@ export function ToastBanner() {
 
   if (!toast) return null
 
+  const toastLine = toast === 'item_added' ? t('toast.addedTitle') : null
   const itemsLabel =
-    itemCount === 1 ? `${itemCount} item in your basket` : `${itemCount} items in your basket`
+    itemCount === 1
+      ? tf('toast.oneItemBasket', { count: itemCount })
+      : tf('toast.multiItemsBasket', { count: itemCount })
 
   const handleCheckout = () => {
     dismiss()
@@ -37,7 +42,7 @@ export function ToastBanner() {
       <div
         className={cn(
           'pointer-events-auto mx-4 flex w-[min(calc(100vw-2rem),420px)] items-center gap-4',
-          'rounded-full border border-neutral-200/90 bg-white pl-5 pr-2 py-2.5 shadow-[0_22px_50px_-12px_rgba(0,0,0,0.18),0_10px_30px_-10px_rgba(0,0,0,0.12)]',
+          'rounded-full border border-neutral-200/90 bg-white ps-5 pe-2 py-2.5 shadow-[0_22px_50px_-12px_rgba(0,0,0,0.18),0_10px_30px_-10px_rgba(0,0,0,0.12)]',
           'motion-safe:animate-toast-rise motion-reduce:animate-none',
         )}
       >
@@ -46,9 +51,9 @@ export function ToastBanner() {
           strokeWidth={2}
           aria-hidden
         />
-        <div className="min-w-0 flex-1 pr-2">
+        <div className="min-w-0 flex-1 pe-2">
           <p className="text-[14px] font-semibold leading-tight tracking-[-0.01em] text-neutral-950">
-            {toast}
+            {toastLine}
           </p>
           <p className="mt-0.5 text-[12px] font-medium leading-tight text-neutral-500">{itemsLabel}</p>
         </div>
@@ -70,14 +75,14 @@ export function ToastBanner() {
             id="toast-checkout-tip"
             role="tooltip"
             className={cn(
-              'pointer-events-none invisible absolute bottom-full right-0 z-10 mb-2 whitespace-nowrap',
+              'pointer-events-none invisible absolute bottom-full end-0 z-10 mb-2 whitespace-nowrap',
               'rounded-lg bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold tracking-tight text-white',
               'shadow-lg opacity-0 transition-[opacity,visibility] duration-150',
               'group-hover/checkout:visible group-hover/checkout:opacity-100',
               'group-focus-within/checkout:visible group-focus-within/checkout:opacity-100',
             )}
           >
-            Checkout Now
+            {t('toast.checkoutShortcut')}
           </span>
         </div>
       </div>

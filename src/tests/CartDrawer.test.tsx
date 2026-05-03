@@ -13,7 +13,9 @@ describe('CartDrawer', () => {
   it('shows the empty-state copy while the drawer is open', () => {
     useCartStore.setState({ drawerOpen: true })
 
-    render(<CartDrawer />)
+    render(
+      <CartDrawer />,
+    )
 
     expect(screen.getByText(/resting for now/i)).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: /your basket/i })).toBeInTheDocument()

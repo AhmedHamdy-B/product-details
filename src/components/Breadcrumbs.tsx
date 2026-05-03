@@ -6,7 +6,7 @@ type BreadcrumbsProps = {
 
 export function Breadcrumbs({ crumbs }: BreadcrumbsProps): JSX.Element {
   return (
-    <nav className="text-left text-[12px] leading-relaxed text-[#8a8a8a]" aria-label="Breadcrumb">
+    <nav className="text-start text-[12px] leading-relaxed text-[#8a8a8a]" aria-label="Breadcrumb">
       <ol className="flex flex-wrap items-center justify-start gap-x-1 gap-y-1">
         {crumbs.map((crumb, index) => {
           const active = index === crumbs.length - 1

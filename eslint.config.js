@@ -21,6 +21,12 @@ export default defineConfig([
     },
   },
   {
+    files: ['src/i18n/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     ...playwright.configs['flat/recommended'],
     files: ['e2e/**/*.ts'],
     languageOptions: {

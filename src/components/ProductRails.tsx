@@ -2,6 +2,7 @@ import { Heart, ShoppingBag, Star } from "lucide-react";
 import { type JSX, type MouseEvent } from "react";
 
 import type { ShowcaseItem } from "../data/mocks";
+import { useLocale } from "../i18n/useLocale";
 import { formatMoney, formatUsdWhole } from "../lib/money";
 import { cn } from "../lib/cn";
 import { useCartStore } from "../stores/cartStore";
@@ -26,7 +27,7 @@ const relatedRailBtn =
   "pointer-events-auto relative z-[12] inline-flex h-[35px] w-[35px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition hover:bg-[#e6e5dd] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1";
 
 const relatedTooltipBase =
-  "pointer-events-none invisible absolute bottom-full right-0 z-[25] mb-2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150 motion-reduce:transition-none";
+  "pointer-events-none invisible absolute bottom-full end-0 z-[25] mb-2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150 motion-reduce:transition-none";
 
 export function ProductRails({
   eyebrow,
@@ -36,6 +37,7 @@ export function ProductRails({
   variant = "default",
   popularWeek = false,
 }: Props): JSX.Element {
+  const { t } = useLocale();
   const isRelated = variant === "related";
 
   return (
@@ -101,14 +103,14 @@ export function ProductRails({
               eyebrow && popularWeek && "shrink-0 self-start pt-[22px]",
             )}
           >
-            View all
+            {t('rails.viewAll')}
           </button>
         ) : (
           <button
             type="button"
             className="rounded-full px-10 py-[9px] text-[11px] font-semibold uppercase tracking-[0.4em]"
           >
-            View all · A–Z
+            {t('rails.viewAllAz')}
           </button>
         )}
       </div>
@@ -180,13 +182,14 @@ export function ProductRails({
 }
 
 function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
+  const { t } = useLocale();
   const addItem = useCartStore((s) => s.addItem);
   const toggleFavorite = useFavoritesStore((s) => s.toggleProduct);
   const saved = useFavoritesStore((s) => s.isFavorite(item.id));
   const slug = item.slug ?? `related-${item.id}`;
   const displayName = `${item.brand} ${item.name}`.trim();
-  const favLabel = saved ? "Remove from favorites" : "Add to Favorite";
-  const favTip = saved ? "Saved" : "Add to Favorite";
+  const favLabel = saved ? t("rails.favAriaRemove") : t("rails.favAriaAdd");
+  const favTip = saved ? t("rails.favTipSaved") : t("rails.favTipAdd");
 
   const stopCard = (e: MouseEvent) => {
     e.preventDefault();
@@ -248,7 +251,7 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
           <button
             type="button"
             className={`peer/rel-rail-cart ${relatedRailBtn}`}
-            aria-label="Add to cart"
+            aria-label={t("rails.addToCartAria")}
             onClick={(e) => {
               stopCard(e);
               addItem({
@@ -277,7 +280,7 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
               "peer-focus-visible/rel-rail-cart:visible peer-focus-visible/rel-rail-cart:opacity-100",
             )}
           >
-            Add to Cart
+            {t("pdp.addToCart")}
           </span>
         </div>
       </div>

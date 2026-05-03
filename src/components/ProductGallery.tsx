@@ -10,6 +10,7 @@ import {
 import { memo, useEffect, useState, type JSX } from "react";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 
+import { useLocale } from "../i18n/useLocale";
 import { cn } from "../lib/cn";
 
 const galleryIcon = "h-[22px] w-[22px]";
@@ -74,6 +75,7 @@ function GalleryInterior({
   wishlisted,
   toggleWishlisted,
 }: InteriorProps): JSX.Element {
+  const { t } = useLocale();
   const [zoomOpen, setZoomOpen] = useState(false);
   const [hoverPulse, setHoverPulse] = useState(false);
   const current = urls[Math.min(selectedIndex, urls.length - 1)];
@@ -131,8 +133,8 @@ function GalleryInterior({
             <button
               type="button"
               onClick={() => setZoomOpen(true)}
-              className={cn(railBtn, "absolute right-3 top-3 z-20 md:hidden")}
-              aria-label="Enlarge product image"
+              className={cn(railBtn, "absolute end-3 top-3 z-20 md:hidden")}
+              aria-label={t("gallery.enlarge")}
             >
               <Maximize2
                 className={galleryIcon}
@@ -151,7 +153,7 @@ function GalleryInterior({
                 "group-focus-within:pointer-events-auto group-focus-within:opacity-100",
                 "focus-visible:pointer-events-auto focus-visible:opacity-100",
               )}
-              aria-label="Enlarge product image"
+              aria-label={t("gallery.enlarge")}
             >
               <Maximize2
                 className={galleryIcon}
@@ -167,14 +169,14 @@ function GalleryInterior({
             "flex w-12 shrink-0 flex-col py-0.5 sm:w-[52px] md:w-14",
             urls.length > 1 ? "justify-between" : "justify-start gap-2",
           )}
-          aria-label="Gallery controls"
+          aria-label={t("gallery.controls")}
         >
           <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={handleShare}
               className={railBtn}
-              aria-label="Share this product"
+              aria-label={t("gallery.share")}
             >
               <Share
                 className={galleryIcon}
@@ -187,7 +189,7 @@ function GalleryInterior({
               onClick={toggleWishlisted}
               className={railBtn}
               aria-label={
-                wishlisted ? "Remove from saved items" : "Save for later"
+                wishlisted ? t("gallery.removeSaved") : t("gallery.saveLater")
               }
               aria-pressed={wishlisted}
             >
@@ -204,7 +206,7 @@ function GalleryInterior({
             <div
               className="flex flex-col gap-2 pb-0.5"
               role="group"
-              aria-label="Carousel navigation"
+              aria-label={t("gallery.carouselNav")}
             >
               <CarouselArrow direction="previous" onClick={() => goto(-1)} />
               <CarouselArrow direction="next" onClick={() => goto(1)} />
@@ -239,15 +241,15 @@ function GalleryInterior({
           >
             <button
               type="button"
-              aria-label="Close zoom"
+              aria-label={t("gallery.closeZoom")}
               onClick={() => setZoomOpen(false)}
-              className="absolute right-4 top-3 inline-flex text-black"
+              className="absolute end-4 top-3 inline-flex text-black"
             >
               <X className="h-7 w-7" strokeWidth={1.75} aria-hidden />
             </button>
             <img
               src={current}
-              alt={`${title} enlarged`}
+              alt={`${title}${t("gallery.enlargedAltSuffix")}`}
               decoding="async"
               className="mx-auto max-h-[70vh] w-auto object-contain"
             />
@@ -264,8 +266,9 @@ type ArrowProps = {
 };
 
 function CarouselArrow({ direction, onClick }: ArrowProps): JSX.Element {
+  const { t } = useLocale();
   const label =
-    direction === "previous" ? "Show previous slide" : "Show next slide";
+    direction === "previous" ? t("gallery.prevSlide") : t("gallery.nextSlide");
 
   return (
     <button

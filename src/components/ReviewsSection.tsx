@@ -20,16 +20,29 @@ import {
   sampleReviews,
   type UiReview,
 } from "../data/mocks";
+import { useLocale } from "../i18n/useLocale";
+import type { Locale, MessageKey } from "../i18n/messages";
 import { cn } from "../lib/cn";
 import { Stars, STORE_STAR_HEX } from "./Stars";
 
-const tabs = ["All Reviews", "With Photo & Video", "With Description"] as const;
+const REVIEW_TAB_IDS = ["all", "photo", "desc"] as const;
+type ReviewTabId = (typeof REVIEW_TAB_IDS)[number];
+
+const REVIEW_TAB_MESSAGE: Record<
+  ReviewTabId,
+  "reviews.tab.all" | "reviews.tab.photo" | "reviews.tab.desc"
+> = {
+  all: "reviews.tab.all",
+  photo: "reviews.tab.photo",
+  desc: "reviews.tab.desc",
+};
 
 const reviewTooltip =
   "pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150";
 
 export function ReviewsSection(): JSX.Element {
-  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>(tabs[0]);
+  const { t } = useLocale();
+  const [activeTab, setActiveTab] = useState<ReviewTabId>(REVIEW_TAB_IDS[0]);
 
   const [starSelections, toggleStarSelection] = useBooleanMap({
     5: true,
@@ -66,7 +79,7 @@ export function ReviewsSection(): JSX.Element {
   return (
     <section className="border-t border-dashed border-[#D1D1D1] bg-white py-12 xl:py-14">
       <h2 className="font-sans text-[22px] font-bold tracking-[-0.02em] text-black xl:text-[26px]">
-        Product Reviews
+        {t("reviews.sectionTitle")}
       </h2>
 
       <ReviewsSummaryBanner
@@ -79,16 +92,16 @@ export function ReviewsSection(): JSX.Element {
       <div className="mt-10 flex flex-col gap-10 lg:mt-12 lg:grid lg:grid-cols-[minmax(240px,_28%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
         <aside className="min-w-0 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-5 lg:px-6 lg:py-6">
           <p className="font-sans text-[18px] font-bold tracking-tight text-black">
-            Reviews Filter
+            {t("reviews.filterHeading")}
           </p>
 
           <div className="mt-5 space-y-0 border-t border-dashed border-[#D1D1D1] pt-5">
             <Disclosure defaultOpen>
               {({ open }) => (
                 <div>
-                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-left">
+                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
                     <span className="font-sans text-[14px] font-semibold text-black">
-                      Rating
+                      {t("reviews.filterRating")}
                     </span>
                     <ChevronDown
                       className={cn(
@@ -118,9 +131,9 @@ export function ReviewsSection(): JSX.Element {
             <Disclosure defaultOpen>
               {({ open }) => (
                 <div className="border-t border-dashed border-[#D1D1D1] pt-5">
-                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-left">
+                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
                     <span className="font-sans text-[14px] font-semibold text-black">
-                      Review Topics
+                      {t("reviews.filterTopics")}
                     </span>
                     <ChevronDown
                       className={cn(
@@ -146,13 +159,7 @@ export function ReviewsSection(): JSX.Element {
                       </div>
                     ) : (
                       <p className="font-sans text-[12px] font-normal leading-relaxed text-neutral-500">
-                        Topic filters need per-review tags from the API (for
-                        example{" "}
-                        <code className="font-mono text-[11px] text-neutral-700">
-                          topicTags
-                        </code>{" "}
-                        matching these labels). They are not applied until the
-                        backend returns that data.
+                        {t("reviews.topicFacetHint")}
                       </p>
                     )}
                   </DisclosurePanel>
@@ -165,22 +172,22 @@ export function ReviewsSection(): JSX.Element {
         <div className="min-w-0">
           <div>
             <p className="font-sans text-[18px] font-bold tracking-tight text-black">
-              Review Lists
+              {t("reviews.listsHeading")}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              {tabs.map((tab) => (
+              {REVIEW_TAB_IDS.map((tabId) => (
                 <button
-                  key={tab}
+                  key={tabId}
                   type="button"
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => setActiveTab(tabId)}
                   className={cn(
                     "rounded-[9px] border-[2px] border-black px-5 py-2.5 font-sans text-[12px] font-semibold tracking-tight transition",
-                    tab === activeTab
+                    tabId === activeTab
                       ? "border-neutral-400 bg-neutral-200 text-black"
                       : "border-neutral-100 bg-white text-black hover:bg-neutral-50",
                   )}
                 >
-                  {tab}
+                  {t(REVIEW_TAB_MESSAGE[tabId])}
                 </button>
               ))}
             </div>
@@ -188,7 +195,7 @@ export function ReviewsSection(): JSX.Element {
 
           {filtered.length === 0 ? (
             <p className="border-t border-dashed border-[#D1D1D1] pt-10 font-sans text-[14px] text-neutral-600">
-              No reviews match your filters.
+              {t("reviews.emptyFilters")}
             </p>
           ) : (
             <ul aria-busy={false}>
@@ -230,7 +237,9 @@ function ReviewsSummaryBanner({
   histogramMax,
   subtitleReviewTotal,
 }: SummaryBannerProps): JSX.Element {
+  const { locale, tf } = useLocale();
   const avgLabel = average.toFixed(1);
+  const histogramNumLoc = locale === "ar" ? "ar-SA" : "en-US";
 
   return (
     <div className="mt-8 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
@@ -240,8 +249,8 @@ function ReviewsSummaryBanner({
           <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
             {/* Figma: five solid orange stars (decorative row next to ring) */}
             <Stars variant="review" value={5} starSizePx={20} />
-            <p className="text-center font-sans text-[14px] font-normal leading-snug text-[#717171] sm:text-left">
-              {formatSubtitleKReviews(subtitleReviewTotal)}
+            <p className="text-center font-sans text-[14px] font-normal leading-snug text-[#717171] sm:text-start">
+              {formatSubtitleKReviews(subtitleReviewTotal, locale, tf)}
             </p>
           </div>
         </div>
@@ -273,8 +282,8 @@ function ReviewsSummaryBanner({
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="text-right tabular-nums text-neutral-700">
-                  {row.count.toLocaleString("en-US")}
+                <span className="text-end tabular-nums text-neutral-700">
+                  {row.count.toLocaleString(histogramNumLoc)}
                 </span>
               </div>
             );
@@ -285,14 +294,24 @@ function ReviewsSummaryBanner({
   );
 }
 
-/** “from 1,25k reviews” — comma as decimal separator to match Figma */
-function formatSubtitleKReviews(total: number): string {
+/** “from N reviews” / “from 1,25k reviews” — English keeps comma fractional k; Arabic uses locale punctuation */
+function formatSubtitleKReviews(
+  total: number,
+  locale: Locale,
+  tf: (key: MessageKey, vars: Record<string, string | number>) => string,
+): string {
+  const numLoc = locale === "ar" ? "ar-SA" : "en-US";
   if (total < 1000) {
-    return `from ${total.toLocaleString("en-US")} reviews`;
+    return tf("reviews.subtitleReviews", {
+      count: total.toLocaleString(numLoc),
+    });
   }
   const k = total / 1000;
-  const part = k.toFixed(2).replace(".", ",");
-  return `from ${part}k reviews`;
+  const part =
+    locale === "ar"
+      ? k.toFixed(2).replace(".", "٫")
+      : k.toFixed(2).replace(".", ",");
+  return tf("reviews.subtitleReviewsK", { part });
 }
 
 /** SVG ring progress = score / maxScore (gap at end of arc); overlays Inter label */
@@ -307,6 +326,7 @@ function AvgScoreRing({
   sizePx?: number;
   strokeWidth?: number;
 }): JSX.Element {
+  const { tf } = useLocale();
   const maxScore = 5;
   const clamped = Math.min(Math.max(score / maxScore, 0), 1);
   const c = sizePx / 2;
@@ -319,7 +339,7 @@ function AvgScoreRing({
       className="relative shrink-0 [&_circle]:motion-reduce:transition-none"
       style={{ width: sizePx, height: sizePx }}
       role="img"
-      aria-label={`Average rating ${label} out of 5`}
+      aria-label={tf("reviews.avgRingAria", { label })}
     >
       <svg
         className="-rotate-90"
@@ -422,14 +442,11 @@ function SidebarCheckboxRow({
   );
 }
 
-function filterReviews(
-  kind: (typeof tabs)[number],
-  reviews: UiReview[],
-): UiReview[] {
+function filterReviews(kind: ReviewTabId, reviews: UiReview[]): UiReview[] {
   switch (kind) {
-    case "With Photo & Video":
+    case "photo":
       return reviews.filter((_, index) => index % 2 === 0);
-    case "With Description":
+    case "desc":
       return reviews.slice(0, Math.max(reviews.length - 1, 1));
     default:
       return reviews;
@@ -443,7 +460,7 @@ function normalizedStarBucket(rating: number): number {
 
 function applyReviewFilters(
   reviews: UiReview[],
-  tab: (typeof tabs)[number],
+  tab: ReviewTabId,
   starSelections: Map<number, boolean>,
   topicSelections: ReadonlyMap<string, boolean>,
   hasTopicFacets: boolean,
@@ -505,7 +522,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
         <div className="mt-7 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
           <button
             type="button"
-            className="flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-left font-sans text-[14px] font-bold leading-tight text-black transition hover:opacity-80"
+            className="flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-start font-sans text-[14px] font-bold leading-tight text-black transition hover:opacity-80"
           >
             {review.avatarSrc ? (
               <img
@@ -543,6 +560,7 @@ function HelpfulVoteChips({
   yes: number;
   no: number;
 }): JSX.Element {
+  const { t, tf } = useLocale();
   const [choice, setChoice] = useState<HelpfulChoice>(null);
   const [yesCount, setYesCount] = useState(initialYes);
   const [noCount, setNoCount] = useState(initialNo);
@@ -593,8 +611,8 @@ function HelpfulVoteChips({
           aria-pressed={upChosen || undefined}
           aria-label={
             upChosen
-              ? `Helpful selected (${yesCount}), press to remove`
-              : `Mark helpful (${yesCount})`
+              ? tf("reviews.helpful.ariaYesSelected", { count: yesCount })
+              : tf("reviews.helpful.ariaYes", { count: yesCount })
           }
           className={`peer/helpful-chip-yes ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3`}
           onClick={onLike}
@@ -617,7 +635,7 @@ function HelpfulVoteChips({
             "peer-focus-visible/helpful-chip-yes:visible peer-focus-visible/helpful-chip-yes:opacity-100",
           )}
         >
-          Like
+          {t("reviews.helpful.tooltipYes")}
         </span>
       </div>
       <div className="relative">
@@ -626,8 +644,8 @@ function HelpfulVoteChips({
           aria-pressed={downChosen || undefined}
           aria-label={
             downChosen
-              ? `Not helpful selected (${noCount}), press to remove`
-              : `Mark not helpful (${noCount})`
+              ? tf("reviews.helpful.ariaNoSelected", { count: noCount })
+              : tf("reviews.helpful.ariaNo", { count: noCount })
           }
           className={`peer/helpful-chip-no ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3`}
           onClick={onDislike}
@@ -650,7 +668,7 @@ function HelpfulVoteChips({
             "peer-focus-visible/helpful-chip-no:visible peer-focus-visible/helpful-chip-no:opacity-100",
           )}
         >
-          Dislike
+          {t("reviews.helpful.tooltipNo")}
         </span>
       </div>
     </div>
@@ -662,6 +680,7 @@ const pgCell =
   "inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] border border-solid bg-white text-[15px] font-semibold tabular-nums leading-none tracking-normal antialiased outline-none transition-[color,border-color,background-color] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
 function Pagination(): JSX.Element {
+  const { t } = useLocale();
   const lastPage = 19;
   const current = 1;
 
@@ -674,12 +693,12 @@ function Pagination(): JSX.Element {
   return (
     <nav
       className="mt-6 flex flex-wrap items-center justify-center gap-2 pb-2 pt-6 font-sans lg:mt-7"
-      aria-label="Review pagination"
+      aria-label={t("reviews.paginationNav")}
     >
       {current > 1 && (
         <button
           type="button"
-          aria-label="Previous page"
+          aria-label={t("reviews.pagePrev")}
           className="inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-black outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
@@ -712,7 +731,7 @@ function Pagination(): JSX.Element {
       </button>
       <button
         type="button"
-        aria-label="Next page"
+        aria-label={t("reviews.pageNext")}
         className="inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-black outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
         <ChevronRight className="size-5" strokeWidth={1.5} aria-hidden />

@@ -15,10 +15,12 @@ export type CartLine = {
   unitPrice: number
 }
 
+export type CartToastKind = 'item_added'
+
 type CartSlice = {
   lines: CartLine[]
   drawerOpen: boolean
-  toast: string | null
+  toast: CartToastKind | null
 }
 
 type CartActions = {
@@ -87,7 +89,7 @@ export const useCartStore = create<CartStore>()(
               unitPrice: payload.unitPrice,
             })
           }
-          draft.toast = 'Added to cart'
+          draft.toast = 'item_added'
           /* Basket opens only from Checkout Now or header — not on every add */
         })
       },

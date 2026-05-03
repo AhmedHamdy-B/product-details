@@ -1,12 +1,14 @@
 import { ChevronUp } from 'lucide-react';
 import { useEffect, useState, type JSX } from 'react';
 
+import { useLocale } from '../i18n/useLocale';
 import { cn } from '../lib/cn';
 
 /** Past promo + sticky header fold — hides control while still in top “landing” scroll band */
 const SHOW_AFTER_SCROLL_Y = 120;
 
 export function GoToTopButton(): JSX.Element {
+  const { t } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function GoToTopButton(): JSX.Element {
   return (
     <button
       type="button"
-      aria-label="Back to top"
+      aria-label={t('gotoTop')}
       aria-hidden={visible ? undefined : true}
       tabIndex={visible ? 0 : -1}
       onClick={() => {
@@ -35,8 +37,8 @@ export function GoToTopButton(): JSX.Element {
       }}
       className={cn(
         'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))]',
-        'right-[max(1.25rem,env(safe-area-inset-right,0px))] z-[45]',
-        'md:bottom-8 md:right-8',
+        'end-[max(1.25rem,env(safe-area-inset-right,0px))] z-[45]',
+        'md:bottom-8 md:end-8',
         'inline-flex size-12 shrink-0 items-center justify-center',
         'rounded-[10px] border border-[#E0E0E0] bg-jl-white',
         'text-jl-black shadow-card',
