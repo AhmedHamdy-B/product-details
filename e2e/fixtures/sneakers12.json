@@ -1,0 +1,110 @@
+{
+  "id": "prod-e2e-sneakers",
+  "slug": "Sneakers12",
+  "name": "Hybrid Trainer",
+  "price": 220,
+  "sale_price": 175,
+  "description": "",
+  "thumb": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+  "images": [],
+  "quantity": 50,
+  "track_stock": true,
+  "categories": [{ "id": "cat_trainers", "name": "Trainers", "slug": "trainers" }],
+  "variations": [
+    {
+      "id": "c1",
+      "name": "color",
+      "product_id": "prod-e2e-sneakers",
+      "type": "image",
+      "props": [
+        {
+          "id": "cp1",
+          "name": "ash",
+          "variation_id": "c1",
+          "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        },
+        {
+          "id": "cp2",
+          "name": "ink",
+          "variation_id": "c1",
+          "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        }
+      ]
+    },
+    {
+      "id": "s1",
+      "name": "size",
+      "product_id": "prod-e2e-sneakers",
+      "type": "button",
+      "props": [
+        { "id": "sp40", "name": "40", "variation_id": "s1" },
+        { "id": "sp41", "name": "41", "variation_id": "s1" }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "ash-40",
+      "product_id": "prod-e2e-sneakers",
+      "price": 220,
+      "sale_price": 175,
+      "quantity": 12,
+      "variation_props": [
+        {
+          "id": "ash-40-c",
+          "variation": "color",
+          "variation_prop": "ash",
+          "product_variant_id": "ash-40"
+        },
+        {
+          "id": "ash-40-s",
+          "variation": "size",
+          "variation_prop": "40",
+          "product_variant_id": "ash-40"
+        }
+      ]
+    },
+    {
+      "id": "ash-41",
+      "product_id": "prod-e2e-sneakers",
+      "price": 220,
+      "sale_price": 0,
+      "quantity": 10,
+      "variation_props": [
+        {
+          "id": "ash-41-c",
+          "variation": "color",
+          "variation_prop": "ash",
+          "product_variant_id": "ash-41"
+        },
+        {
+          "id": "ash-41-s",
+          "variation": "size",
+          "variation_prop": "41",
+          "product_variant_id": "ash-41"
+        }
+      ]
+    },
+    {
+      "id": "ink-41",
+      "product_id": "prod-e2e-sneakers",
+      "price": 220,
+      "sale_price": 0,
+      "quantity": 10,
+      "variation_props": [
+        {
+          "id": "ink-41-c",
+          "variation": "color",
+          "variation_prop": "ink",
+          "product_variant_id": "ink-41"
+        },
+        {
+          "id": "ink-41-s",
+          "variation": "size",
+          "variation_prop": "41",
+          "product_variant_id": "ink-41"
+        }
+      ]
+    }
+  ]
+}

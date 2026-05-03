@@ -34,11 +34,14 @@ export const ProductGallery = memo(function ProductGallery({
   const safeImages = images.length ? images : [];
   const [active, setActive] = useState(0);
 
+  /* Clamp active index when the gallery list shrinks (e.g. colour swap removes frames). */
+  /* eslint-disable react-hooks/set-state-in-effect -- keep selected slide in-range when urls length drops */
   useEffect(() => {
     if (active > safeImages.length - 1) {
       setActive(0);
     }
   }, [active, safeImages.length]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!safeImages.length) return null;
 
@@ -112,7 +115,7 @@ function GalleryInterior({
             <div
               className={cn(
                 "absolute inset-0 transition-[transform] duration-[1300ms] ease-out",
-                hoverPulse && "scale-[1.06]",
+                hoverPulse && "motion-safe:scale-[1.06]",
               )}
             >
               <img

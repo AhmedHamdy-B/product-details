@@ -1,5 +1,12 @@
 import { Star } from "lucide-react";
-import { useEffect, useMemo, useState, type JSX } from "react";
+import {
+  type MutableRefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+} from "react";
 
 import type { Product, Variation } from "../types/product";
 import { formatMoney } from "../lib/money";
@@ -92,6 +99,70 @@ type BuyingProps = {
   product: Product;
 };
 
+function PurchaseQuantityStepper({
+  maxBasketQty,
+  trackStockUnavailable,
+  purchaseQtyRef,
+}: {
+  maxBasketQty: number;
+  trackStockUnavailable: boolean;
+  purchaseQtyRef: MutableRefObject<number>;
+}): JSX.Element {
+  const [quantity, setQuantity] = useState(1);
+  const lineQty = Math.min(Math.max(1, quantity), maxBasketQty);
+
+  useEffect(() => {
+    purchaseQtyRef.current = lineQty;
+  }, [lineQty, purchaseQtyRef]);
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
+      <div className="flex items-center gap-3">
+        <span
+          id="pdp-qty-label"
+          className="text-[13px] font-semibold tracking-tight text-black"
+        >
+          Quantity
+        </span>
+        <div
+          className="flex items-center gap-3 border border-black px-[10px] py-[8px] text-black"
+          role="group"
+          aria-labelledby="pdp-qty-label"
+        >
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={lineQty <= 1}
+            className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+          >
+            −
+          </button>
+          <span className="min-w-[28px] text-center text-[17px] font-semibold tabular-nums">
+            {lineQty}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            disabled={
+              lineQty >= maxBasketQty || trackStockUnavailable
+            }
+            className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
+            onClick={() =>
+              setQuantity((q) => Math.min(maxBasketQty, q + 1))
+            }
+          >
+            +
+          </button>
+        </div>
+        <span className="sr-only">
+          Maximum {maxBasketQty} for this selection
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const selectedVariations = useProductStore(
     (state) => state.selectedVariations,
@@ -112,16 +183,13 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
-  const [quantity, setQuantity] = useState(1);
 
   const maxBasketQty = useMemo(
     () => getMaxBasketQuantity(product, selectedVariant?.quantity),
     [product, selectedVariant?.quantity],
   );
 
-  useEffect(() => {
-    setQuantity((q) => Math.min(Math.max(1, q), maxBasketQty));
-  }, [maxBasketQty, selectedVariant?.id]);
+  const purchaseQtyRef = useRef(1);
 
   const heroImageSelection = (): string => {
     const colorKey = variationKeyNormalize("color");
@@ -157,7 +225,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
       selections: { ...selectedVariations },
       variantId: selectedVariant.id,
       unitPrice: payable,
-      quantity,
+      quantity: purchaseQtyRef.current,
     });
   };
 
@@ -274,55 +342,14 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
-        <div className="flex items-center gap-3">
-          <span
-            id="pdp-qty-label"
-            className="text-[13px] font-semibold tracking-tight text-black"
-          >
-            Quantity
-          </span>
-          <div
-            className="flex items-center gap-3 border border-black px-[10px] py-[8px] text-black"
-            role="group"
-            aria-labelledby="pdp-qty-label"
-          >
-            <button
-              type="button"
-              aria-label="Decrease quantity"
-              disabled={quantity <= 1}
-              className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
-              onClick={() =>
-                setQuantity((q) => Math.max(1, q - 1))
-              }
-            >
-              −
-            </button>
-            <span className="min-w-[28px] text-center text-[17px] font-semibold tabular-nums">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              aria-label="Increase quantity"
-              disabled={
-                quantity >= maxBasketQty ||
-                Boolean(
-                  product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
-                )
-              }
-              className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
-              onClick={() =>
-                setQuantity((q) => Math.min(maxBasketQty, q + 1))
-              }
-            >
-              +
-            </button>
-          </div>
-          <span className="sr-only">
-            Maximum {maxBasketQty} for this selection
-          </span>
-        </div>
-      </div>
+      <PurchaseQuantityStepper
+        key={selectedVariant?.id ?? "unset-qty"}
+        maxBasketQty={maxBasketQty}
+        trackStockUnavailable={Boolean(
+          product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
+        )}
+        purchaseQtyRef={purchaseQtyRef}
+      />
 
       <div className="flex gap-4 pt-4">
         <button

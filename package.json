@@ -9,7 +9,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lh:a11y": "start-server-and-test \"npm run dev -- --host localhost --strictPort --port 5199\" http://localhost:5199 lh:a11y:run",
+    "lh:a11y:run": "node scripts/lighthouse-a11y.mjs",
+    "test:coverage-matrix": "npm run test:run && npm run test:e2e"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.10",
@@ -20,11 +25,14 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-icons": "^5.6.0",
+    "react-router-dom": "^7.14.2",
     "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
@@ -37,11 +45,14 @@
     "@vitest/ui": "^4.1.5",
     "autoprefixer": "^10.5.0",
     "eslint": "^10.2.1",
+    "eslint-plugin-playwright": "^2.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "jsdom": "^29.1.1",
+    "lighthouse": "^13.2.0",
     "postcss": "^8.5.13",
+    "start-server-and-test": "^3.0.2",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",

@@ -153,7 +153,11 @@ export function ProductDetailPage(): JSX.Element {
         <SiteHeader crumbs={crumbs} />
       </Reveal>
 
-      <main className="min-w-0">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4"
+      >
         <PageContainer className="pb-24">{bodyContent}</PageContainer>
       </main>
 

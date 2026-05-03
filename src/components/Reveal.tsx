@@ -19,11 +19,13 @@ export function Reveal({ children, className, delayMs = 0 }: RevealProps): JSX.E
   const [visible, setVisible] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
 
+  /* eslint-disable react-hooks/set-state-in-effect -- one-shot matchMedia snapshot on mount */
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReduceMotion(mq.matches)
     if (mq.matches) setVisible(true)
   }, [])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (reduceMotion) return

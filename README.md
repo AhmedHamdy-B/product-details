@@ -10,6 +10,7 @@ Implementing the [Frontend Engineering Task (ElegantSoft)](https://github.com/El
 | PDP state | **Zustand + Immer** (`useProductStore` mirrors the readme contract incl. getters) |
 | Cart | **Zustand + Immer + `persist`** (localStorage, partialised lines only) |
 | Data layer | `@tanstack/react-query` fetches the task SKU (`useQuery`), then mirrors into `useProductStore` for the readme contract + selectors |
+| Quality gates | **[Playwright](https://playwright.dev/)** Chromium E2E + **[axe-core](https://github.com/dequelabs/axe-core)** · **Lighthouse** accessibility smoke (CLI bridge in [`scripts/lighthouse-a11y.mjs`](scripts/lighthouse-a11y.mjs)) |
 
 ## Prerequisites
 
@@ -19,10 +20,21 @@ Node 22+ recommended (matching the toolchain used while authoring).
 
 ```bash
 npm install
-npm run dev        # Vite dev server (http://localhost:5173)
+npx playwright install chromium   # first time only (Pulls Chromium for `@playwright/test`)
+
+npm run dev        # Human loop — http://localhost:5173
 npm run build      # Production bundle
-npm run test:run   # Vitest suite (pricing, variants, cart/product stores, CartDrawer smoke)
+
+npm run test:run           # Vitest (unit/integration-style; excludes `e2e/`)
+npm run test:e2e           # Playwright — dedicated Vite on http://localhost:5199 via webServer hook
+npm run test:e2e:ui        # Playwright inspector UI
+npm run lh:a11y            # Spins Vite :5199, runs Lighthouse Accessibility category (default MIN_A11Y_SCORE=0.86)
+npm run test:coverage-matrix # Vitest then Playwright in one sweep
 ```
+
+**E2E hardening:** Playwright mocks the EasyOrders JSON response from [`e2e/fixtures/sneakers12.json`](e2e/fixtures/sneakers12.json) so CI/local runs avoid flaky WAN dependencies.
+
+**Lighthouse:** `npm run lh:a11y` runs against the ordinary dev bundle and **hits the live EasyOrders API** (no route mocking). Offline or flaky networks should skip Lighthouse and lean on Vitest + Playwright; override the audited URL via `LH_URL` if needed.
 
 No `.env` is required—the reference product is fetched from EasyOrders publicly.
 
@@ -34,10 +46,10 @@ Criteria usually mirror the recruitment brief ([task repo README](https://github
 | --- | --- | --- |
 | **Code quality (25%)** | Readable structure, modular components, TypeScript soundness, edge cases | `src/components/` slices, **`strict: true`** in [`tsconfig.app.json`](tsconfig.app.json), [`src/lib/*.ts`](src/lib/), shared test fixtures [`src/tests/fixtures/`](src/tests/fixtures/) |
 | **State management (25%)** | Zustand + Immer patterns, persistence + hydration, sane update flow | [`src/stores/productStore.ts`](src/stores/productStore.ts), [`src/stores/cartStore.ts`](src/stores/cartStore.ts) (`persist` + `partialize`), granular selectors (`useCartStore`, `useProductStore`) |
-| **UI implementation (25%)** | Design fidelity, responsive behaviour, UX polish, accessibility | JL-inspired PDP/footer/header, breakpoints in Tailwind, [`ProductGallery.tsx`](src/components/ProductGallery.tsx) / drawers / toasts; **a11y**: `aria-*` on controls, dialogs via Headless UI, `aria-live` on [`ToastBanner`](src/components/ToastBanner.tsx); **risk**: subjective “pixel-perfect” vs original Figma is for human review |
-| **Technical implementation (25%)** | Solid API integration, performance awareness, automated tests, documentation | [`api/product.ts`](src/api/product.ts) + React Query defaults in [`App.tsx`](src/App.tsx), lazy thumbnails, **`ErrorBoundary`** in [`components/ErrorBoundary.tsx`](src/components/ErrorBoundary.tsx), Vitest in [`src/tests/`](src/tests/), this README + inline comments where behaviour is non-obvious |
+| **UI implementation (25%)** | Design fidelity, responsive behaviour, UX polish, accessibility | JL-inspired PDP/footer/header, breakpoints in Tailwind, [`ProductGallery.tsx`](src/components/ProductGallery.tsx) / drawers / toasts; **keyboard**: [`SkipToMain`](src/components/SkipToMain.tsx) + `#main-content`; **`prefers-reduced-motion`**: `motion-safe` zoom in gallery; dialogs & `aria-live` toast |
+| **Technical implementation (25%)** | Solid API integration, performance awareness, automated tests, documentation | [`api/product.ts`](api/product.ts), React Query in [`App.tsx`](src/App.tsx), Vitest [`src/tests/`](src/tests/), Playwright [`e2e/`](e2e/) + axe main-landmark scan [`e2e/accessibilityaxe.spec.ts`](e2e/accessibilityaxe.spec.ts), Lighthouse script, this README |
 
-Being explicit about residual gaps is part of solid documentation too: browser E2E, a full keyboard pass on bespoke controls, and Lighthouse perf snapshots are sensible next steps if an interviewer digs deeper.
+**Still subjective / optional polish:** Lighthouse *performance* & *best-practices* buckets (heavy third-party rails), axe `color-contrast` (disabled briefly for JL greys pending token audit — see axe spec comment), exhaustive keyboard coverage of mega-menu chrome.
 
 ### Product API
 
@@ -61,7 +73,16 @@ Refer to [`src/pages/ProductDetailPage.tsx`](src/pages/ProductDetailPage.tsx) fo
 
 ### Testing & quality gates
 
-[`npm run test:run`](package.json) executes Vitest: pricing helpers, variant utilities, **`productStore` / `cartStore` actions**, and a **`CartDrawer` smoke render**. Extend with Playwright/Cypress when you want the readme’s E2E bar—structure is ready, but browsers are not wired in this repo yet.
+| Layer | Command | Notes |
+| --- | --- | --- |
+| Unit / RTL | [`npm run test:run`](package.json) | Vitest excludes `e2e/**` · stores, pricing, variants, `CartDrawer` smoke |
+| E2E | [`npm run test:e2e`](package.json) | Chromium · [`playwright.config.ts`](playwright.config.ts) boots Vite **`localhost:5199`** (keeps `:5173` free for humans) · [`mockEasyOrdersProductPayload`](e2e/helpers/mock-easyorders.ts) |
+| Deep a11y | same Playwright suite | axe `critical`/`serious` on `main#main-content`, `color-contrast` currently opt-out ([`accessibilityaxe.spec.ts`](e2e/accessibilityaxe.spec.ts)) |
+| Lighthouse | [`npm run lh:a11y`](package.json) | Accessibility category threshold via `MIN_A11Y_SCORE` env (defaults `0.86`) |
+
+HTML reports land in `playwright-report/` · failures capture traces under `test-results/` (both gitignored).
+
+**Lighthouse troubleshooting:** `npm run lh:a11y` reserves **port 5199**. If you see `Port 5199 is already in use`, stop the other Vite first or run `npm run lh:a11y:run` while you already have `npm run dev -- --host localhost --strictPort --port 5199` running. On Windows, `start-server-and-test` may log a noisy `taskkill` line after the audit even when the script printed a passing score—use the **exit code** and the `Lighthouse accessibility score:` line as the source of truth.
 
 ## Deployment notes
 
