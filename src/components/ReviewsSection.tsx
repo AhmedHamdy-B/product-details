@@ -15,6 +15,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type JSX,
   type ReactNode,
 } from "react";
@@ -48,35 +49,52 @@ const reviewTooltip =
 
 const REVIEW_TAB_FADE_MS = 220;
 
+function subscribePrefersReducedMotion(onStoreChange: () => void): () => void {
+  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+
+function getPrefersReducedMotionSnapshot(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getPrefersReducedMotionServerSnapshot(): boolean {
+  return false;
+}
+
 export function ReviewsSection(): JSX.Element {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<ReviewTabId>(REVIEW_TAB_IDS[0]);
   /** Tab used for list content; trails `activeTab` while cross-fading. */
   const [displayTab, setDisplayTab] = useState<ReviewTabId>(activeTab);
   const [listFadeIn, setListFadeIn] = useState(true);
-  const [reduceMotion, setReduceMotion] = useState(false);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduceMotion(mq.matches);
-    const onChange = () => setReduceMotion(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+  const reduceMotion = useSyncExternalStore(
+    subscribePrefersReducedMotion,
+    getPrefersReducedMotionSnapshot,
+    getPrefersReducedMotionServerSnapshot,
+  );
 
   const fadeMs = reduceMotion ? 0 : REVIEW_TAB_FADE_MS;
 
   useEffect(() => {
     if (activeTab === displayTab) {
-      setListFadeIn(true);
+      queueMicrotask(() => {
+        setListFadeIn(true);
+      });
       return;
     }
     if (fadeMs === 0) {
-      setDisplayTab(activeTab);
-      setListFadeIn(true);
+      queueMicrotask(() => {
+        setDisplayTab(activeTab);
+        setListFadeIn(true);
+      });
       return;
     }
-    setListFadeIn(false);
+    queueMicrotask(() => {
+      setListFadeIn(false);
+    });
     const id = window.setTimeout(() => {
       setDisplayTab(activeTab);
       requestAnimationFrame(() => {
