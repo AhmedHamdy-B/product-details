@@ -72,7 +72,7 @@ function NewsletterField(): JSX.Element {
               border-0
               outline-none outline-0 [outline-offset:0px]
               ring-0 ring-offset-0
-              placeholder:text-[#707070]
+              placeholder:text-[#7A7A7A]
               shadow-none
               shadow-[inset_0_0_0_9999px_transparent]
               focus:border-0
@@ -143,7 +143,9 @@ function EgyptFlagSvg({ className }: { className?: string }): JSX.Element {
 function LanguageMenu(): JSX.Element {
   const { locale, setLocale, t } = useLocale();
   const currentLabel =
-    locale === "ar" ? t("footer.localeArabicShort") : t("footer.localeEnglishShort");
+    locale === "ar"
+      ? t("footer.localeArabicShort")
+      : t("footer.localeEnglishShort");
 
   return (
     <Menu as="div" className="relative inline-block text-start">
@@ -181,7 +183,9 @@ function LanguageMenu(): JSX.Element {
               }}
               className={cn(
                 "flex w-full items-center gap-2 px-3 py-2 text-start text-[12px]",
-                locale === "en" ? "bg-neutral-100 font-semibold text-black" : "text-neutral-800",
+                locale === "en"
+                  ? "bg-neutral-100 font-semibold text-black"
+                  : "text-neutral-800",
                 focus && "outline-none bg-neutral-50",
               )}
             >
@@ -200,7 +204,9 @@ function LanguageMenu(): JSX.Element {
               }}
               className={cn(
                 "flex w-full items-center gap-2 px-3 py-2 text-start text-[12px]",
-                locale === "ar" ? "bg-neutral-100 font-semibold text-black" : "text-neutral-800",
+                locale === "ar"
+                  ? "bg-neutral-100 font-semibold text-black"
+                  : "text-neutral-800",
                 focus && "outline-none bg-neutral-50",
               )}
             >
@@ -313,7 +319,9 @@ function FooterLinkColumn({
 }): JSX.Element {
   return (
     <div>
-      <p className="text-[13px] font-bold leading-tight text-black">{heading}</p>
+      <p className="text-[13px] font-bold leading-tight text-black">
+        {heading}
+      </p>
       <ul className="mt-3 space-y-2 text-[13px] font-normal leading-normal text-black">
         {links.map((label) => (
           <li key={label}>

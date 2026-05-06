@@ -40,7 +40,9 @@ export function FavoritesDrawer(): JSX.Element {
           </div>
 
           {items.length === 0 ? (
-            <p className="text-[15px] leading-relaxed text-neutral-600">{t("fav.empty")}</p>
+            <p className="text-[15px] leading-relaxed text-neutral-600">
+              {t("fav.empty")}
+            </p>
           ) : (
             <ul className="flex flex-1 flex-col gap-0 overflow-y-auto pe-1">
               {items.map((item) => (
@@ -48,7 +50,7 @@ export function FavoritesDrawer(): JSX.Element {
                   key={item.productId}
                   className="flex gap-5 border-b border-neutral-900/10 py-6 first:pt-0"
                 >
-                  <div className="h-28 w-24 shrink-0 overflow-hidden rounded-lg bg-jl-gray">
+                  <div className="h-28 w-24 shrink-0 overflow-hidden rounded-md bg-jl-gray">
                     <img
                       src={item.image}
                       alt=""

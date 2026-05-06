@@ -56,9 +56,9 @@ function formatSelectionLabel(
 
 function VariationHeading({ label, value }: { label: string; value: string }) {
   return (
-    <p className="text-[15px] leading-tight">
-      <span className="font-normal text-[#999999]">{label}: </span>
-      <span className="font-bold tracking-tight text-black">{value}</span>
+    <p className="text-[20px] leading-tight mt-2 mb-1">
+      <span className="font-normal text-[#8F8F8F]">{label}: </span>
+      <span className="font-semibold tracking-tight text-black">{value}</span>
     </p>
   );
 }
@@ -158,18 +158,16 @@ function PurchaseQuantityStepper({
           <button
             type="button"
             aria-label={t("pdp.incQty")}
-            disabled={
-              lineQty >= maxBasketQty || trackStockUnavailable
-            }
+            disabled={lineQty >= maxBasketQty || trackStockUnavailable}
             className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
-            onClick={() =>
-              setQuantity((q) => Math.min(maxBasketQty, q + 1))
-            }
+            onClick={() => setQuantity((q) => Math.min(maxBasketQty, q + 1))}
           >
             +
           </button>
         </div>
-        <span className="sr-only">{tf("pdp.qtyMaxHint", { n: maxBasketQty })}</span>
+        <span className="sr-only">
+          {tf("pdp.qtyMaxHint", { n: maxBasketQty })}
+        </span>
       </div>
     </div>
   );
@@ -246,17 +244,20 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const ratingAvg = product.rating_avg ?? HEADER_DEFAULTS.rating_avg;
 
   return (
-    <div className="space-y-9">
+    <div className="space-y-6">
       <header className="border-b border-dashed border-[#D1D1D1] pb-5">
-        <p className="text-[13px] font-normal leading-[1.25] text-[#717171]">
+        <p className="text-[16px] font-medium leading-[1.25] text-[#8F8F8F] mb-3">
           John Lewis <span className="uppercase">ANYDAY</span>
         </p>
-        <h1 className="mt-1 font-sans text-[24px] font-bold leading-[1.25] tracking-[-0.02em] text-black sm:text-[28px]">
+        <h1 className="mt-1 font-sans text-[20px] font-bold leading-[1.25] tracking-[-0.02em] text-black sm:text-[36px]">
           {product.name}
         </h1>
 
-        {product.categories?.length ? (
-          <ul className="mt-3 flex flex-wrap gap-2" aria-label={t("pdp.categoriesAria")}>
+        {/* {product.categories?.length ? (
+          <ul
+            className="mt-3 flex flex-wrap gap-2"
+            aria-label={t("pdp.categoriesAria")}
+          >
             {product.categories.map((category) => (
               <li key={category.id}>
                 <span className="inline-flex rounded-full border border-[#D1D1D1] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
@@ -270,34 +271,34 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         <StockStatusLabel
           trackStock={product.track_stock}
           variantQty={selectedVariant?.quantity}
-        />
+        /> */}
 
-        <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+        <div className="mt-4 mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
             {showDiscount ? (
-              <span className="text-[15px] font-normal leading-none text-[#999999] line-through decoration-[#999999]">
+              <span className="text-[17px] font-normal leading-none text-[#8F8F8F] line-through decoration-[#8F8F8F] decoration-1">
                 {formatMoney(catalogue)}
               </span>
             ) : null}
-            <span className="text-[22px] font-bold leading-none tracking-[-0.02em] text-black sm:text-[24px]">
+            <span className="text-[22px] font-semibold ml-2 leading-none tracking-[-0.02em] text-black sm:text-[24px]">
               {formatMoney(payable)}
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-[6px] text-[14px] leading-none">
-            <span className="font-normal whitespace-nowrap text-[#999999]">
+            <span className="font-normal whitespace-nowrap text-[#8F8F8F]  text-[20px]">
               {formatSold(soldCount, locale)} {t("pdp.soldSuffix")}
             </span>
             <span className="text-[12px] text-[#CCCCCC]" aria-hidden>
               •
             </span>
             <Star
-              className="h-[17px] w-[17px] shrink-0"
+              className="h-[22px] w-[22px] shrink-0"
               fill={STORE_STAR_HEX}
               color={STORE_STAR_HEX}
               strokeWidth={0}
               aria-hidden
             />
-            <span className="font-bold tabular-nums text-black">
+            <span className="font-semibold tabular-nums text-black text-[22px]">
               {ratingAvg.toFixed(1)}
             </span>
           </div>
@@ -306,7 +307,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
 
       <ExpandableRichDescription html={product.description} />
 
-      <div className="space-y-10 pt-2">
+      <div className="space-y-8 pt-2">
         {product.variations.map((variation) => (
           <div key={variation.id} className="space-y-4">
             <div className="flex items-baseline justify-between gap-x-8">
@@ -356,23 +357,23 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         </p>
       )}
 
-      <PurchaseQuantityStepper
+      {/* <PurchaseQuantityStepper
         key={selectedVariant?.id ?? "unset-qty"}
         maxBasketQty={maxBasketQty}
         trackStockUnavailable={Boolean(
           product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
         )}
         purchaseQtyRef={purchaseQtyRef}
-      />
+      /> */}
 
-      <div className="flex gap-4 pt-4">
+      <div className="flex gap-6 pt-4">
         <button
           type="button"
           disabled={Boolean(
             product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
           )}
           onClick={handleAddToCart}
-          className="min-h-[52px] min-w-0 flex-[3] rounded-lg bg-black px-5 text-[15px] font-bold leading-tight text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-[58px] min-w-0 flex-[3] rounded-md bg-black px-5 text-[20px] font-semibold leading-tight text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {t("pdp.addToCart")}
         </button>
@@ -380,13 +381,13 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         <button
           type="button"
           onClick={() => openDrawer()}
-          className="min-h-[52px] min-w-0 flex-[2] rounded-lg border border-[#D1D1D1] bg-white px-5 text-[15px] font-normal leading-tight text-black transition hover:border-[#B0B0B0]"
+          className="min-h-[58px] min-w-0 flex-[2] rounded-md border border-[#D1D1D1] bg-white px-5 text-[20px] font-medium leading-tight text-black transition hover:border-[#B0B0B0]"
         >
           {t("pdp.checkoutNow")}
         </button>
       </div>
 
-      <div className="border-t border-dashed border-[#D1D1D1] pt-5">
+      <div className=" pt-2">
         <DeliveryTermsTooltip />
       </div>
     </div>
@@ -403,7 +404,7 @@ type SelectorProps = {
 /** Figma: ~48×48 thumb; selected = same inner image (+ 48) inside 60 frame = 5px white + 1px black per side */
 const SWATCH_GAP = "gap-[14px]";
 const swatchCell =
-  "flex h-[60px] min-h-[60px] w-[60px] min-w-[60px] shrink-0 items-center justify-center";
+  "flex h-[40px] min-h-[40px] w-[75px] min-w-[75px] shrink-0 items-center justify-center";
 
 function ColorSwatches({
   variation,
@@ -440,8 +441,8 @@ function ColorSwatches({
               className={cn(
                 "relative shrink-0 overflow-hidden rounded-[10px] transition outline-none ring-0 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
                 selectedValue
-                  ? "h-[60px] w-[60px] border border-black bg-white shadow-none"
-                  : "h-[48px] w-[48px] border-0 shadow-none hover:opacity-95",
+                  ? "h-[40px] w-[75px] border border-black bg-white shadow-none"
+                  : "h-[40px] w-[75px] border-0 shadow-none hover:opacity-95",
                 !available && "cursor-not-allowed opacity-[0.35]",
               )}
             >
@@ -450,7 +451,7 @@ function ColorSwatches({
                 className={cn(
                   "absolute overflow-hidden bg-jl-gray",
                   selectedValue
-                    ? "inset-[5px] rounded-[7px]"
+                    ? "inset-[2px] rounded-[8px]"
                     : "inset-0 rounded-[10px]",
                 )}
                 style={thumbStyle}
@@ -490,7 +491,7 @@ function SizeButtons({
             key={prop.id}
             onClick={() => select(prop.name)}
             className={cn(
-              "inline-flex h-9 min-h-[38px] min-w-[72px] shrink-0 items-center justify-center rounded-[8px] px-3.5 text-[14px] font-bold tabular-nums tracking-tight transition outline-none",
+              "inline-flex h-[40px] min-h-[40px] w-[75px] min-w-[75px] shrink-0 items-center justify-center rounded-[8px] px-0 text-[20px] font-semibold tabular-nums tracking-tight transition outline-none",
               "focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
               selectedValue
                 ? "border-2 border-black bg-jl-gray text-black"
@@ -508,7 +509,7 @@ function SizeButtons({
 }
 
 const descriptionCopyClass =
-  "text-[14px] leading-[1.65] text-[#666666] [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" +
+  "text-[16px] font-normal leading-[1.5ch] tracking-[0] text-[#8F8F8F] [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" +
   " [&_ul]:my-2 [&_ul]:list-none [&_ul]:space-y-2 [&_ul]:ps-0 [&_ul]:leading-[1.65]" +
   " [&_li]:relative [&_li]:my-0 [&_li]:py-0 [&_li]:ps-[18px]" +
   " [&_li]:before:pointer-events-none [&_li]:before:absolute [&_li]:before:start-0 [&_li]:before:top-[10px]" +
@@ -517,8 +518,8 @@ const descriptionCopyClass =
   " [&_ol>li]:relative [&_ol>li]:ps-[18px]" +
   " [&_ol>li]:before:pointer-events-none [&_ol>li]:before:absolute [&_ol>li]:before:start-0 [&_ol>li]:before:top-[10px]" +
   " [&_ol>li]:before:h-[5px] [&_ol>li]:before:w-[5px] [&_ol>li]:before:rounded-full [&_ol>li]:before:bg-[#CCCCCC]" +
-  " [&_strong]:font-semibold [&_strong]:text-[#555555]" +
-  " [&_a]:font-bold [&_a]:text-black";
+  " [&_strong]:font-medium [&_strong]:text-[#444444]" +
+  " [&_a]:font-medium [&_a]:text-black";
 
 function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
   const { t } = useLocale();
@@ -527,19 +528,19 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
 
   return (
     <section className="mb-10">
-      <h2 className="text-[15px] font-bold leading-tight tracking-[-0.01em] text-black">
+      <h2 className="font-raleway text-[20px] font-bold leading-[1.2] tracking-[0] text-black">
         {t("pdp.descriptionHeading")}
       </h2>
-      <div className="relative mt-2">
+      <div className="relative mt-1">
         <div
-          className={cn(descriptionCopyClass, !expanded && "line-clamp-6")}
+          className={cn(descriptionCopyClass, !expanded && "line-clamp-4")}
           dangerouslySetInnerHTML={{ __html: html }}
         />
         {!expanded ? (
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="mt-3 inline-flex text-[14px] font-bold leading-none tracking-[-0.01em] text-black underline decoration-black underline-offset-4 hover:text-neutral-800"
+            className="mt-1 inline-flex text-[16px] font-medium leading-[1.5ch] tracking-[0] text-black underline decoration-black underline-offset-2 hover:text-neutral-800"
           >
             {t("pdp.seeMore")}
           </button>
@@ -547,7 +548,7 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="mt-4 inline-flex text-[14px] font-bold leading-none tracking-[-0.01em] text-black underline decoration-black underline-offset-4 hover:text-neutral-800"
+            className="mt-2 inline-flex text-[16px] font-medium leading-[1.5ch] tracking-[0] text-black underline decoration-black underline-offset-2 hover:text-neutral-800"
           >
             {t("pdp.showLess")}
           </button>
@@ -617,7 +618,7 @@ const SIZE_GUIDE_ROWS: ReadonlyArray<{
 ] as const;
 
 const pdpPopoverPanelClass =
-  "relative overflow-hidden rounded-lg border border-neutral-200/95 bg-white px-4 py-3.5 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.2),0_8px_24px_-8px_rgba(0,0,0,0.1)]";
+  "relative overflow-hidden rounded-md border border-neutral-200/95 bg-white px-4 py-3.5 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.2),0_8px_24px_-8px_rgba(0,0,0,0.1)]";
 
 /** Shared hover/reveal tooltip shell (delivery uses group, size guide uses group/sizeguide). */
 function pdpPopoverRevealClass(extra: string) {
@@ -638,8 +639,8 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
       <button
         type="button"
         className={cn(
-          "bg-transparent px-0 py-0 text-end font-sans text-[13px] font-semibold tracking-normal text-black",
-          "underline decoration-black decoration-1 underline-offset-[6px]",
+          "bg-transparent px-0 py-0 text-end font-sans text-[16px] font-normal tracking-normal text-black",
+          "underline decoration-black decoration-1 underline-offset-[2px]",
           "transition hover:text-neutral-700 hover:decoration-neutral-700",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
         )}
@@ -664,14 +665,18 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-900">
             {t("pdp.sizeGuideBadge")}
           </p>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-500">{t("pdp.sizeGuideBody")}</p>
-          <div className="mt-3 max-h-[min(50vh,320px)] overflow-y-auto rounded-lg border border-neutral-100">
+          <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-500">
+            {t("pdp.sizeGuideBody")}
+          </p>
+          <div className="mt-3 max-h-[min(50vh,320px)] overflow-y-auto rounded-md border border-neutral-100">
             <table className="w-full border-collapse text-start text-[11px] text-neutral-700">
               <thead className="sticky top-0 z-[1] border-b border-neutral-200 bg-neutral-50 font-semibold text-neutral-900">
                 <tr>
                   <th className="px-2 py-2.5 sm:px-3">{t("pdp.sizeColTag")}</th>
                   <th className="px-2 py-2.5 sm:px-3">{t("pdp.sizeColUk")}</th>
-                  <th className="px-2 py-2.5 pe-3 sm:px-3">{t("pdp.sizeColMeaning")}</th>
+                  <th className="px-2 py-2.5 pe-3 sm:px-3">
+                    {t("pdp.sizeColMeaning")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -705,7 +710,10 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
 
 function DeliveryTermsTooltip(): JSX.Element {
   const { t } = useLocale();
-  const deliveryBullets = [t("pdp.deliveryBullets.point1"), t("pdp.deliveryBullets.point2")] as const;
+  const deliveryBullets = [
+    t("pdp.deliveryBullets.point1"),
+    t("pdp.deliveryBullets.point2"),
+  ] as const;
   const revealTail =
     "group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100";
 
@@ -714,8 +722,8 @@ function DeliveryTermsTooltip(): JSX.Element {
       <button
         type="button"
         className={cn(
-          "bg-transparent px-0 py-0 text-start font-sans text-[13px] font-medium leading-snug tracking-normal text-[#707070]",
-          "underline decoration-[#707070] decoration-1 underline-offset-[3px]",
+          "bg-transparent px-0 py-0 text-start font-sans text-[16px] font-medium leading-snug tracking-normal text-[#7A7A7A]",
+          "underline decoration-[#7A7A7A] decoration-1 underline-offset-[3px]",
           "transition hover:text-[#555555] hover:decoration-[#555555]",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
         )}

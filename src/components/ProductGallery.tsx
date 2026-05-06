@@ -17,7 +17,7 @@ const galleryIcon = "h-[22px] w-[22px]";
 const galleryStroke = 1.5;
 
 const railBtn =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition active:scale-[0.97] hover:bg-[#e6e5dd]";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition active:scale-[0.97] hover:bg-[#e6e5dd]";
 
 type Props = {
   images: string[];
@@ -107,10 +107,10 @@ function GalleryInterior({
         Thumbnails sit below in a second row, width-matched to the image (spacer under the rail).
         Fullscreen: phone = top-right on image; md+ = centered on hover/focus.
       */}
-      <div className="flex items-stretch gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4">
-        <div className="min-w-0 flex-1">
+      <div className="flex items-stretch gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4 min-[1300px]:max-[1620px]:gap-[31px] 2xl:gap-[31px]">
+        <div className="min-w-0 flex-1 min-[1300px]:max-[1620px]:w-[458px] min-[1300px]:max-[1620px]:max-w-[458px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[458px] 2xl:max-w-[458px] 2xl:flex-none 2xl:shrink-0">
           <div
-            className="group relative isolate aspect-[3/5] w-full overflow-hidden rounded-xl bg-jl-gray"
+            className="group relative isolate aspect-[3/5] w-full overflow-hidden rounded-xl bg-jl-gray min-[1300px]:max-[1620px]:aspect-auto min-[1300px]:max-[1620px]:h-[610px] min-[1300px]:max-[1620px]:max-w-[458px] 2xl:aspect-auto 2xl:h-[610px] 2xl:max-w-[458px]"
             onMouseEnter={() => setHoverPulse(true)}
             onMouseLeave={() => setHoverPulse(false)}
           >
@@ -126,7 +126,7 @@ function GalleryInterior({
                 alt={title}
                 loading={selectedIndex === 0 ? "eager" : "lazy"}
                 decoding="async"
-                className="h-full w-full select-none"
+                className="h-full w-full select-none object-contain"
               />
             </div>
 
@@ -216,8 +216,8 @@ function GalleryInterior({
       </div>
 
       {urls.length > 1 ? (
-        <div className="flex gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4">
-          <div className="min-w-0 flex-1">
+        <div className="flex gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4 min-[1300px]:max-[1620px]:gap-[31px] 2xl:gap-[31px]">
+          <div className="min-w-0 flex-1 min-[1300px]:max-[1620px]:w-[458px] min-[1300px]:max-[1620px]:max-w-[458px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[458px] 2xl:max-w-[458px] 2xl:flex-none 2xl:shrink-0">
             <ThumbnailStrip
               urls={urls}
               selectedIndex={selectedIndex}
@@ -313,7 +313,7 @@ function ThumbnailStrip({
               type="button"
               key={`${thumb}-${idx}`}
               onClick={() => onSelect(idx)}
-              className="group relative h-[84px] w-[66px] shrink-0 overflow-hidden rounded-lg bg-jl-gray sm:h-[104px] sm:w-[76px]"
+              className="group relative h-[84px] w-[66px] shrink-0 overflow-hidden rounded-md bg-jl-gray sm:h-[104px] sm:w-[76px]"
               aria-current={selected}
             >
               <img

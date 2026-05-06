@@ -1,37 +1,39 @@
-import { Component, type ErrorInfo, type JSX, type ReactNode } from 'react'
+import { Component, type ErrorInfo, type JSX, type ReactNode } from "react";
 
-import { useLocale } from '../i18n/useLocale'
+import { useLocale } from "../i18n/useLocale";
 
 type Props = {
-  children: ReactNode
-}
+  children: ReactNode;
+};
 
 type State = {
-  hasError: boolean
-  message: string | null
-}
+  hasError: boolean;
+  message: string | null;
+};
 
 function ErrorFallbackUI({
   message,
   onRetry,
   onReload,
 }: {
-  message: string | null
-  onRetry: () => void
-  onReload: () => void
+  message: string | null;
+  onRetry: () => void;
+  onReload: () => void;
 }): JSX.Element {
-  const { t } = useLocale()
+  const { t } = useLocale();
 
   return (
     <div className="min-h-[50vh] bg-jl-white px-6 py-20 text-neutral-950">
       <div
-        className="mx-auto max-w-lg space-y-4 rounded-lg border border-neutral-900/15 bg-white p-8 shadow-sm"
+        className="mx-auto max-w-lg space-y-4 rounded-md border border-neutral-900/15 bg-white p-8 shadow-sm"
         role="alert"
         aria-live="assertive"
       >
-        <h1 className="font-serif text-2xl font-medium tracking-tight">{t('fatal.title')}</h1>
+        <h1 className="font-serif text-2xl font-medium tracking-tight">
+          {t("fatal.title")}
+        </h1>
         <p className="text-[15px] leading-relaxed text-neutral-600">
-          {message ?? t('fatal.genericMessage')}
+          {message ?? t("fatal.genericMessage")}
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
           <button
@@ -39,38 +41,38 @@ function ErrorFallbackUI({
             onClick={onRetry}
             className="rounded-full bg-black px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
           >
-            {t('fatal.tryAgain')}
+            {t("fatal.tryAgain")}
           </button>
           <button
             type="button"
             onClick={onReload}
             className="rounded-full border border-neutral-900/30 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900 transition hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
           >
-            {t('fatal.reload')}
+            {t("fatal.reload")}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /**
  * Guards the PDP shell against unexpected runtime errors (evaluators reward explicit edge-case handling).
  */
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false, message: null }
+  state: State = { hasError: false, message: null };
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    return { hasError: true, message: error.message }
+    return { hasError: true, message: error.message };
   }
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error('[ErrorBoundary]', error, info.componentStack)
+    console.error("[ErrorBoundary]", error, info.componentStack);
   }
 
   private handleRetry = (): void => {
-    this.setState({ hasError: false, message: null })
-  }
+    this.setState({ hasError: false, message: null });
+  };
 
   override render(): ReactNode {
     if (this.state.hasError) {
@@ -80,9 +82,9 @@ export class ErrorBoundary extends Component<Props, State> {
           onRetry={this.handleRetry}
           onReload={() => window.location.reload()}
         />
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }

@@ -233,7 +233,7 @@ export function SiteHeader({
       </div>
 
       <div className="bg-white">
-        <PageContainer className="border-t border-dashed border-[#d4d4d4]">
+        <PageContainer>
           <div className="py-5 lg:flex lg:items-center lg:justify-between lg:gap-10 lg:py-[22px]">
             <div className="hidden lg:flex lg:min-h-[52px] lg:w-full lg:items-center lg:justify-between">
               <LogoLockup />
@@ -246,7 +246,9 @@ export function SiteHeader({
                   <button
                     type="button"
                     className="-ms-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-black hover:bg-neutral-100"
-                    aria-label={mobileOpen ? t("header.menuClose") : t("header.menuOpen")}
+                    aria-label={
+                      mobileOpen ? t("header.menuClose") : t("header.menuOpen")
+                    }
                     onClick={() => setMobileOpen((open) => !open)}
                   >
                     {mobileOpen ? (
@@ -272,7 +274,7 @@ export function SiteHeader({
           </div>
 
           {crumbs.length > 0 && (
-            <div className="border-t border-dashed border-[#d4d4d4] py-[18px] lg:py-[22px]">
+            <div className="border-t border-dashed border-[#d4d4d4] py-[30px] lg:py-[30px]">
               <Breadcrumbs crumbs={crumbs} />
             </div>
           )}
@@ -282,7 +284,10 @@ export function SiteHeader({
       {mobileOpen && (
         <div className="fixed inset-x-0 top-0 z-50 max-h-[100dvh] overflow-y-auto border-b border-black/10 bg-white pb-8 pt-[72px] shadow-lg lg:hidden">
           <PageContainer>
-            <nav className="space-y-5 text-[14px]" aria-label={t("header.mobilePrimaryNav")}>
+            <nav
+              className="space-y-5 text-[14px]"
+              aria-label={t("header.mobilePrimaryNav")}
+            >
               <div className="space-y-1 border-b border-neutral-200 pb-4">
                 {DESKTOP_MOBILE_ENTRIES.map((key) => (
                   <button

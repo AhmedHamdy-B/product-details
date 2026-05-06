@@ -24,10 +24,10 @@ type Props = {
 const relatedRailIcon = "h-[18px] w-[18px]";
 const relatedRailStroke = 1.35;
 const relatedRailBtn =
-  "pointer-events-auto relative z-[12] inline-flex h-[35px] w-[35px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition hover:bg-[#e6e5dd] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1";
+  "pointer-events-auto relative z-[12] inline-flex h-[35px] w-[35px] shrink-0 cursor-pointer items-center justify-center rounded-md border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition hover:bg-[#e6e5dd] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1";
 
 const relatedTooltipBase =
-  "pointer-events-none invisible absolute bottom-full end-0 z-[25] mb-2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150 motion-reduce:transition-none";
+  "pointer-events-none invisible absolute bottom-full end-0 z-[25] mb-2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150 motion-reduce:transition-none";
 
 export function ProductRails({
   eyebrow,
@@ -83,12 +83,12 @@ export function ProductRails({
             className={cn(
               isRelated &&
                 popularWeek &&
-                "font-sans text-[26px] font-bold tracking-[-0.02em] text-black sm:text-[28px]",
+                "font-sans text-[28px] font-semibold tracking-[-0.02em] text-black sm:text-[28px]",
               isRelated &&
                 !popularWeek &&
-                "font-sans text-[22px] font-bold tracking-normal text-black",
+                "font-sans text-[28px] font-semibold tracking-normal text-black",
               !isRelated &&
-                "font-serif text-[28px] font-medium tracking-[0.04em] sm:text-[32px] md:text-[36px]",
+                "font-serif text-[28px] font-semibold tracking-[0.04em] sm:text-[32px] md:text-[36px]",
             )}
           >
             {headline}
@@ -99,18 +99,18 @@ export function ProductRails({
           <button
             type="button"
             className={cn(
-              "text-[13px] font-normal text-black underline decoration-black underline-offset-[5px] transition hover:text-neutral-700 hover:decoration-neutral-700",
+              "text-[16px] font-medium text-[#525252] underline decoration-black underline-offset-[3px] transition hover:text-neutral-700 hover:decoration-neutral-700",
               eyebrow && popularWeek && "shrink-0 self-start pt-[22px]",
             )}
           >
-            {t('rails.viewAll')}
+            {t("rails.viewAll")}
           </button>
         ) : (
           <button
             type="button"
             className="rounded-full px-10 py-[9px] text-[11px] font-semibold uppercase tracking-[0.4em]"
           >
-            {t('rails.viewAllAz')}
+            {t("rails.viewAllAz")}
           </button>
         )}
       </div>
@@ -119,7 +119,7 @@ export function ProductRails({
         <div
           className={cn(
             isRelated
-              ? "grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-5 lg:gap-[18px] xl:gap-5"
+              ? "grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-5 lg:gap-[18px] xl:gap-9"
               : "grid grid-cols-2 gap-[18px] sm:gap-8 md:flex md:flex-nowrap md:gap-10 md:overflow-x-auto md:no-scrollbar md:scroll-smooth lg:justify-between xl:justify-start",
           )}
         >
@@ -136,20 +136,20 @@ export function ProductRails({
               <div
                 className={cn(
                   "relative isolate bg-jl-gray",
-                  isRelated && "aspect-[3/4] overflow-visible rounded-lg",
+                  isRelated && "aspect-[3/4] overflow-visible rounded-md",
                   !isRelated &&
                     "overflow-hidden aspect-[3/5] md:aspect-[120/208] xl:aspect-[148/258]",
                 )}
               >
                 {isRelated ? (
                   <>
-                    <div className="absolute inset-0 overflow-hidden rounded-lg">
+                    <div className="absolute inset-0 overflow-hidden rounded-md">
                       <img
                         src={item.image}
                         alt=""
                         loading="lazy"
                         decoding="async"
-                        className="h-full w-full rounded-lg object-cover"
+                        className="h-full w-full rounded-md object-cover"
                       />
                     </div>
                     <RelatedImageHoverTray item={item} />
@@ -168,11 +168,7 @@ export function ProductRails({
                 )}
               </div>
 
-              {isRelated ? (
-                <RelatedCardBody item={item} />
-              ) : (
-                <DefaultCardBody item={item} />
-              )}
+              <RailCardBody item={item} isRelated={isRelated} />
             </article>
           ))}
         </div>
@@ -288,60 +284,67 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
   );
 }
 
-function RelatedCardBody({ item }: { item: ShowcaseItem }): JSX.Element {
+function RailCardBody({
+  item,
+  isRelated,
+}: {
+  item: ShowcaseItem;
+  isRelated: boolean;
+}): JSX.Element {
+  if (!isRelated) {
+    return (
+      <div className="flex flex-col gap-[8px] py-6 text-neutral-950">
+        <p className="text-[13px] font-semibold">{item.brand}</p>
+        <p className="font-serif text-[18px] font-medium leading-snug">
+          {item.name}
+        </p>
+        <p className="text-[13px] text-neutral-600">{item.snippet}</p>
+        <div className="flex flex-wrap gap-3 text-[17px] font-semibold tracking-tight">
+          {typeof item.catalogue === "number" &&
+            item.catalogue > item.price && (
+              <span className="text-neutral-600 line-through">
+                {formatMoney(item.catalogue)}
+              </span>
+            )}
+          <span>{formatMoney(item.price)}</span>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2 text-neutral-950">
+          <Stars value={item.rating} />
+          <span className="text-[13px] font-semibold text-neutral-950">
+            {item.rating.toFixed(1)} ·{" "}
+            <span className="text-neutral-600">{item.reviewCount} reviews</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   const sold = item.soldCount ?? 0;
   return (
     <div className="flex flex-col gap-[5px] pt-3 font-sans text-black">
-      <p className="text-[13px] font-bold leading-tight">{item.brand}</p>
-      <p className="text-[17px] font-bold leading-tight tracking-tight">
+      <p className="text-[18px] font-semibold leading-tight">{item.brand}</p>
+      <p className="text-[20px] font-semibold leading-tight tracking-tight">
         {formatUsdWhole(item.price)}
       </p>
-      <p className="text-[12px] leading-snug text-[#717171]">{item.name}</p>
-      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] leading-tight text-[#717171]">
+      <p className="text-[16px] leading-snug text-[#7A7A7A]">{item.name}</p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] leading-tight text-[#7A7A7A]">
         <Star
-          className="h-[20px] w-[20px] shrink-0"
+          className="h-[24px] w-[24px]"
           fill={STORE_STAR_HEX}
           stroke={STORE_STAR_HEX}
           strokeWidth={0}
           aria-hidden
         />
-        <span className="font-normal tabular-nums">
+        <span className="text-[16px] text-[#0B0F0E] font-normal tabular-nums">
           {item.rating.toFixed(1)}
         </span>
         <span
           className="inline-block h-1 w-1 shrink-0 rounded-full bg-[#d1d1d1]"
           aria-hidden
         />
-        <span className="font-normal tabular-nums">
+        <span className="font-regular text-[#666666] text-[16px] tabular-nums">
           {sold.toLocaleString("en-US")} Sold
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function DefaultCardBody({ item }: { item: ShowcaseItem }): JSX.Element {
-  return (
-    <div className="flex flex-col gap-[6px] py-6 text-neutral-950">
-      <p className="text-[13px] font-semibold">{item.brand}</p>
-      <p className="font-serif text-[18px] font-medium leading-snug">
-        {item.name}
-      </p>
-      <p className="text-[13px] text-neutral-600">{item.snippet}</p>
-      <div className="flex flex-wrap gap-3 text-[17px] font-semibold tracking-tight">
-        {typeof item.catalogue === "number" && item.catalogue > item.price && (
-          <span className="text-neutral-600 line-through">
-            {formatMoney(item.catalogue)}
-          </span>
-        )}
-        <span>{formatMoney(item.price)}</span>
-      </div>
-
-      <div className="flex items-center gap-2 pt-2 text-neutral-950">
-        <Stars value={item.rating} />
-        <span className="text-[13px] font-semibold text-neutral-950">
-          {item.rating.toFixed(1)} ·{" "}
-          <span className="text-neutral-600">{item.reviewCount} reviews</span>
         </span>
       </div>
     </div>

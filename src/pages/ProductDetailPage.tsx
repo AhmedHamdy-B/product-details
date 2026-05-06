@@ -1,59 +1,59 @@
-import { useQuery } from '@tanstack/react-query'
-import { useEffect, useMemo, type JSX } from 'react'
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, type JSX } from "react";
 
-import { TASK_PRODUCT_SLUG, fetchProductBySlug } from '../api/product'
-import { CartDrawer } from '../components/CartDrawer'
-import { ProductBuyingSection } from '../components/ProductBuyingSection'
-import { ProductGallery } from '../components/ProductGallery'
-import { ProductRails } from '../components/ProductRails'
-import { Reveal } from '../components/Reveal'
-import { ReviewsSection } from '../components/ReviewsSection'
-import { PageContainer } from '../components/PageContainer'
-import { SiteFooter } from '../components/SiteFooter'
-import { SiteHeader } from '../components/SiteHeader'
-import { ToastBanner } from '../components/ToastBanner'
-import { popularShowcase, relatedShowcase } from '../data/mocks'
-import { buildGallery } from '../lib/variants'
-import type { Product } from '../types/product'
-import { FavoritesDrawer } from '../components/FavoritesDrawer'
-import { useProductStore } from '../stores/productStore'
-import { useFavoritesStore } from '../stores/favoritesStore'
-import { useLocale } from '../i18n/useLocale'
-import type { MessageKey } from '../i18n/messages'
+import { TASK_PRODUCT_SLUG, fetchProductBySlug } from "../api/product";
+import { CartDrawer } from "../components/CartDrawer";
+import { ProductBuyingSection } from "../components/ProductBuyingSection";
+import { ProductGallery } from "../components/ProductGallery";
+import { ProductRails } from "../components/ProductRails";
+import { Reveal } from "../components/Reveal";
+import { ReviewsSection } from "../components/ReviewsSection";
+import { PageContainer } from "../components/PageContainer";
+import { SiteFooter } from "../components/SiteFooter";
+import { SiteHeader } from "../components/SiteHeader";
+import { ToastBanner } from "../components/ToastBanner";
+import { popularShowcase, relatedShowcase } from "../data/mocks";
+import { buildGallery } from "../lib/variants";
+import type { Product } from "../types/product";
+import { FavoritesDrawer } from "../components/FavoritesDrawer";
+import { useProductStore } from "../stores/productStore";
+import { useFavoritesStore } from "../stores/favoritesStore";
+import { useLocale } from "../i18n/useLocale";
+import type { MessageKey } from "../i18n/messages";
 
 export function ProductDetailPage(): JSX.Element {
-  const { t } = useLocale()
-  const product = useProductStore((state) => state.product)
-  const loading = useProductStore((state) => state.loading)
-  const errorMessage = useProductStore((state) => state.error)
-  const selections = useProductStore((state) => state.selectedVariations)
-  const ingestProduct = useProductStore((state) => state.ingestProduct)
-  const ingestError = useProductStore((state) => state.ingestError)
-  const setLoadingFlag = useProductStore((state) => state.setLoadingFlag)
+  const { t } = useLocale();
+  const product = useProductStore((state) => state.product);
+  const loading = useProductStore((state) => state.loading);
+  const errorMessage = useProductStore((state) => state.error);
+  const selections = useProductStore((state) => state.selectedVariations);
+  const ingestProduct = useProductStore((state) => state.ingestProduct);
+  const ingestError = useProductStore((state) => state.ingestError);
+  const setLoadingFlag = useProductStore((state) => state.setLoadingFlag);
 
-  const slug = TASK_PRODUCT_SLUG
+  const slug = TASK_PRODUCT_SLUG;
   const productQuery = useQuery({
-    queryKey: ['easyorders-product', slug],
+    queryKey: ["easyorders-product", slug],
     queryFn: () => fetchProductBySlug(slug),
     staleTime: 60_000,
-  })
+  });
 
   /** Keep Zustand in sync with React Query without a flash of “error” while data awaits ingest. */
   useEffect(() => {
     if (productQuery.data) {
-      ingestProduct(productQuery.data)
-      return
+      ingestProduct(productQuery.data);
+      return;
     }
     if (productQuery.isError) {
       const msg =
         productQuery.error instanceof Error
           ? productQuery.error.message
-          : 'Something went wrong while loading product'
-      ingestError(msg)
-      return
+          : "Something went wrong while loading product";
+      ingestError(msg);
+      return;
     }
     if (productQuery.isPending) {
-      setLoadingFlag(true)
+      setLoadingFlag(true);
     }
   }, [
     productQuery.data,
@@ -63,44 +63,44 @@ export function ProductDetailPage(): JSX.Element {
     ingestProduct,
     ingestError,
     setLoadingFlag,
-  ])
+  ]);
 
   const gallery = useMemo(() => {
-    if (!product) return []
-    return buildGallery(product, selections)
-  }, [product, selections])
+    if (!product) return [];
+    return buildGallery(product, selections);
+  }, [product, selections]);
 
   const wishlistedGallery = useFavoritesStore((s) =>
     product?.id ? s.isFavorite(product.id) : false,
-  )
-  const toggleFavoriteProduct = useFavoritesStore((s) => s.toggleProduct)
+  );
+  const toggleFavoriteProduct = useFavoritesStore((s) => s.toggleProduct);
 
-  const crumbs = useMemo(() => buildCrumbs(product, t), [product, t])
+  const crumbs = useMemo(() => buildCrumbs(product, t), [product, t]);
 
-  let bodyContent: JSX.Element
+  let bodyContent: JSX.Element;
 
   if (loading && !product) {
     bodyContent = (
       <Reveal>
         <LoadingPanels />
       </Reveal>
-    )
+    );
   } else if (!product || errorMessage) {
     bodyContent = (
       <Reveal>
         <ErrorPanels
-          message={errorMessage ?? t('error.productNotFound')}
+          message={errorMessage ?? t("error.productNotFound")}
           onRetry={() => void productQuery.refetch()}
         />
       </Reveal>
-    )
+    );
   } else {
     bodyContent = (
       <>
         <Reveal delayMs={50}>
           <section className="border-y border-transparent bg-white">
-            <div className="flex flex-col gap-12 py-12 md:gap-14 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
-              <div className="w-full xl:max-w-[52%]">
+            <div className="flex flex-col gap-12 pb-16 md:gap-14 xl:flex-row xl:items-start xl:gap-16 min-[1300px]:max-[1620px]:gap-[135px] 2xl:gap-[135px]">
+              <div className="w-full min-[1300px]:max-[1620px]:w-[545px] min-[1300px]:max-[1620px]:max-w-[545px] min-[1300px]:max-[1620px]:shrink-0 2xl:w-[545px] 2xl:max-w-[545px] 2xl:shrink-0 min-[1601px]:w-[620px] min-[1601px]:max-w-[620px]">
                 <ProductGallery
                   images={gallery}
                   productTitle={product.name}
@@ -115,7 +115,7 @@ export function ProductDetailPage(): JSX.Element {
                   }
                 />
               </div>
-              <div className="w-full flex-1 space-y-[26px]">
+              <div className="w-full space-y-[26px] xl:flex-1 min-[1300px]:max-[1620px]:w-[520px] min-[1300px]:max-[1620px]:max-w-[520px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[520px] 2xl:max-w-[520px] 2xl:flex-none 2xl:shrink-0">
                 <ProductBuyingSection product={product} />
               </div>
             </div>
@@ -126,7 +126,7 @@ export function ProductDetailPage(): JSX.Element {
           <Reveal>
             <ProductRails
               variant="related"
-              headline={t('rails.relatedProduct')}
+              headline={t("rails.relatedProduct")}
               items={relatedShowcase}
               anchorId="related"
             />
@@ -140,14 +140,14 @@ export function ProductDetailPage(): JSX.Element {
             <ProductRails
               variant="related"
               popularWeek
-              headline={t('rails.popularThisWeek')}
+              headline={t("rails.popularThisWeek")}
               items={popularShowcase}
               anchorId="popular-week"
             />
           </Reveal>
         </div>
       </>
-    )
+    );
   }
 
   return (
@@ -172,24 +172,30 @@ export function ProductDetailPage(): JSX.Element {
       <FavoritesDrawer />
       <ToastBanner />
     </div>
-  )
+  );
 }
 
 function buildCrumbs(
   product: Product | null,
   t: (key: MessageKey) => string,
 ): string[] {
-  const trail = [t('crumb.homepage'), t('crumb.women')]
+  const trail = [t("crumb.homepage"), t("crumb.women")];
   const categorySlug = product?.categories?.find((category) =>
     Boolean(category.slug),
-  )
+  );
 
-  const dynamicBranch = categorySlug?.name ?? t('crumb.sneakersFallback')
-  return [...trail, dynamicBranch, product?.name ?? t('crumb.productDetailFallback')].filter(Boolean)
+  const dynamicBranch = categorySlug?.name ?? t("crumb.sneakersFallback");
+  return [
+    ...trail,
+    dynamicBranch,
+    product?.name ?? t("crumb.productDetailFallback"),
+  ].filter(Boolean);
 }
 
 function LoadingPanels(): JSX.Element {
-  const pulseRows = Array.from({ length: 12 }).map((_, index) => `pulse-${index}`)
+  const pulseRows = Array.from({ length: 12 }).map(
+    (_, index) => `pulse-${index}`,
+  );
 
   return (
     <div className="space-y-[18px] pb-36 pt-24 lg:pb-52">
@@ -202,30 +208,32 @@ function LoadingPanels(): JSX.Element {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function ErrorPanels({
   message,
   onRetry,
 }: {
-  message: string
-  onRetry: () => void
+  message: string;
+  onRetry: () => void;
 }): JSX.Element {
-  const { t } = useLocale()
+  const { t } = useLocale();
   return (
     <div className="space-y-[18px] py-32 text-neutral-950">
       <div className="space-y-[22px] border border-black px-14 py-[46px] text-center lg:text-start">
         <h2 className="font-serif text-[38px] font-medium">{message}</h2>
-        <p className="text-[15px] leading-relaxed text-neutral-600">{t('error.feedUnreachableBody')}</p>
+        <p className="text-[15px] leading-relaxed text-neutral-600">
+          {t("error.feedUnreachableBody")}
+        </p>
         <button
           type="button"
           onClick={onRetry}
           className="inline-flex rounded-full border border-transparent bg-black px-16 py-4 text-[12px] font-semibold uppercase tracking-[0.43em] text-white"
         >
-          {t('error.retryButton')}
+          {t("error.retryButton")}
         </button>
       </div>
     </div>
-  )
+  );
 }

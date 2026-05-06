@@ -45,7 +45,7 @@ const REVIEW_TAB_MESSAGE: Record<
 };
 
 const reviewTooltip =
-  "pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150";
+  "pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150";
 
 const REVIEW_TAB_FADE_MS = 220;
 
@@ -137,8 +137,8 @@ export function ReviewsSection(): JSX.Element {
   );
 
   return (
-    <section className="border-t border-dashed border-[#D1D1D1] bg-white py-12 xl:py-14">
-      <h2 className="font-sans text-[22px] font-bold tracking-[-0.02em] text-black xl:text-[26px]">
+    <section className="border-t border-dashed border-[#D1D1D1] bg-white py-12 pt-[75px] mb-0">
+      <h2 className="font-sans text-[28px] font-semibold tracking-[-0.02em] text-black xl:text-[28px]">
         {t("reviews.sectionTitle")}
       </h2>
 
@@ -309,14 +309,14 @@ function ReviewsSummaryBanner({
   const histogramNumLoc = locale === "ar" ? "ar-SA" : "en-US";
 
   return (
-    <div className="mt-8 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
+    <div className="mt-5 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
       <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center  sm:justify-center sm:gap-7 lg:justify-center lg:gap-8">
           <AvgScoreRing score={average} label={avgLabel} />
           <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
             {/* Figma: five solid orange stars (decorative row next to ring) */}
             <Stars variant="review" value={5} starSizePx={20} />
-            <p className="text-center font-sans text-[14px] font-normal leading-snug text-[#717171] sm:text-start">
+            <p className="text-center font-sans text-[14px] font-normal leading-snug text-[#7A7A7A] sm:text-start">
               {formatSubtitleKReviews(subtitleReviewTotal, locale, tf)}
             </p>
           </div>

@@ -2,7 +2,7 @@ import { Star } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 /** Same hue as PDP header star — use everywhere for filled stars & rating ring */
-export const STORE_STAR_HEX = '#F5A623' as const
+export const STORE_STAR_HEX = '#FFA439' as const
 
 type StarsProps = {
   value: number
