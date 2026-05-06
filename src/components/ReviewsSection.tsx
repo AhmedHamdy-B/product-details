@@ -138,7 +138,7 @@ export function ReviewsSection(): JSX.Element {
   );
 
   return (
-    <section className="border-t border-dashed border-[#BBBBBB] bg-white py-12 pt-[75px] mb-0">
+    <section className="dash-top dash-color-bbb bg-white py-12 pt-[75px] mb-0">
       <h2 className="font-sans text-[28px] font-semibold tracking-[-0.02em] text-black xl:text-[28px]">
         {t("reviews.sectionTitle")}
       </h2>
@@ -151,12 +151,12 @@ export function ReviewsSection(): JSX.Element {
       />
 
       <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(240px,_28%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
-        <aside className="min-w-0 rounded-xl border border-dashed border-[#BBBBBB] bg-white px-5 py-5 lg:px-6 lg:py-6">
+        <aside className="dash-border dash-color-bbb min-w-0 rounded-xl bg-white px-5 py-5 lg:px-6 lg:py-6">
           <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
             {t("reviews.filterHeading")}
           </p>
 
-          <div className="mt-5 space-y-0 border-t border-dashed border-[#BBBBBB] pt-5">
+          <div className="dash-top dash-color-bbb mt-5 space-y-0 pt-5">
             <Disclosure defaultOpen>
               {({ open }) => (
                 <div>
@@ -191,7 +191,7 @@ export function ReviewsSection(): JSX.Element {
 
             <Disclosure defaultOpen>
               {({ open }) => (
-                <div className="border-t border-dashed border-[#BBBBBB] pt-5">
+                <div className="dash-top dash-color-bbb pt-5">
                   <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
                     <span className="font-sans text-[20px] font-semibold text-black">
                       {t("reviews.filterTopics")}
@@ -261,7 +261,7 @@ export function ReviewsSection(): JSX.Element {
             )}
           >
             {filtered.length === 0 ? (
-              <p className="border-t border-dashed border-[#BBBBBB] pt-10 font-sans text-[14px] text-neutral-600">
+              <p className="dash-top dash-color-bbb pt-10 font-sans text-[14px] text-neutral-600">
                 {t("reviews.emptyFilters")}
               </p>
             ) : (
@@ -271,7 +271,7 @@ export function ReviewsSection(): JSX.Element {
                     key={review.id}
                     className={cn(
                       /* Figma: separators are between items only — no rule above the first review */
-                      index > 0 && "border-t border-dashed border-[#BBBBBB]",
+                      index > 0 && "dash-top dash-color-bbb",
                       /* Consistent vertical padding; lighter top on first row under pills */
                       "py-[32px]  first:pt-6",
                     )}
@@ -310,7 +310,7 @@ function ReviewsSummaryBanner({
   const histogramNumLoc = locale === "ar" ? "ar-SA" : "en-US";
 
   return (
-    <div className="mt-5 rounded-xl border border-dashed border-[#BBBBBB] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
+    <div className="dash-border dash-color-bbb mt-5 rounded-xl bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
       <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[120px]">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center  sm:justify-center  lg:justify-center ">
           <AvgScoreRing score={average} label={avgLabel} />

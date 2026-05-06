@@ -274,7 +274,7 @@ export function SiteHeader({
           </div>
 
           {crumbs.length > 0 && (
-            <div className="border-t border-dashed border-[#d4d4d4] py-[30px] lg:py-[30px]">
+            <div className="dash-top dash-color-d4 py-[30px] lg:py-[30px]">
               <Breadcrumbs crumbs={crumbs} />
             </div>
           )}

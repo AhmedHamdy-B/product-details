@@ -47,9 +47,9 @@ export function ProductRails({
         "space-y-5",
         isRelated
           ? cn(
-              "border-dashed border-[#BBBBBB] pt-16 pb-20",
+              "dash-color-bbb pt-16 pb-20",
               /* Popular sits above footer — no bottom rule in design */
-              popularWeek ? "border-t" : "border-y",
+              popularWeek ? "dash-top" : "dash-y",
             )
           : "border-t border-jl-border/80 pt-10",
       )}

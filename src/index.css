@@ -7,13 +7,13 @@
     @apply bg-jl-white text-jl-black antialiased font-sans;
   }
 
-  html[lang='ar'],
-  html[lang='ar'] body {
-    font-family: 'Noto Sans Arabic', 'Inter', system-ui, sans-serif;
+  html[lang="ar"],
+  html[lang="ar"] body {
+    font-family: "Noto Sans Arabic", "Inter", system-ui, sans-serif;
   }
 
-  html[lang='ar'] .font-serif {
-    font-family: 'Noto Naskh Arabic', Georgia, serif;
+  html[lang="ar"] .font-serif {
+    font-family: "Noto Naskh Arabic", Georgia, serif;
   }
 }
 
@@ -34,6 +34,171 @@
 }
 
 @layer utilities {
+  .dash-color-bbb {
+    --dash-color: #d0c9c9;
+  }
+
+  .dash-color-d4 {
+    --dash-color: #d0c9c9;
+  }
+
+  .dash-color-c7 {
+    --dash-color: #d0c9c9;
+  }
+
+  .dash-top {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--dash-color, #d0c9c9) 0 8px,
+      transparent 8px 15px
+    );
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: top left;
+  }
+
+  .dash-bottom {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--dash-color, #d0c9c9) 0 8px,
+      transparent 8px 15px
+    );
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: bottom left;
+  }
+
+  .dash-y {
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      ),
+      repeating-linear-gradient(
+        to right,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      );
+    background-size:
+      100% 1px,
+      100% 1px;
+    background-repeat: no-repeat, no-repeat;
+    background-position:
+      top left,
+      bottom left;
+  }
+
+  .dash-border {
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      ),
+      repeating-linear-gradient(
+        to right,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--dash-color, #d0c9c9) 0 8px,
+        transparent 8px 15px
+      ),
+      radial-gradient(
+        circle at top left,
+        var(--dash-color, #d0c9c9) 0 1px,
+        transparent 1px
+      ),
+      radial-gradient(
+        circle at top right,
+        var(--dash-color, #d0c9c9) 0 1px,
+        transparent 1px
+      ),
+      radial-gradient(
+        circle at bottom left,
+        var(--dash-color, #d0c9c9) 0 1px,
+        transparent 1px
+      ),
+      radial-gradient(
+        circle at bottom right,
+        var(--dash-color, #d0c9c9) 0 1px,
+        transparent 1px
+      );
+    background-size:
+      100% 1px,
+      100% 1px,
+      1px 100%,
+      1px 100%,
+      1px 1px,
+      1px 1px,
+      1px 1px,
+      1px 1px;
+    background-repeat:
+      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+      no-repeat, no-repeat;
+    background-position:
+      top left,
+      bottom left,
+      top left,
+      top right,
+      top left,
+      top right,
+      bottom left,
+      bottom right;
+    position: relative;
+  }
+
+  /* Create the top-left and top-right corners */
+  .dash-border::before,
+  .dash-border::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-color: #d0c9c9;
+    border-style: dashed;
+  }
+
+  .dash-border::before {
+    top: 0;
+    left: 0;
+    border-width: 1px 0 0 1px;
+  } /* Top & Left */
+  .dash-border::after {
+    top: 0;
+    right: 0;
+    border-width: 1px 1px 0 0;
+  } /* Top & Right */
+
+  /* Use a child element's pseudo-elements for the bottom corners */
+  .dash-border > div::before,
+  .dash-border > div::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-color: #d0c9c9;
+    border-style: solid;
+  }
+
+  .dash-border > div::before {
+    bottom: 0;
+    right: 0;
+    border-width: 0 1px 1px 0;
+  } /* Bottom & Right */
+  .dash-border > div::after {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 1px 1px;
+  }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }

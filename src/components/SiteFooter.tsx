@@ -287,7 +287,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-5 border-t border-dashed border-[#c7c7c7] pt-10 sm:mt-[42px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-[42px] md:gap-8">
+        <div className="dash-top dash-color-c7 mt-10 flex flex-col gap-5 pt-10 sm:mt-[42px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-[42px] md:gap-8">
           <p className="order-2 text-[12px] font-normal leading-[1.5] text-black sm:order-1">
             {copyrightLine}
           </p>

@@ -245,7 +245,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <header className="border-b border-dashed border-[#BBBBBB] pb-5">
+      <header className="dash-bottom dash-color-bbb pb-5">
         <p className="text-[16px] font-medium leading-[1.25] text-[#8F8F8F] mb-3">
           John Lewis <span className="uppercase">ANYDAY</span>
         </p>
