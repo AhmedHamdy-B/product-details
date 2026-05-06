@@ -47,7 +47,7 @@ export function ProductRails({
         "space-y-5",
         isRelated
           ? cn(
-              "border-dashed border-[#D1D1D1] pt-16 pb-20",
+              "border-dashed border-[#BBBBBB] pt-16 pb-20",
               /* Popular sits above footer — no bottom rule in design */
               popularWeek ? "border-t" : "border-y",
             )
@@ -340,7 +340,7 @@ function RailCardBody({
           {item.rating.toFixed(1)}
         </span>
         <span
-          className="inline-block h-1 w-1 shrink-0 rounded-full bg-[#d1d1d1]"
+          className="inline-block h-1 w-1 shrink-0 rounded-full bg-[#BBBBBB]"
           aria-hidden
         />
         <span className="font-regular text-[#666666] text-[16px] tabular-nums">

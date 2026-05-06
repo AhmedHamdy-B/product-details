@@ -132,12 +132,13 @@ export function ReviewsSection(): JSX.Element {
     [displayTab, starSelections, topicSelections, hasTopicFacets],
   );
 
-  const histogramMax = Math.max(
-    ...reviewInsights.histogram.map((r) => r.count),
+  const histogramMax = reviewInsights.histogram.reduce(
+    (sum, row) => sum + row.count,
+    0,
   );
 
   return (
-    <section className="border-t border-dashed border-[#D1D1D1] bg-white py-12 pt-[75px] mb-0">
+    <section className="border-t border-dashed border-[#BBBBBB] bg-white py-12 pt-[75px] mb-0">
       <h2 className="font-sans text-[28px] font-semibold tracking-[-0.02em] text-black xl:text-[28px]">
         {t("reviews.sectionTitle")}
       </h2>
@@ -149,18 +150,18 @@ export function ReviewsSection(): JSX.Element {
         subtitleReviewTotal={reviewInsights.reviewsSubtitleTotal}
       />
 
-      <div className="mt-10 flex flex-col gap-10 lg:mt-12 lg:grid lg:grid-cols-[minmax(240px,_28%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
-        <aside className="min-w-0 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-5 lg:px-6 lg:py-6">
-          <p className="font-sans text-[18px] font-bold tracking-tight text-black">
+      <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(240px,_28%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
+        <aside className="min-w-0 rounded-xl border border-dashed border-[#BBBBBB] bg-white px-5 py-5 lg:px-6 lg:py-6">
+          <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
             {t("reviews.filterHeading")}
           </p>
 
-          <div className="mt-5 space-y-0 border-t border-dashed border-[#D1D1D1] pt-5">
+          <div className="mt-5 space-y-0 border-t border-dashed border-[#BBBBBB] pt-5">
             <Disclosure defaultOpen>
               {({ open }) => (
                 <div>
                   <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
-                    <span className="font-sans text-[14px] font-semibold text-black">
+                    <span className="font-sans text-[16px] font-semibold text-black">
                       {t("reviews.filterRating")}
                     </span>
                     <ChevronDown
@@ -190,9 +191,9 @@ export function ReviewsSection(): JSX.Element {
 
             <Disclosure defaultOpen>
               {({ open }) => (
-                <div className="border-t border-dashed border-[#D1D1D1] pt-5">
+                <div className="border-t border-dashed border-[#BBBBBB] pt-5">
                   <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
-                    <span className="font-sans text-[14px] font-semibold text-black">
+                    <span className="font-sans text-[20px] font-semibold text-black">
                       {t("reviews.filterTopics")}
                     </span>
                     <ChevronDown
@@ -231,7 +232,7 @@ export function ReviewsSection(): JSX.Element {
 
         <div className="min-w-0">
           <div>
-            <p className="font-sans text-[18px] font-bold tracking-tight text-black">
+            <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
               {t("reviews.listsHeading")}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -241,10 +242,10 @@ export function ReviewsSection(): JSX.Element {
                   type="button"
                   onClick={() => setActiveTab(tabId)}
                   className={cn(
-                    "rounded-[9px] border-[2px] border-black px-5 py-2.5 font-sans text-[12px] font-semibold tracking-tight transition",
+                    "rounded-[9px] border-[2px] border-[#E6E6E6] px-5 py-2.5 font-sans text-[14px] font-medium tracking-tight transition",
                     tabId === activeTab
-                      ? "border-neutral-400 bg-neutral-200 text-black"
-                      : "border-neutral-100 bg-white text-black hover:bg-neutral-50",
+                      ? "border-[#333333] bg-neutral-200 text-black"
+                      : "border-[#E6E6E6] bg-white text-black hover:bg-neutral-50",
                   )}
                 >
                   {t(REVIEW_TAB_MESSAGE[tabId])}
@@ -260,19 +261,19 @@ export function ReviewsSection(): JSX.Element {
             )}
           >
             {filtered.length === 0 ? (
-              <p className="border-t border-dashed border-[#D1D1D1] pt-10 font-sans text-[14px] text-neutral-600">
+              <p className="border-t border-dashed border-[#BBBBBB] pt-10 font-sans text-[14px] text-neutral-600">
                 {t("reviews.emptyFilters")}
               </p>
             ) : (
-              <ul aria-busy={false}>
+              <ul aria-busy={false} className="mt-[4px]">
                 {filtered.map((review, index) => (
                   <li
                     key={review.id}
                     className={cn(
                       /* Figma: separators are between items only — no rule above the first review */
-                      index > 0 && "border-t border-dashed border-[#D1D1D1]",
+                      index > 0 && "border-t border-dashed border-[#BBBBBB]",
                       /* Consistent vertical padding; lighter top on first row under pills */
-                      "pb-8 pt-8 first:pt-6",
+                      "py-[32px]  first:pt-6",
                     )}
                   >
                     <ReviewCard review={review} />
@@ -309,8 +310,8 @@ function ReviewsSummaryBanner({
   const histogramNumLoc = locale === "ar" ? "ar-SA" : "en-US";
 
   return (
-    <div className="mt-5 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
-      <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+    <div className="mt-5 rounded-xl border border-dashed border-[#BBBBBB] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
+      <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[120px]">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center  sm:justify-center  lg:justify-center ">
           <AvgScoreRing score={average} label={avgLabel} />
           <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
@@ -322,15 +323,15 @@ function ReviewsSummaryBanner({
           </div>
         </div>
 
-        <div className="min-w-0 flex-1 space-y-2.5 lg:max-w-[min(100%,820px)] lg:justify-self-end xl:max-w-[880px]">
+        <div className="min-w-0 space-y-2.5">
           {histogram.map((row) => {
             const pct = histogramMax > 0 ? (row.count / histogramMax) * 100 : 0;
             return (
               <div
                 key={row.stars}
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 text-[13px] font-medium"
+                className="grid grid-cols-[56px_minmax(0,1fr)_70px] items-center gap-x-0 text-[13px] font-medium"
               >
-                <span className="flex items-center gap-1.5 tabular-nums text-black">
+                <span className="flex items-center gap-1.5 tabular-nums text-[#0B0F0E] text-[13px] font-medium">
                   <span>{row.stars}.0</span>
                   {/* Figma: one accent star per row (not a 5-star row) */}
                   <Star
@@ -349,7 +350,7 @@ function ReviewsSummaryBanner({
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="text-end tabular-nums text-neutral-700">
+                <span className="whitespace-nowrap text-start pl-4 text-[#0B0F0E] text-[13px] font-medium">
                   {row.count.toLocaleString(histogramNumLoc)}
                 </span>
               </div>
@@ -457,7 +458,7 @@ function SidebarRatingCheckboxRow({
 }: SidebarRatingCheckboxRowProps): JSX.Element {
   const id = `review-filter-grade-${grade}`;
   return (
-    <label htmlFor={id} className="flex cursor-pointer items-center gap-3.5">
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2.5 ">
       <input
         id={id}
         type="checkbox"
@@ -469,13 +470,13 @@ function SidebarRatingCheckboxRow({
       <span className="inline-flex shrink-0 items-center gap-[5px]" aria-hidden>
         <Star
           className="shrink-0"
-          width={17}
-          height={17}
+          width={18}
+          height={18}
           fill={STORE_STAR_HEX}
           color={STORE_STAR_HEX}
           strokeWidth={0}
         />
-        <span className="font-sans text-[13px] font-bold tabular-nums text-[#818b9c]">
+        <span className="font-sans text-[16px] font-semibold tabular-nums text-[#818b9c]">
           {grade}
         </span>
       </span>
@@ -502,7 +503,7 @@ function SidebarCheckboxRow({
         onChange={() => onChange()}
         className="h-4 w-4 shrink-0 rounded-[3px] border border-neutral-500 text-black checked:border-black checked:bg-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
       />
-      <span className="font-sans text-[13px] font-bold text-[#818b9c]">
+      <span className="font-sans text-[16px] font-semibold text-[#818b9c]">
         {children}
       </span>
     </label>
@@ -572,11 +573,11 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
       {/* Figma rhythm: stars 10→ title 8→ date; optional body +12; footer +28 */}
       <div className="flex flex-col">
         <div className="min-w-0">
-          <Stars variant="review" value={review.rating} starSizePx={15} />
-          <h3 className="mt-[10px] font-sans text-[16px] font-bold leading-[1.35] tracking-[-0.02em] text-black sm:text-[17px]">
+          <Stars variant="review" value={review.rating} starSizePx={20} />
+          <h3 className="mt-[8px] font-sans text-[18px] font-semibold leading-[1.35] tracking-[-0.02em] text-black sm:text-[17px]">
             {review.title}
           </h3>
-          <p className="mt-2 font-sans text-[12px] font-normal leading-[1.5] text-neutral-500">
+          <p className="mt-1 font-sans text-[16px] font-regular leading-[1.5] text-[#818B9C]">
             {review.dateLabel}
           </p>
           {review.body.trim() ? (
@@ -586,16 +587,16 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
           ) : null}
         </div>
 
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
           <button
             type="button"
-            className="flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-start font-sans text-[14px] font-bold leading-tight text-black transition hover:opacity-80"
+            className="flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-start font-sans text-[16px] font-medium leading-tight text-black transition hover:opacity-80"
           >
             {review.avatarSrc ? (
               <img
                 src={review.avatarSrc}
                 alt=""
-                className="size-9 shrink-0 rounded-full object-cover sm:size-10"
+                className="size-[32px] shrink-0 rounded-full object-cover "
               />
             ) : (
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-black text-[12px] text-white sm:size-10 sm:text-[13px]">
@@ -613,7 +614,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
 }
 
 const reviewVoteCountClass =
-  "font-sans text-[12px] font-bold tabular-nums leading-none text-[#818b9c] sm:text-[13px]";
+  "font-sans text-[14px] font-normal tabular-nums leading-[1.6] tracking-[0] text-[#0B0F0E] ";
 
 /** Outlined ↔ solid (#818b9c) — same Lucide glyphs; stroke when idle, filled when chosen */
 const VOTE_ICON_HEX = "#000000" as const;
@@ -681,11 +682,11 @@ function HelpfulVoteChips({
               ? tf("reviews.helpful.ariaYesSelected", { count: yesCount })
               : tf("reviews.helpful.ariaYes", { count: yesCount })
           }
-          className={`peer/helpful-chip-yes ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3`}
+          className={`peer/helpful-chip-yes ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3 `}
           onClick={onLike}
         >
           <ThumbsUp
-            className="size-4 shrink-0 transition-[fill,stroke-width] sm:size-[18px]"
+            className="size-4  shrink-0 transition-[fill,stroke-width] sm:size-[18px]"
             strokeWidth={upChosen ? 0 : 1.75}
             fill={upChosen ? VOTE_ICON_HEX : "none"}
             stroke={VOTE_ICON_HEX}

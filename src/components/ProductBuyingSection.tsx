@@ -245,7 +245,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <header className="border-b border-dashed border-[#D1D1D1] pb-5">
+      <header className="border-b border-dashed border-[#BBBBBB] pb-5">
         <p className="text-[16px] font-medium leading-[1.25] text-[#8F8F8F] mb-3">
           John Lewis <span className="uppercase">ANYDAY</span>
         </p>
@@ -260,7 +260,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           >
             {product.categories.map((category) => (
               <li key={category.id}>
-                <span className="inline-flex rounded-full border border-[#D1D1D1] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
+                <span className="inline-flex rounded-full border border-[#BBBBBB] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
                   {category.name}
                 </span>
               </li>
@@ -381,7 +381,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         <button
           type="button"
           onClick={() => openDrawer()}
-          className="min-h-[58px] min-w-0 flex-[2] rounded-md border border-[#D1D1D1] bg-white px-5 text-[20px] font-medium leading-tight text-black transition hover:border-[#B0B0B0]"
+          className="min-h-[58px] min-w-0 flex-[2] rounded-md border border-[#BBBBBB] bg-white px-5 text-[20px] font-medium leading-tight text-black transition hover:border-[#B0B0B0]"
         >
           {t("pdp.checkoutNow")}
         </button>
@@ -495,7 +495,7 @@ function SizeButtons({
               "focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
               selectedValue
                 ? "border-2 border-black bg-jl-gray text-black"
-                : "border border-[#D1D1D1] bg-white text-black hover:border-[#B0B0B0]",
+                : "border border-[#BBBBBB] bg-white text-black hover:border-[#B0B0B0]",
               !available && "cursor-not-allowed opacity-35",
             )}
             aria-pressed={selectedValue}

@@ -152,10 +152,10 @@ export type ReviewHistogramRow = { stars: number; count: number };
 
 export const reviewHistogram: readonly ReviewHistogramRow[] = [
   { stars: 5, count: 2823 },
-  { stars: 4, count: 618 },
-  { stars: 3, count: 152 },
-  { stars: 2, count: 48 },
-  { stars: 1, count: 24 },
+  { stars: 4, count: 38 },
+  { stars: 3, count: 4 },
+  { stars: 2, count: 0 },
+  { stars: 1, count: 0 },
 ] as const;
 
 export const reviewInsights = {
