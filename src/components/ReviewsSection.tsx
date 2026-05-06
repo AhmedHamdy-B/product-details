@@ -150,7 +150,7 @@ export function ReviewsSection(): JSX.Element {
         subtitleReviewTotal={reviewInsights.reviewsSubtitleTotal}
       />
 
-      <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(210px,_22%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
+      <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(210px,_22%)_minmax(0,1fr)] lg:items-start  lg:gap-y-10">
         <aside className="dash-border dash-color-bbb min-w-0 rounded-xl bg-white px-5 py-5 lg:px-6 lg:py-6">
           <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
             {t("reviews.filterHeading")}
@@ -311,7 +311,7 @@ function ReviewsSummaryBanner({
 
   return (
     <div className="dash-border dash-color-bbb mt-5 rounded-xl bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
-      <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[120px]">
+      <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[125px]">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center  sm:justify-center  lg:justify-center ">
           <AvgScoreRing score={average} label={avgLabel} />
           <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
@@ -745,7 +745,7 @@ function HelpfulVoteChips({
 
 /** Figma review pagination: uniform rounded-square tiles; active = black stroke; idle = neutral stroke + muted label; chevrons standalone. */
 const pgCell =
-  "inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] border border-solid bg-white text-[15px] font-semibold tabular-nums leading-none tracking-normal antialiased outline-none transition-[color,border-color,background-color] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white";
+  "inline-flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-solid bg-white text-[14px] font-medium tabular-nums leading-[1.6] tracking-[0] antialiased outline-none transition-[color,border-color,background-color] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white";
 
 function Pagination(): JSX.Element {
   const { t } = useLocale();
@@ -754,20 +754,20 @@ function Pagination(): JSX.Element {
 
   const idleCell = cn(
     pgCell,
-    "cursor-pointer border-[#E0E0E0] text-[#757575]",
+    "cursor-pointer border-[#E4E9EE] text-[#757575]",
     "hover:border-[#BDBDBD] hover:text-neutral-900",
   );
 
   return (
     <nav
-      className="mt-6 flex flex-wrap items-center justify-center gap-2 pb-2 pt-6 font-sans lg:mt-7"
+      className="mt-6 flex flex-wrap items-center justify-center gap-2 pb-2 pt-6 font-sans  lg:mt-7"
       aria-label={t("reviews.paginationNav")}
     >
       {current > 1 && (
         <button
           type="button"
           aria-label={t("reviews.pagePrev")}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-black outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="inline-flex size-11  shrink-0 items-center justify-center rounded-[10px] text-[#141414] outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
           <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
         </button>
@@ -777,7 +777,7 @@ function Pagination(): JSX.Element {
         aria-current="page"
         className={cn(
           pgCell,
-          "cursor-default border-black text-black hover:border-black hover:bg-black/[0.02]",
+          "cursor-default border-[#333333] text-black hover:border-[#333333] hover:bg-black/[0.02]",
         )}
       >
         {current}
@@ -789,7 +789,7 @@ function Pagination(): JSX.Element {
         aria-hidden="true"
         className={cn(
           pgCell,
-          "pointer-events-none cursor-default select-none border-[#E0E0E0] text-[#757575]",
+          "pointer-events-none cursor-default select-none border-[#E4E9EE] text-[#757575]",
         )}
       >
         …
@@ -802,7 +802,11 @@ function Pagination(): JSX.Element {
         aria-label={t("reviews.pageNext")}
         className="inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-black outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
       >
-        <ChevronRight className="size-5" strokeWidth={1.5} aria-hidden />
+        <ChevronRight
+          className="size-[36px] ml-[8px]"
+          strokeWidth={1}
+          aria-hidden
+        />
       </button>
     </nav>
   );

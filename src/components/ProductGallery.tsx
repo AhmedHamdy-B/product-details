@@ -13,11 +13,11 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { useLocale } from "../i18n/useLocale";
 import { cn } from "../lib/cn";
 
-const galleryIcon = "h-[22px] w-[22px]";
+const galleryIcon = "h-5 w-5";
 const galleryStroke = 1.5;
 
 const railBtn =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition active:scale-[0.97] hover:bg-[#e6e5dd]";
+  "inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[8px]  bg-[#F2F2F2] text-black transition active:scale-[0.97] hover:bg-[#ebebeb]";
 
 type Props = {
   images: string[];

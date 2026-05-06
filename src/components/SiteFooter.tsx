@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import { SiFacebook, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
 
@@ -45,7 +45,7 @@ const footerColumns: ReadonlyArray<{
 function NewsletterField(): JSX.Element {
   const { t } = useLocale();
   return (
-    <div className="w-full max-w-full font-sans md:max-w-[80%] xl:max-w-[55%]">
+    <div className="w-full max-w-full font-sans md:max-w-[80%] xl:max-w-[45.5%]">
       <form
         aria-label={t("footer.newsletterAria")}
         className="w-full"
@@ -65,14 +65,14 @@ function NewsletterField(): JSX.Element {
             placeholder={t("footer.newsletterPlaceholder")}
             className="
               min-h-0 min-w-0 flex-1
-              rounded-none bg-transparent px-0 !pb-0 pt-[7px] text-[13px] font-normal !leading-[1.3]
-              tracking-[0.01em] text-neutral-900 antialiased caret-neutral-950
+              rounded-none bg-transparent px-0 !pb-0 pt-[6px] text-[16px] font-normal !leading-[1.6]
+              tracking-[0] text-neutral-900 antialiased caret-neutral-950
               [appearance:textfield]
               [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:appearance-none
               border-0
               outline-none outline-0 [outline-offset:0px]
               ring-0 ring-offset-0
-              placeholder:text-[#7A7A7A]
+              placeholder:text-[#737D8A] placeholder:font-medium placeholder:tracking-[0.01em]
               shadow-none
               shadow-[inset_0_0_0_9999px_transparent]
               focus:border-0
@@ -87,8 +87,8 @@ function NewsletterField(): JSX.Element {
             type="submit"
             aria-label={t("footer.newsletterSubmit")}
             className="
-              ms-1 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer
-              items-center justify-center rounded-xl
+              ms-0 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer
+              items-center justify-center rounded-[8px]
               bg-black text-white outline-none ring-0
               transition-colors hover:bg-neutral-900
               focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950
@@ -104,9 +104,9 @@ function NewsletterField(): JSX.Element {
 
 function FooterNewsletterArrow(): JSX.Element {
   return (
-    <ArrowRight
-      size={12}
-      strokeWidth={1.35}
+    <ChevronRight
+      size={20}
+      strokeWidth={1.8}
       className="shrink-0 rtl:rotate-180"
       aria-hidden
     />
@@ -152,14 +152,14 @@ function LanguageMenu(): JSX.Element {
       <MenuButton
         type="button"
         aria-label={t("footer.langMenu")}
-        className="inline-flex h-10 items-center gap-2 px-2 text-[12px] font-medium text-black transition hover:underline hover:underline-offset-4"
+        className="inline-flex h-10 items-center gap-1 px-0 text-[16px] font-medium leading-[1.6] tracking-[0] text-black transition hover:underline hover:underline-offset-4"
       >
         {locale === "ar" ? (
-          <EgyptFlagSvg className="h-[13px] w-[20px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
+          <EgyptFlagSvg className="h-[14px] w-[18px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
         ) : (
-          <USFlagSvg className="h-[13px] w-[20px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
+          <USFlagSvg className="h-[14px] w-[18px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
         )}
-        <span>{currentLabel}</span>
+        <span className="font-medium text-[14px]">{currentLabel}</span>
         <ChevronDownTiny />
       </MenuButton>
 
@@ -235,12 +235,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
       : `© ${t("footer.copyrightBrand")}\u00a02001\u00a0–\u00a0${currentYear}`;
 
   return (
-    <footer
-      className={cn(
-        "border-t border-[#d2d2d2] bg-[#f3f3f3] font-sans text-black",
-        className,
-      )}
-    >
+    <footer className={cn("bg-[#f3f3f3] font-sans text-black", className)}>
       <PageContainer className="pb-10 pt-10 md:pb-11 md:pt-11 xl:pb-12 xl:pt-12">
         <div className="grid grid-cols-1 gap-x-10 gap-y-11 md:gap-x-12 lg:grid-cols-12 lg:gap-x-8 lg:gap-y-12 xl:gap-x-10">
           <div className="min-w-0 space-y-[22px] lg:col-span-6">
@@ -248,10 +243,10 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
               <img
                 src={johnLewisLogo}
                 alt="John Lewis & Partners"
-                width={320}
-                height={80}
+                width={170}
+                height={32.03}
                 decoding="async"
-                className="block h-[36px] w-auto max-w-full object-contain object-start md:h-[40px]"
+                className="block h-[32.03px] w-[170px] max-w-full object-contain object-start"
               />
             </div>
 
@@ -287,8 +282,8 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
           ))}
         </div>
 
-        <div className="dash-top dash-color-c7 mt-10 flex flex-col gap-5 pt-10 sm:mt-[42px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-[42px] md:gap-8">
-          <p className="order-2 text-[12px] font-normal leading-[1.5] text-black sm:order-1">
+        <div className="dash-top dash-color-c7 mt-[72px] flex flex-col gap-5 pt-[24px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:gap-8">
+          <p className="order-2 text-[14px] font-normal leading-[22px] tracking-[0] text-[#3E3E59] sm:order-1">
             {copyrightLine}
           </p>
 
@@ -296,7 +291,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
             <LanguageMenu />
             <button
               type="button"
-              className="inline-flex h-10 items-center gap-1 px-2 text-[12px] font-medium text-black opacity-85 transition hover:underline hover:underline-offset-4"
+              className="inline-flex h-10 items-center gap-1 px-2 text-[14px] text-[#121212] font-medium leading-[1.6] tracking-[0] transition hover:underline hover:underline-offset-4"
               disabled
               aria-disabled
             >
@@ -319,10 +314,10 @@ function FooterLinkColumn({
 }): JSX.Element {
   return (
     <div>
-      <p className="text-[13px] font-bold leading-tight text-black">
+      <p className="text-[14px] font-semibold leading-tight text-black">
         {heading}
       </p>
-      <ul className="mt-3 space-y-2 text-[13px] font-normal leading-normal text-black">
+      <ul className="mt-3 space-y-2 text-[14px] font-normal leading-normal text-black">
         {links.map((label) => (
           <li key={label}>
             <button
@@ -351,7 +346,7 @@ function SocialCircle({
     <a
       href={href}
       aria-label={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e4e4e4] bg-white text-black shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition hover:border-[#bdbdbd] hover:shadow"
+      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-50"
     >
       <span className="flex items-center justify-center">{children}</span>
     </a>
@@ -361,8 +356,8 @@ function SocialCircle({
 function ChevronDownTiny(): JSX.Element {
   return (
     <ChevronDown
-      width={9}
-      height={9}
+      width={18}
+      height={18}
       strokeWidth={1.35}
       className="shrink-0"
       aria-hidden

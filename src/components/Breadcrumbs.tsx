@@ -23,7 +23,7 @@ export function Breadcrumbs({ crumbs }: BreadcrumbsProps): JSX.Element {
               <span
                 className={
                   active
-                    ? "max-w-[min(760px,_88vw)] truncate font-semibold  text-[#292929]"
+                    ? "max-w-[min(760px,_88vw)] truncate font-medium  text-[#292929]"
                     : "font-medium  underline-offset-[5px] hover: text-[#8F8F8F] hover:underline"
                 }
               >

@@ -119,7 +119,7 @@ function HeaderUtilities({ className }: { className?: string }): JSX.Element {
       >
         <span className={utilityLabelClass}>{t("header.categories")}</span>
         <ChevronDown
-          className="h-[10px] w-[10px] shrink-0"
+          className="h-[20px] w-[20px] shrink-0 text-black"
           strokeWidth={1.35}
           aria-hidden
         />
@@ -189,12 +189,12 @@ function LogoLockup({ compact }: { compact?: boolean }): JSX.Element {
       <img
         src={johnLewisLogo}
         alt="John Lewis & Partners"
-        width={320}
-        height={80}
+        width={170}
+        height={32.03}
         decoding="async"
         className={cn(
-          "block w-auto max-w-full object-contain object-start",
-          compact ? "h-[30px]" : "h-[38px] xl:h-[40px]",
+          "block max-w-full object-contain object-start",
+          compact ? "h-[30px] w-auto" : "h-[32.03px] w-[170px]",
         )}
       />
     </div>
