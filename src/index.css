@@ -160,21 +160,24 @@
   .dash-border::after {
     content: "";
     position: absolute;
-    width: 5px;
-    height: 5px;
-    border-color: #d0c9c9;
+    width: 15px;
+    height: 15px;
+    border-color: var(--dash-color, #a3a3a3);
     border-style: dashed;
+    pointer-events: none;
   }
 
   .dash-border::before {
     top: 0;
     left: 0;
     border-width: 1px 0 0 1px;
+    border-top-left-radius: 8px;
   } /* Top & Left */
   .dash-border::after {
     top: 0;
     right: 0;
     border-width: 1px 1px 0 0;
+    border-top-right-radius: 8px;
   } /* Top & Right */
 
   /* Use a child element's pseudo-elements for the bottom corners */
@@ -182,21 +185,24 @@
   .dash-border > div::after {
     content: "";
     position: absolute;
-    width: 5px;
-    height: 5px;
-    border-color: #d0c9c9;
-    border-style: solid;
+    width: 15px;
+    height: 15px;
+    border-color: var(--dash-color, #a3a3a3);
+    border-style: dashed;
+    pointer-events: none;
   }
 
   .dash-border > div::before {
     bottom: 0;
     right: 0;
     border-width: 0 1px 1px 0;
+    border-bottom-right-radius: 8px;
   } /* Bottom & Right */
   .dash-border > div::after {
     bottom: 0;
     left: 0;
     border-width: 0 0 1px 1px;
+    border-bottom-left-radius: 8px;
   }
 
   .no-scrollbar::-webkit-scrollbar {
