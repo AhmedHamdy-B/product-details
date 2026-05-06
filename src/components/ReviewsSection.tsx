@@ -150,7 +150,7 @@ export function ReviewsSection(): JSX.Element {
         subtitleReviewTotal={reviewInsights.reviewsSubtitleTotal}
       />
 
-      <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(240px,_28%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
+      <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(210px,_22%)_minmax(0,1fr)] lg:items-start lg:gap-x-14 lg:gap-y-10">
         <aside className="dash-border dash-color-bbb min-w-0 rounded-xl bg-white px-5 py-5 lg:px-6 lg:py-6">
           <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
             {t("reviews.filterHeading")}
