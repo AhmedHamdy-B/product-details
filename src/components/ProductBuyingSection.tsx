@@ -1,9 +1,5 @@
 import { Star } from "lucide-react";
 import {
-  type MutableRefObject,
-  useEffect,
-  useMemo,
-  useRef,
   useState,
   type JSX,
 } from "react";
@@ -18,7 +14,6 @@ import { STORE_STAR_HEX } from "./Stars";
 import { cn } from "../lib/cn";
 import { useLocale } from "../i18n/useLocale";
 import type { Locale } from "../i18n/messages";
-import { getMaxBasketQuantity } from "../lib/qty";
 import { useProductStore } from "../stores/productStore";
 import { useCartStore } from "../stores/cartStore";
 /** Figma PDP header defaults when API omits social-proof fields */
@@ -63,115 +58,9 @@ function VariationHeading({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StockStatusLabel({
-  trackStock,
-  variantQty,
-}: {
-  trackStock: boolean;
-  variantQty?: number;
-}): JSX.Element {
-  const { t, locale } = useLocale();
-  const numLoc = locale === "ar" ? "ar-SA" : "en-GB";
-
-  if (!trackStock) {
-    return (
-      <p className="mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]">
-        {t("pdp.stockInStock")}
-      </p>
-    );
-  }
-
-  const qty = variantQty ?? 0;
-  if (qty <= 0) {
-    return (
-      <p className="mt-3 text-[14px] font-semibold leading-snug text-red-700">
-        {t("pdp.stockOut")}
-      </p>
-    );
-  }
-
-  const low = qty <= 3;
-  const qtyFmt = qty.toLocaleString(numLoc);
-  const prefix = low ? t("pdp.stockLowPrefix") : t("pdp.stockInStockPrefix");
-
-  return (
-    <p
-      className={
-        low
-          ? "mt-3 text-[14px] font-semibold leading-snug text-amber-800"
-          : "mt-3 text-[14px] font-medium leading-snug text-[#2e7d32]"
-      }
-    >
-      {prefix}
-      {qtyFmt} {t("pdp.availableSuffix")}
-    </p>
-  );
-}
-
 type BuyingProps = {
   product: Product;
 };
-
-function PurchaseQuantityStepper({
-  maxBasketQty,
-  trackStockUnavailable,
-  purchaseQtyRef,
-}: {
-  maxBasketQty: number;
-  trackStockUnavailable: boolean;
-  purchaseQtyRef: MutableRefObject<number>;
-}): JSX.Element {
-  const { t, tf } = useLocale();
-  const [quantity, setQuantity] = useState(1);
-  const lineQty = Math.min(Math.max(1, quantity), maxBasketQty);
-
-  useEffect(() => {
-    purchaseQtyRef.current = lineQty;
-  }, [lineQty, purchaseQtyRef]);
-
-  return (
-    <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
-      <div className="flex items-center gap-3">
-        <span
-          id="pdp-qty-label"
-          className="text-[13px] font-semibold tracking-tight text-black"
-        >
-          {t("pdp.quantity")}
-        </span>
-        <div
-          className="flex items-center gap-3 border border-black px-[10px] py-[8px] text-black"
-          role="group"
-          aria-labelledby="pdp-qty-label"
-        >
-          <button
-            type="button"
-            aria-label={t("pdp.decQty")}
-            disabled={lineQty <= 1}
-            className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          >
-            −
-          </button>
-          <span className="min-w-[28px] text-center text-[17px] font-semibold tabular-nums">
-            {lineQty}
-          </span>
-          <button
-            type="button"
-            aria-label={t("pdp.incQty")}
-            disabled={lineQty >= maxBasketQty || trackStockUnavailable}
-            className="min-w-[28px] text-[22px] font-medium leading-none transition enabled:hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-35"
-            onClick={() => setQuantity((q) => Math.min(maxBasketQty, q + 1))}
-          >
-            +
-          </button>
-        </div>
-        <span className="sr-only">
-          {tf("pdp.qtyMaxHint", { n: maxBasketQty })}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const { t, locale } = useLocale();
@@ -194,13 +83,6 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null,
   );
-
-  const maxBasketQty = useMemo(
-    () => getMaxBasketQuantity(product, selectedVariant?.quantity),
-    [product, selectedVariant?.quantity],
-  );
-
-  const purchaseQtyRef = useRef(1);
 
   const heroImageSelection = (): string => {
     const colorKey = variationKeyNormalize("color");
@@ -236,7 +118,7 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
       selections: { ...selectedVariations },
       variantId: selectedVariant.id,
       unitPrice: payable,
-      quantity: purchaseQtyRef.current,
+      quantity: 1,
     });
   };
 
@@ -356,15 +238,6 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           {validationMessage}
         </p>
       )}
-
-      {/* <PurchaseQuantityStepper
-        key={selectedVariant?.id ?? "unset-qty"}
-        maxBasketQty={maxBasketQty}
-        trackStockUnavailable={Boolean(
-          product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
-        )}
-        purchaseQtyRef={purchaseQtyRef}
-      /> */}
 
       <div className="flex gap-6 pt-4">
         <button
