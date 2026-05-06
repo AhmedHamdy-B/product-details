@@ -242,7 +242,7 @@ export function ReviewsSection(): JSX.Element {
                   type="button"
                   onClick={() => setActiveTab(tabId)}
                   className={cn(
-                    "rounded-[9px] border-[2px] border-[#E6E6E6] px-5 py-2.5 font-sans text-[14px] font-medium tracking-tight transition",
+                    "rounded-[9px] border border-[#E6E6E6] px-5 py-2.5 font-sans text-[14px] font-medium tracking-tight transition",
                     tabId === activeTab
                       ? "border-[#333333] bg-neutral-200 text-black"
                       : "border-[#E6E6E6] bg-white text-black hover:bg-neutral-50",
