@@ -310,13 +310,13 @@ function ReviewsSummaryBanner({
 
   return (
     <div className="mt-5 rounded-xl border border-dashed border-[#D1D1D1] bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
-      <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center  sm:justify-center sm:gap-7 lg:justify-center lg:gap-8">
+      <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center  sm:justify-center  lg:justify-center ">
           <AvgScoreRing score={average} label={avgLabel} />
           <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
             {/* Figma: five solid orange stars (decorative row next to ring) */}
             <Stars variant="review" value={5} starSizePx={20} />
-            <p className="text-center font-sans text-[14px] font-normal leading-snug text-[#7A7A7A] sm:text-start">
+            <p className="text-center font-sans text-[16px] font-regular leading-snug text-[#525252] sm:text-start">
               {formatSubtitleKReviews(subtitleReviewTotal, locale, tf)}
             </p>
           </div>
@@ -409,7 +409,7 @@ function AvgScoreRing({
       aria-label={tf("reviews.avgRingAria", { label })}
     >
       <svg
-        className="-rotate-90"
+        className="-rotate-70"
         width={sizePx}
         height={sizePx}
         viewBox={`0 0 ${sizePx} ${sizePx}`}
@@ -436,7 +436,7 @@ function AvgScoreRing({
         />
       </svg>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span className="font-sans text-[34px] font-semibold tracking-tight text-black sm:text-[36px]">
+        <span className=" text-[20px] font-semibold tracking-tight text-black text-[#0B0F0E]">
           {label}
         </span>
       </div>
