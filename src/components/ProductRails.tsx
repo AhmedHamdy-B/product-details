@@ -303,6 +303,8 @@ function RailCardBody({
   item: ShowcaseItem;
   isRelated: boolean;
 }): JSX.Element {
+  const { t } = useLocale();
+
   if (!isRelated) {
     return (
       <div className="flex flex-col gap-[8px] py-6 text-neutral-950">
@@ -333,7 +335,6 @@ function RailCardBody({
   }
 
   const sold = item.soldCount ?? 0;
-  const { t } = useLocale();
   return (
     <div className="flex flex-col gap-[5px] pt-3 font-sans text-black">
       <p className="text-[18px] font-semibold leading-tight">{item.brand}</p>

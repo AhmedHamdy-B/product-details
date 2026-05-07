@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Suspense, lazy, useEffect, useMemo, useState, type JSX } from "react";
+import { Suspense, lazy, useMemo, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 
 import { TASK_PRODUCT_SLUG } from "../api/product";
@@ -43,25 +43,36 @@ export function ProductDetailPage(): JSX.Element {
   const { t } = useLocale();
   const { slug: rawSlug } = useParams<{ slug: string }>();
   const slug = rawSlug ?? TASK_PRODUCT_SLUG;
-  const [selectedVariations, setSelectedVariations] = useState<
-    Record<string, string>
-  >({});
+  const [selectionState, setSelectionState] = useState<{
+    productId: null | string;
+    overrides: Record<string, string>;
+  }>({
+    productId: null,
+    overrides: {},
+  });
 
   const productQuery = useQuery(productDetailQuery(slug));
-  useEffect(() => {
-    if (!productQuery.data) return;
-    // Reset selection seed only when product identity changes.
-    // Depending on the full object would re-seed on cache refreshes and override user picks.
-    setSelectedVariations(getInitialSelectionsForProduct(productQuery.data));
-  }, [productQuery.data?.id]);
 
   const product = productQuery.data ?? null;
+  const productId = product?.id ?? null;
   const loading = productQuery.isPending;
   const errorMessage = productQuery.isError
     ? productQuery.error instanceof Error
       ? productQuery.error.message
       : t("error.productNotFound")
     : null;
+
+  const seededSelections = useMemo(() => {
+    if (!product) return {};
+    return getInitialSelectionsForProduct(product);
+  }, [product]);
+  const selectedVariations = useMemo(
+    () => ({
+      ...seededSelections,
+      ...(selectionState.productId === productId ? selectionState.overrides : {}),
+    }),
+    [seededSelections, selectionState, productId],
+  );
 
   const gallery = useMemo(() => {
     if (!product) return [];
@@ -119,10 +130,18 @@ export function ProductDetailPage(): JSX.Element {
                   product={product}
                   selectedVariations={selectedVariations}
                   onSelectVariation={(variationType, value) => {
-                    setSelectedVariations((current) => ({
-                      ...current,
-                      [variationKey(variationType)]: value,
-                    }));
+                    const normalizedVariation = variationKey(variationType);
+                    setSelectionState((current) => {
+                      const baseOverrides =
+                        current.productId === productId ? current.overrides : {};
+                      return {
+                        productId,
+                        overrides: {
+                          ...baseOverrides,
+                          [normalizedVariation]: value,
+                        },
+                      };
+                    });
                   }}
                 />
               </div>
