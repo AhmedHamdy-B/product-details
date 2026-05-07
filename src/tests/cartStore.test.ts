@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { useCartStore } from '../stores/cartStore'
+import { selectCartTotal } from '../stores/selectors'
 
 describe('cart store', () => {
   beforeEach(() => {
@@ -59,7 +60,34 @@ describe('cart store', () => {
       quantity: 1,
     })
 
-    expect(useCartStore.getState().getTotal()).toBe(25)
+    expect(selectCartTotal(useCartStore.getState())).toBe(25)
+  })
+
+  it('merges equivalent lines even when selection key order differs', () => {
+    useCartStore.getState().addItem({
+      productId: 'p1',
+      slug: 'shoe',
+      name: 'Trainer',
+      image: '/a.jpg',
+      variantId: 'v1',
+      selections: { color: 'ash', size: '40' },
+      unitPrice: 50,
+      quantity: 1,
+    })
+    useCartStore.getState().addItem({
+      productId: 'p1',
+      slug: 'shoe',
+      name: 'Trainer',
+      image: '/a.jpg',
+      variantId: 'v1',
+      selections: { size: '40', color: 'ash' },
+      unitPrice: 50,
+      quantity: 2,
+    })
+
+    const { lines } = useCartStore.getState()
+    expect(lines).toHaveLength(1)
+    expect(lines[0].quantity).toBe(3)
   })
 
   it('removes a line when quantity drops to zero', () => {

@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
 import type { Product, ProductVariant } from '../types/product'
-import { fetchProductBySlug } from '../api/product'
 import { resolveCatalogAndPayable } from '../lib/pricing'
 import {
   buildGallery as buildGalleryUrls,
@@ -11,143 +10,88 @@ import {
 } from '../lib/variants'
 
 export type ProductStore = {
-  product: Product | null
-  loading: boolean
-  error: string | null
   selectedVariations: Record<string, string>
-  selectedVariant: ProductVariant | null
 
-  /** Loads the product for the given catalogue slug (matches ElegantSoft readme contract). */
-  fetchProduct: (slug: string) => Promise<void>
-  /** Used by React Query sync in `ProductDetailPage`; also invoked on successful `fetchProduct`. */
-  ingestProduct: (product: Product) => void
-  ingestError: (message: string) => void
-  setLoadingFlag: (loading: boolean) => void
+  initializeSelections: (product: Product) => void
   setSelectedVariation: (variationType: string, value: string) => void
   clearSelectedVariations: () => void
-  hydrateSelectionFromVariant: (variant: ProductVariant) => void
-
-  /** Catalogue (“was”) price shown struck-through when discounted */
-  getCurrentPrice: () => number
-  /** Payable selling price shown bold; combine with catalogue to detect discount UI */
-  getCurrentSalePrice: () => number
-  isVariantAvailable: () => boolean
-  getGallery: () => string[]
 }
 
-function applySelection(
-  draft: Pick<ProductStore, 'product' | 'selectedVariations' | 'selectedVariant'>,
-) {
-  const product = draft.product
-  if (!product) {
-    draft.selectedVariant = null
-    return
+/** Pure derivation helpers are exported so UI/tests can stay store-agnostic. */
+export function selectVariantForProduct(
+  product: Product,
+  selectedVariations: Record<string, string>,
+): ProductVariant | null {
+  return findVariantForSelections(product, selectedVariations)
+}
+
+export function getProductPrices(product: Product, selectedVariant: ProductVariant | null) {
+  return resolveCatalogAndPayable(product, selectedVariant)
+}
+
+export function isVariantSelectionComplete(
+  product: Product,
+  selectedVariations: Record<string, string>,
+  selectedVariant: ProductVariant | null,
+): boolean {
+  const required = product.variations.map((variation) => variationKey(variation.name))
+  const allChosen = required.every((key) => Boolean(selectedVariations[key]))
+  return allChosen && selectedVariant !== null
+}
+
+export function buildProductGallery(product: Product, selectedVariations: Record<string, string>) {
+  return buildGalleryUrls(product, selectedVariations)
+}
+
+/** Seed defaults from the first variant to match initial PDP visual state. */
+function defaultSelectionsForProduct(product: Product): Record<string, string> {
+  const seed: Record<string, string> = {}
+  const first = product.variants[0]
+  if (!first) return seed
+  for (const vp of first.variation_props) {
+    seed[variationKey(vp.variation)] = vp.variation_prop
   }
-  draft.selectedVariant = findVariantForSelections(product, draft.selectedVariations)
+  return seed
+}
+
+export function getInitialSelectionsForProduct(
+  product: Product,
+): Record<string, string> {
+  return defaultSelectionsForProduct(product)
+}
+
+/** Prevent accidental whitespace-only values from polluting selection state. */
+function sanitizeSelectionValue(value: string): string {
+  return value.trim()
 }
 
 export const useProductStore = create<ProductStore>()(
-  immer((set, get) => ({
-    product: null,
-    loading: false,
-    error: null,
+  immer((set) => ({
     selectedVariations: {},
-    selectedVariant: null,
 
-    fetchProduct: async (slug: string) => {
+    initializeSelections: (product) => {
       set((draft) => {
-        draft.loading = true
-        draft.error = null
-      })
-      try {
-        const data = await fetchProductBySlug(slug)
-        get().ingestProduct(data)
-      } catch (e) {
-        const message =
-          e instanceof Error ? e.message : 'Something went wrong while loading product'
-        get().ingestError(message)
-      }
-    },
-
-    ingestProduct: (data) => {
-      set((draft) => {
-        draft.product = data
-        draft.loading = false
-        draft.error = null
-        draft.selectedVariations = {}
-        const first = data.variants[0]
-        if (first) {
-          for (const vp of first.variation_props) {
-            draft.selectedVariations[variationKey(vp.variation)] = vp.variation_prop
-          }
-        }
-        applySelection(draft)
-      })
-    },
-
-    ingestError: (message) => {
-      set((draft) => {
-        draft.loading = false
-        draft.error = message
-        draft.product = null
-        draft.selectedVariations = {}
-        draft.selectedVariant = null
-      })
-    },
-
-    setLoadingFlag: (loading) => {
-      set((draft) => {
-        draft.loading = loading
+        draft.selectedVariations = defaultSelectionsForProduct(product)
       })
     },
 
     setSelectedVariation: (variationType, value) => {
       set((draft) => {
-        draft.selectedVariations[variationKey(variationType)] = value
-        applySelection(draft)
+        // Always normalize keys so casing/localized labels do not fork state shape.
+        const normalizedKey = variationKey(variationType)
+        const normalizedValue = sanitizeSelectionValue(value)
+        if (!normalizedValue) {
+          delete draft.selectedVariations[normalizedKey]
+          return
+        }
+        draft.selectedVariations[normalizedKey] = normalizedValue
       })
     },
 
     clearSelectedVariations: () => {
       set((draft) => {
         draft.selectedVariations = {}
-        draft.selectedVariant = null
       })
-    },
-
-    hydrateSelectionFromVariant: (variant) => {
-      set((draft) => {
-        draft.selectedVariations = {}
-        for (const vp of variant.variation_props) {
-          draft.selectedVariations[variationKey(vp.variation)] = vp.variation_prop
-        }
-        applySelection(draft)
-      })
-    },
-
-    getCurrentPrice: () => {
-      const { product, selectedVariant } = get()
-      return resolveCatalogAndPayable(product, selectedVariant).catalog
-    },
-
-    getCurrentSalePrice: () => {
-      const { product, selectedVariant } = get()
-      return resolveCatalogAndPayable(product, selectedVariant).payable
-    },
-
-    isVariantAvailable: () => {
-      const { product, selectedVariant } = get()
-      if (!product) return false
-      const required = product.variations.map((v) => variationKey(v.name))
-      const selections = get().selectedVariations
-      const picks = required.every((key) => Boolean(selections[key]))
-      return picks && selectedVariant !== null
-    },
-
-    getGallery: () => {
-      const { product } = get()
-      if (!product) return []
-      return buildGalleryUrls(product, get().selectedVariations)
     },
   })),
 )

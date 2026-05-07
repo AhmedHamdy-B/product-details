@@ -2,9 +2,11 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Funnel,
   Star,
   ThumbsDown,
   ThumbsUp,
+  X,
 } from "lucide-react";
 import {
   Disclosure,
@@ -31,6 +33,16 @@ import { useLocale } from "../i18n/useLocale";
 import type { Locale, MessageKey } from "../i18n/messages";
 import { cn } from "../lib/cn";
 import { Stars, STORE_STAR_HEX } from "./Stars";
+import {
+  helpfulVoteChipBaseClass,
+  pageArrowClass,
+  pgCell,
+  reviewCheckboxClass,
+  reviewRingTrack,
+  reviewTooltip,
+  reviewVoteCountClass,
+  VOTE_ICON_HEX,
+} from "./variants/reviewsSection.variants";
 
 const REVIEW_TAB_IDS = ["all", "photo", "desc"] as const;
 type ReviewTabId = (typeof REVIEW_TAB_IDS)[number];
@@ -43,9 +55,6 @@ const REVIEW_TAB_MESSAGE: Record<
   photo: "reviews.tab.photo",
   desc: "reviews.tab.desc",
 };
-
-const reviewTooltip =
-  "pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150";
 
 const REVIEW_TAB_FADE_MS = 220;
 
@@ -66,6 +75,7 @@ function getPrefersReducedMotionServerSnapshot(): boolean {
 export function ReviewsSection(): JSX.Element {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<ReviewTabId>(REVIEW_TAB_IDS[0]);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   /** Tab used for list content; trails `activeTab` while cross-fading. */
   const [displayTab, setDisplayTab] = useState<ReviewTabId>(activeTab);
   const [listFadeIn, setListFadeIn] = useState(true);
@@ -103,6 +113,15 @@ export function ReviewsSection(): JSX.Element {
     }, fadeMs);
     return () => window.clearTimeout(id);
   }, [activeTab, displayTab, fadeMs]);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileFiltersOpen]);
 
   const [starSelections, toggleStarSelection] = useBooleanMap({
     5: true,
@@ -151,90 +170,32 @@ export function ReviewsSection(): JSX.Element {
       />
 
       <div className=" flex flex-col gap-10 mt-6 lg:grid lg:grid-cols-[minmax(210px,_22%)_minmax(0,1fr)] lg:items-start  lg:gap-y-10">
-        <aside className="dash-border dash-color-bbb min-w-0 rounded-xl bg-white px-5 py-5 lg:px-6 lg:py-6">
-          <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
-            {t("reviews.filterHeading")}
-          </p>
-
-          <div className="dash-top dash-color-bbb mt-5 space-y-0 pt-5">
-            <Disclosure defaultOpen>
-              {({ open }) => (
-                <div>
-                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
-                    <span className="font-sans text-[16px] font-semibold text-black">
-                      {t("reviews.filterRating")}
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0 text-neutral-500 transition-transform duration-200",
-                        open ? "rotate-180" : "rotate-0",
-                      )}
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  </DisclosureButton>
-                  <DisclosurePanel className="-mt-1 pb-6">
-                    <div className="space-y-3.5">
-                      {[5, 4, 3, 2, 1].map((grade) => (
-                        <SidebarRatingCheckboxRow
-                          key={`star-${grade}`}
-                          checked={starSelections.get(grade) ?? false}
-                          grade={grade}
-                          onToggle={() => toggleStarSelection(grade)}
-                        />
-                      ))}
-                    </div>
-                  </DisclosurePanel>
-                </div>
-              )}
-            </Disclosure>
-
-            <Disclosure defaultOpen>
-              {({ open }) => (
-                <div className="dash-top dash-color-bbb pt-5">
-                  <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
-                    <span className="font-sans text-[20px] font-semibold text-black">
-                      {t("reviews.filterTopics")}
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0 text-neutral-500 transition-transform duration-200",
-                        open ? "rotate-180" : "rotate-0",
-                      )}
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  </DisclosureButton>
-                  <DisclosurePanel className="-mt-1 pb-1">
-                    {hasTopicFacets ? (
-                      <div className="space-y-3.5">
-                        {reviewFilterTopics.map((topic) => (
-                          <SidebarCheckboxRow
-                            key={topic}
-                            checked={topicSelections.get(topic) ?? false}
-                            onChange={() => toggleTopicSelection(topic)}
-                          >
-                            {topic}
-                          </SidebarCheckboxRow>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="font-sans text-[12px] font-normal leading-relaxed text-neutral-500">
-                        {t("reviews.topicFacetHint")}
-                      </p>
-                    )}
-                  </DisclosurePanel>
-                </div>
-              )}
-            </Disclosure>
-          </div>
+        <aside className="dash-border dash-color-bbb hidden min-w-0 rounded-xl bg-white px-5 py-5 lg:block lg:px-6 lg:py-6">
+          <ReviewFiltersPanel
+            starSelections={starSelections}
+            toggleStarSelection={toggleStarSelection}
+            hasTopicFacets={hasTopicFacets}
+            topicSelections={topicSelections}
+            toggleTopicSelection={toggleTopicSelection}
+          />
         </aside>
 
         <div className="min-w-0">
           <div>
-            <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
-              {t("reviews.listsHeading")}
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
+                {t("reviews.listsHeading")}
+              </p>
+              <button
+                type="button"
+                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-[#E4E9EE] bg-white text-black transition hover:bg-neutral-50 lg:hidden"
+                aria-label={t("reviews.filterHeading")}
+                aria-expanded={mobileFiltersOpen}
+                onClick={() => setMobileFiltersOpen((open) => !open)}
+              >
+                <Funnel className="h-[25px] w-[25px]" strokeWidth={1.9} aria-hidden />
+              </button>
+            </div>
             <div className="mt-5 flex flex-wrap gap-3">
               {REVIEW_TAB_IDS.map((tabId) => (
                 <button
@@ -251,6 +212,48 @@ export function ReviewsSection(): JSX.Element {
                   {t(REVIEW_TAB_MESSAGE[tabId])}
                 </button>
               ))}
+            </div>
+            <div className="lg:hidden">
+              <div
+                className={cn(
+                  "fixed inset-0 z-[140] bg-black/35 transition-opacity duration-200 ease-out",
+                  mobileFiltersOpen
+                    ? "opacity-100"
+                    : "pointer-events-none opacity-0",
+                )}
+                onClick={() => setMobileFiltersOpen(false)}
+                aria-hidden
+              />
+              <aside
+                className={cn(
+                  "fixed inset-y-0 end-0 z-[150] w-[min(86vw,360px)] overflow-y-auto border-s border-neutral-200 bg-white px-5 py-5 shadow-2xl transition-transform duration-300 ease-out",
+                  mobileFiltersOpen ? "translate-x-0" : "translate-x-full",
+                )}
+                aria-label={t("reviews.filterHeading")}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
+                    {t("reviews.filterHeading")}
+                  </p>
+                  <button
+                    type="button"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-neutral-200 text-black transition hover:bg-neutral-50"
+                    onClick={() => setMobileFiltersOpen(false)}
+                    aria-label={t("reviews.filterHeading")}
+                  >
+                    <X className="h-5 w-5" strokeWidth={1.9} aria-hidden />
+                  </button>
+                </div>
+                <div className="dash-top dash-color-bbb pt-4">
+                  <ReviewFiltersPanel
+                    starSelections={starSelections}
+                    toggleStarSelection={toggleStarSelection}
+                    hasTopicFacets={hasTopicFacets}
+                    topicSelections={topicSelections}
+                    toggleTopicSelection={toggleTopicSelection}
+                  />
+                </div>
+              </aside>
             </div>
           </div>
 
@@ -297,7 +300,104 @@ type SummaryBannerProps = {
   subtitleReviewTotal: number;
 };
 
-const reviewRingTrack = "#eaeaea";
+type ReviewFiltersPanelProps = {
+  starSelections: ReadonlyMap<number, boolean>;
+  toggleStarSelection: (grade: number) => void;
+  hasTopicFacets: boolean;
+  topicSelections: ReadonlyMap<string, boolean>;
+  toggleTopicSelection: (topic: string) => void;
+};
+
+function ReviewFiltersPanel({
+  starSelections,
+  toggleStarSelection,
+  hasTopicFacets,
+  topicSelections,
+  toggleTopicSelection,
+}: ReviewFiltersPanelProps): JSX.Element {
+  const { t } = useLocale();
+
+  return (
+    <>
+      <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
+        {t("reviews.filterHeading")}
+      </p>
+
+      <div className="dash-top dash-color-bbb mt-5 space-y-0 pt-5">
+        <Disclosure defaultOpen>
+          {({ open }) => (
+            <div>
+              <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
+                <span className="font-sans text-[16px] font-semibold text-black">
+                  {t("reviews.filterRating")}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-5 w-5 shrink-0 text-neutral-500 transition-transform duration-200",
+                    open ? "rotate-180" : "rotate-0",
+                  )}
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="-mt-1 pb-6">
+                <div className="space-y-3.5">
+                  {[5, 4, 3, 2, 1].map((grade) => (
+                    <SidebarRatingCheckboxRow
+                      key={`star-${grade}`}
+                      checked={starSelections.get(grade) ?? false}
+                      grade={grade}
+                      onToggle={() => toggleStarSelection(grade)}
+                    />
+                  ))}
+                </div>
+              </DisclosurePanel>
+            </div>
+          )}
+        </Disclosure>
+
+        <Disclosure defaultOpen>
+          {({ open }) => (
+            <div className="dash-top dash-color-bbb pt-5">
+              <DisclosureButton className="flex w-full items-center justify-between pb-4 text-start">
+                <span className="font-sans text-[20px] font-semibold text-black">
+                  {t("reviews.filterTopics")}
+                </span>
+                <ChevronDown
+                  className={cn(
+                    "h-5 w-5 shrink-0 text-neutral-500 transition-transform duration-200",
+                    open ? "rotate-180" : "rotate-0",
+                  )}
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+              </DisclosureButton>
+              <DisclosurePanel className="-mt-1 pb-1">
+                {hasTopicFacets ? (
+                  <div className="space-y-3.5">
+                    {reviewFilterTopics.map((topic) => (
+                      <SidebarCheckboxRow
+                        key={topic}
+                        checked={topicSelections.get(topic) ?? false}
+                        onChange={() => toggleTopicSelection(topic)}
+                      >
+                        {topic}
+                      </SidebarCheckboxRow>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="font-sans text-[12px] font-normal leading-relaxed text-neutral-500">
+                    {t("reviews.topicFacetHint")}
+                  </p>
+                )}
+              </DisclosurePanel>
+            </div>
+          )}
+        </Disclosure>
+      </div>
+    </>
+  );
+}
 
 function ReviewsSummaryBanner({
   average,
@@ -312,12 +412,12 @@ function ReviewsSummaryBanner({
   return (
     <div className="dash-border dash-color-bbb mt-5 rounded-xl bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
       <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[125px]">
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center  sm:justify-center  lg:justify-center ">
+        <div className="flex items-center justify-start gap-5 lg:justify-center">
           <AvgScoreRing score={average} label={avgLabel} />
-          <div className="flex flex-col items-center gap-2 sm:items-start sm:gap-2.5">
+          <div className="flex flex-col items-start gap-2 sm:gap-2.5">
             {/* Figma: five solid orange stars (decorative row next to ring) */}
             <Stars variant="review" value={5} starSizePx={20} />
-            <p className="text-center font-sans text-[16px] font-regular leading-snug text-[#525252] sm:text-start">
+            <p className="text-start font-sans text-[16px] font-medium sm:text-regular leading-snug text-[#0B0F0E] sm:text-[#525252]">
               {formatSubtitleKReviews(subtitleReviewTotal, locale, tf)}
             </p>
           </div>
@@ -329,7 +429,7 @@ function ReviewsSummaryBanner({
             return (
               <div
                 key={row.stars}
-                className="grid grid-cols-[56px_minmax(0,1fr)_70px] items-center gap-x-0 text-[13px] font-medium"
+                className="grid grid-cols-[56px_minmax(0,1fr)_43px] items-center gap-x-0 text-[13px] font-medium sm:grid-cols-[56px_minmax(0,1fr)_70px]"
               >
                 <span className="flex items-center gap-1.5 tabular-nums text-[#0B0F0E] text-[13px] font-medium">
                   <span>{row.stars}.0</span>
@@ -344,13 +444,13 @@ function ReviewsSummaryBanner({
                     aria-hidden
                   />
                 </span>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200">
+                <div className="h-2 w-full overflow-hidden rounded-none bg-neutral-200 sm:rounded-full">
                   <div
-                    className="h-full rounded-full bg-black transition-[width] duration-500"
+                    className="h-full rounded-none bg-black transition-[width] duration-500 sm:rounded-full"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <span className="whitespace-nowrap text-start pl-4 text-[#0B0F0E] text-[13px] font-medium">
+                <span className="whitespace-nowrap text-end ps-2 text-[#0B0F0E] text-[13px] font-medium sm:text-start sm:ps-4">
                   {row.count.toLocaleString(histogramNumLoc)}
                 </span>
               </div>
@@ -464,7 +564,7 @@ function SidebarRatingCheckboxRow({
         type="checkbox"
         checked={checked}
         onChange={() => onToggle()}
-        className="h-4 w-4 shrink-0 rounded-[3px] border border-neutral-500 text-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 checked:border-black checked:bg-black"
+        className={reviewCheckboxClass}
       />
       {/* Figma: one filled star + grade digit (not a 5-star row) */}
       <span className="inline-flex shrink-0 items-center gap-[5px]" aria-hidden>
@@ -501,7 +601,7 @@ function SidebarCheckboxRow({
         type="checkbox"
         checked={checked}
         onChange={() => onChange()}
-        className="h-4 w-4 shrink-0 rounded-[3px] border border-neutral-500 text-black checked:border-black checked:bg-black focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        className={reviewCheckboxClass}
       />
       <span className="font-sans text-[16px] font-semibold text-[#818b9c]">
         {children}
@@ -568,6 +668,13 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
       .map((part) => part[0]?.toUpperCase())
       .join("") ?? "";
 
+  const authorButtonClass =
+    "flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-start font-sans " +
+    "text-[16px] font-medium leading-tight text-black transition hover:opacity-80";
+  const initialsBadgeClass =
+    "inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-black " +
+    "text-[12px] text-white sm:size-10 sm:text-[13px]";
+
   return (
     <article>
       {/* Figma rhythm: stars 10→ title 8→ date; optional body +12; footer +28 */}
@@ -588,10 +695,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
-          <button
-            type="button"
-            className="flex max-w-max min-w-0 items-center gap-[10px] rounded-sm text-start font-sans text-[16px] font-medium leading-tight text-black transition hover:opacity-80"
-          >
+          <button type="button" className={authorButtonClass}>
             {review.avatarSrc ? (
               <img
                 src={review.avatarSrc}
@@ -599,9 +703,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
                 className="size-[32px] shrink-0 rounded-full object-cover "
               />
             ) : (
-              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-black text-[12px] text-white sm:size-10 sm:text-[13px]">
-                {initials}
-              </span>
+              <span className={initialsBadgeClass}>{initials}</span>
             )}
             {review.author}
           </button>
@@ -613,11 +715,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
   );
 }
 
-const reviewVoteCountClass =
-  "font-sans text-[14px] font-normal tabular-nums leading-[1.6] tracking-[0] text-[#0B0F0E] ";
-
 /** Outlined ↔ solid (#818b9c) — same Lucide glyphs; stroke when idle, filled when chosen */
-const VOTE_ICON_HEX = "#000000" as const;
 
 type HelpfulChoice = null | "up" | "down";
 
@@ -632,9 +730,6 @@ function HelpfulVoteChips({
   const [choice, setChoice] = useState<HelpfulChoice>(null);
   const [yesCount, setYesCount] = useState(initialYes);
   const [noCount, setNoCount] = useState(initialNo);
-
-  const chipBase =
-    "peer inline-flex shrink-0 cursor-pointer items-center justify-center rounded-[8px] border border-[#e8e8e8] bg-white transition hover:border-neutral-300 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2";
 
   const onLike = () => {
     if (choice === "up") {
@@ -682,7 +777,7 @@ function HelpfulVoteChips({
               ? tf("reviews.helpful.ariaYesSelected", { count: yesCount })
               : tf("reviews.helpful.ariaYes", { count: yesCount })
           }
-          className={`peer/helpful-chip-yes ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3 `}
+          className={`peer/helpful-chip-yes ${helpfulVoteChipBaseClass} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3 `}
           onClick={onLike}
         >
           <ThumbsUp
@@ -715,7 +810,7 @@ function HelpfulVoteChips({
               ? tf("reviews.helpful.ariaNoSelected", { count: noCount })
               : tf("reviews.helpful.ariaNo", { count: noCount })
           }
-          className={`peer/helpful-chip-no ${chipBase} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3`}
+          className={`peer/helpful-chip-no ${helpfulVoteChipBaseClass} h-9 gap-[7px] px-2.5 sm:h-10 sm:gap-2 sm:px-3`}
           onClick={onDislike}
         >
           <ThumbsDown
@@ -743,10 +838,10 @@ function HelpfulVoteChips({
   );
 }
 
-/** Figma review pagination: uniform rounded-square tiles; active = black stroke; idle = neutral stroke + muted label; chevrons standalone. */
-const pgCell =
-  "inline-flex size-11 shrink-0 items-center justify-center rounded-[8px] border border-solid bg-white text-[14px] font-medium tabular-nums leading-[1.6] tracking-[0] antialiased outline-none transition-[color,border-color,background-color] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white";
-
+/**
+ * Figma review pagination: uniform rounded-square tiles.
+ * Active = black stroke; idle = neutral stroke + muted label; chevrons standalone.
+ */
 function Pagination(): JSX.Element {
   const { t } = useLocale();
   const lastPage = 19;
@@ -767,7 +862,7 @@ function Pagination(): JSX.Element {
         <button
           type="button"
           aria-label={t("reviews.pagePrev")}
-          className="inline-flex size-11  shrink-0 items-center justify-center rounded-[10px] text-[#141414] outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className={pageArrowClass}
         >
           <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
         </button>
@@ -800,7 +895,7 @@ function Pagination(): JSX.Element {
       <button
         type="button"
         aria-label={t("reviews.pageNext")}
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-black outline-none transition-colors hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className={pageArrowClass}
       >
         <ChevronRight
           className="size-[36px] ml-[8px]"

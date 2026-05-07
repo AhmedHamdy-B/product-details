@@ -1,5 +1,6 @@
 import { useLayoutEffect, type JSX } from 'react'
 import { useTranslation } from 'react-i18next'
+import { messagesAr, messagesEn } from './messages'
 
 function isRtlLanguage(code: string | undefined): boolean {
   const c = code ?? ''
@@ -15,9 +16,7 @@ export function I18nDocumentSync(): JSX.Element | null {
     const isAr = isRtlLanguage(resolved)
     document.documentElement.lang = isAr ? 'ar' : 'en'
     document.documentElement.dir = isAr ? 'rtl' : 'ltr'
-    document.title = isAr
-      ? 'John Lewis & Partners — المنتج'
-      : 'John Lewis & Partners — Product'
+    document.title = isAr ? messagesAr['doc.titleProduct'] : messagesEn['doc.titleProduct']
   }, [resolved])
 
   return null

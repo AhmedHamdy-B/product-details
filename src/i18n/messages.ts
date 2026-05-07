@@ -34,6 +34,7 @@ export type MessageKey =
   | 'fav.empty'
   | 'fav.remove'
   /** Footer */
+  | 'brand.anyday'
   | 'footer.copyrightBrand'
   | 'footer.langMenu'
   | 'footer.langEnglish'
@@ -174,6 +175,9 @@ export type MessageKey =
   | 'reviews.helpful.ariaNoSelected'
   /** Skip link */
   | 'skipToMain'
+  /** Accessibility/UI meta */
+  | 'a11y.breadcrumbNav'
+  | 'doc.titleProduct'
   /** Toast */
   | 'toast.addedTitle'
   | 'toast.oneItemBasket'
@@ -213,6 +217,8 @@ export const messagesEn: Record<MessageKey, string> = {
   'fav.close': 'Close Favourite Items',
   'fav.empty': "Save pieces you love by tapping the heart on a product's gallery.",
   'fav.remove': 'Remove from favourites',
+
+  'brand.anyday': 'John Lewis ANYDAY',
 
   'footer.copyrightBrand': 'John Lewis plc',
   'footer.langMenu': 'Choose language',
@@ -368,6 +374,8 @@ export const messagesEn: Record<MessageKey, string> = {
     'Not helpful selected ({{count}}), press to remove',
 
   'skipToMain': 'Skip to main content',
+  'a11y.breadcrumbNav': 'Breadcrumb',
+  'doc.titleProduct': 'John Lewis & Partners — Product',
 
   'toast.addedTitle': 'Added to cart',
   'toast.oneItemBasket': '{{count}} item in your basket',
@@ -408,6 +416,8 @@ export const messagesAr: Record<MessageKey, string> = {
   'fav.close': 'إغلاق المفضلة',
   'fav.empty': 'احفظ القطع التي تعجبك عبر النقر على أيقونة القلب في معرض الصور.',
   'fav.remove': 'إزالة من المفضلة',
+
+  'brand.anyday': 'John Lewis ANYDAY',
 
   'footer.copyrightBrand': 'John Lewis plc',
   'footer.langMenu': 'اختيار اللغة',
@@ -562,6 +572,8 @@ export const messagesAr: Record<MessageKey, string> = {
   'reviews.helpful.ariaNoSelected': 'تم اختيار غير مفيد ({{count}})؛ اضغط للإلغاء',
 
   'skipToMain': 'تخطّي إلى المحتوى الرئيسي',
+  'a11y.breadcrumbNav': 'مسار التنقل',
+  'doc.titleProduct': 'John Lewis & Partners — المنتج',
 
   'toast.addedTitle': 'تمت الإضافة إلى السلة',
   'toast.oneItemBasket': '{{count}} قطعة في سلتك',

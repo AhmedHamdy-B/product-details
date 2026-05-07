@@ -3,11 +3,21 @@ import { type JSX, type MouseEvent } from "react";
 
 import type { ShowcaseItem } from "../data/mocks";
 import { useLocale } from "../i18n/useLocale";
+import { getResponsiveImageAttrs } from "../lib/image";
 import { formatMoney, formatUsdWhole } from "../lib/money";
 import { cn } from "../lib/cn";
 import { useCartStore } from "../stores/cartStore";
 import { useFavoritesStore } from "../stores/favoritesStore";
+import { selectIsFavoriteByProductId } from "../stores/selectors";
 import { Stars, STORE_STAR_HEX } from "./Stars";
+import {
+  relatedRailIcon,
+  relatedRailBtn,
+  relatedRailGridClass,
+  relatedTooltipBase,
+  relatedTrayVisibilityClass,
+  relatedViewAllLinkClass,
+} from "./variants/productRails.variants";
 
 type Props = {
   eyebrow?: string;
@@ -21,14 +31,7 @@ type Props = {
 };
 
 /** Related rail: ~80% scale of gallery `railBtn` (44×44 / 22px icon) — icon-only + peer tooltips */
-const relatedRailIcon = "h-[18px] w-[18px]";
 const relatedRailStroke = 1.35;
-const relatedRailBtn =
-  "pointer-events-auto relative z-[12] inline-flex h-[35px] w-[35px] shrink-0 cursor-pointer items-center justify-center rounded-md border border-black/18 bg-[#f1f0ea] text-black shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition hover:bg-[#e6e5dd] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-1";
-
-const relatedTooltipBase =
-  "pointer-events-none invisible absolute bottom-full end-0 z-[25] mb-2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-[10px] font-semibold tracking-tight text-white shadow-lg opacity-0 transition-[opacity,visibility] duration-150 motion-reduce:transition-none";
-
 export function ProductRails({
   eyebrow,
   headline,
@@ -44,7 +47,7 @@ export function ProductRails({
     <section
       id={anchorId}
       className={cn(
-        "space-y-5",
+        "space-y-10 sm:space-y-5",
         isRelated
           ? cn(
               "dash-color-bbb pt-16 pb-20",
@@ -99,7 +102,7 @@ export function ProductRails({
           <button
             type="button"
             className={cn(
-              "text-[16px] font-medium text-[#525252] underline decoration-black underline-offset-[3px] transition hover:text-neutral-700 hover:decoration-neutral-700",
+              relatedViewAllLinkClass,
               eyebrow && popularWeek && "shrink-0 self-start pt-[22px]",
             )}
           >
@@ -118,9 +121,7 @@ export function ProductRails({
       <div className="relative">
         <div
           className={cn(
-            isRelated
-              ? "grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-5 lg:gap-[18px] xl:gap-9"
-              : "grid grid-cols-2 gap-[18px] sm:gap-8 md:flex md:flex-nowrap md:gap-10 md:overflow-x-auto md:no-scrollbar md:scroll-smooth lg:justify-between xl:justify-start",
+            relatedRailGridClass({ variant: isRelated ? "related" : "default" }),
           )}
         >
           {items.map((item) => (
@@ -144,27 +145,18 @@ export function ProductRails({
                 {isRelated ? (
                   <>
                     <div className="absolute inset-0 overflow-hidden rounded-md">
-                      <img
-                        src={item.image}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full rounded-md object-cover"
-                      />
+                      <RailItemImage src={item.image} alt="" />
                     </div>
                     <RelatedImageHoverTray item={item} />
                   </>
                 ) : (
-                  <img
-                    src={item.image}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className={cn(
-                      "h-full w-full object-cover",
-                      "transition duration-[1200ms] group-hover:scale-105",
-                    )}
-                  />
+                  <div className="h-full w-full overflow-hidden">
+                    <RailItemImage
+                      src={item.image}
+                      alt=""
+                      className="transition duration-[1200ms] group-hover:scale-105"
+                    />
+                  </div>
                 )}
               </div>
 
@@ -177,11 +169,38 @@ export function ProductRails({
   );
 }
 
+function RailItemImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}): JSX.Element {
+  const attrs = getResponsiveImageAttrs(src, {
+    widths: [280, 420, 620, 820],
+    sizes: "(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 20vw",
+  });
+
+  return (
+    <img
+      src={attrs.src}
+      srcSet={attrs.srcSet}
+      sizes={attrs.sizes}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className={cn("h-full w-full rounded-md object-cover", className)}
+    />
+  );
+}
+
 function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
   const { t } = useLocale();
   const addItem = useCartStore((s) => s.addItem);
   const toggleFavorite = useFavoritesStore((s) => s.toggleProduct);
-  const saved = useFavoritesStore((s) => s.isFavorite(item.id));
+  const saved = useFavoritesStore(selectIsFavoriteByProductId(item.id));
   const slug = item.slug ?? `related-${item.id}`;
   const displayName = `${item.brand} ${item.name}`.trim();
   const favLabel = saved ? t("rails.favAriaRemove") : t("rails.favAriaAdd");
@@ -194,22 +213,13 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
 
   return (
     <div
-      className={cn(
-        "pointer-events-none absolute inset-0 z-10 flex flex-col items-end justify-start p-2",
-        /* Below `md`: phones — keep actions visible (hover unreliable) */
-        "visible opacity-100 max-md:motion-safe:transition-none",
-        /* md+: desktop-style reveal on hover / keyboard focus inside card */
-        "md:invisible md:opacity-0 md:motion-safe:transition-[opacity,visibility]",
-        "md:motion-safe:duration-200 md:motion-safe:ease-out",
-        "md:group-hover/related:visible md:group-hover/related:opacity-100",
-        "md:group-focus-within/related:visible md:group-focus-within/related:opacity-100",
-      )}
+      className={relatedTrayVisibilityClass}
     >
       <div className="pointer-events-auto relative z-[11] flex flex-col items-end gap-2">
         <div className="relative shrink-0">
           <button
             type="button"
-            className={`peer/rel-rail-fav ${relatedRailBtn}`}
+            className={cn("peer/rel-rail-fav", relatedRailBtn)}
             aria-label={favLabel}
             onClick={(e) => {
               stopCard(e);
@@ -246,7 +256,7 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
         <div className="relative shrink-0">
           <button
             type="button"
-            className={`peer/rel-rail-cart ${relatedRailBtn}`}
+            className={cn("peer/rel-rail-cart", relatedRailBtn)}
             aria-label={t("rails.addToCartAria")}
             onClick={(e) => {
               stopCard(e);
@@ -321,6 +331,7 @@ function RailCardBody({
   }
 
   const sold = item.soldCount ?? 0;
+  const { t } = useLocale();
   return (
     <div className="flex flex-col gap-[5px] pt-3 font-sans text-black">
       <p className="text-[18px] font-semibold leading-tight">{item.brand}</p>
@@ -344,7 +355,7 @@ function RailCardBody({
           aria-hidden
         />
         <span className="font-regular text-[#666666] text-[16px] tabular-nums">
-          {sold.toLocaleString("en-US")} Sold
+          {sold.toLocaleString("en-US")} {t("pdp.soldSuffix")}
         </span>
       </div>
     </div>

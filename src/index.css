@@ -31,6 +31,48 @@
     margin-bottom: 0 !important;
     vertical-align: bottom;
   }
+
+  /** High repetition input styling extracted with @apply for maintainability. */
+  .footer-newsletter-input {
+    @apply min-h-0 min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 pt-[6px] text-[16px] font-normal tracking-[0] text-neutral-900 antialiased caret-neutral-950;
+    @apply outline-none outline-0 ring-0 ring-offset-0 shadow-none;
+    @apply placeholder:font-medium placeholder:tracking-[0.01em];
+    line-height: 1.6 !important;
+    appearance: textfield;
+    outline-offset: 0;
+    box-shadow: inset 0 0 0 9999px transparent;
+  }
+
+  .footer-newsletter-input::placeholder {
+    color: #737d8a;
+  }
+
+  .footer-newsletter-input::-webkit-search-cancel-button,
+  .footer-newsletter-input::-webkit-search-decoration {
+    display: none;
+    appearance: none;
+  }
+
+  .footer-newsletter-input:focus,
+  .footer-newsletter-input:focus-visible {
+    @apply border-0 !outline-none !ring-0 !shadow-none;
+    outline-offset: 0 !important;
+  }
+
+  .footer-newsletter-input:-webkit-autofill,
+  .footer-newsletter-input:-webkit-autofill:focus {
+    box-shadow: inset 0 0 0 32px rgb(243, 243, 243);
+  }
+
+  .footer-newsletter-submit {
+    @apply ms-0 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer items-center justify-center rounded-[8px];
+    @apply bg-black text-white outline-none ring-0 transition-colors hover:bg-neutral-900;
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950;
+  }
+
+  .main-focus-ring {
+    @apply min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4;
+  }
 }
 
 @layer utilities {

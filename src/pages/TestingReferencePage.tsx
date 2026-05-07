@@ -8,6 +8,10 @@ import { FavoritesDrawer } from "../components/FavoritesDrawer";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
 import { ToastBanner } from "../components/ToastBanner";
+import {
+  tableBaseClass,
+  tableShellClass,
+} from "./variants/testingReferencePage.variants";
 
 type ReferenceRow = {
   topic: string;
@@ -47,7 +51,8 @@ const rows = [
   {
     topic: "Lighthouse accessibility gate",
     applied:
-      "Desktop preset, accessibility category only, CLI bundle for stable scores on Windows. Default pass threshold MIN_A11Y_SCORE=0.86 (env override).",
+      "Desktop preset, accessibility category only, CLI bundle for stable scores on Windows. " +
+      "Default pass threshold MIN_A11Y_SCORE=0.86 (env override).",
     verify: `\`npm run lh:a11y\` serves on :5199 then runs \`lh:a11y:run\`. Direct run: \`npm run lh:a11y:run\` against LH_URL.`,
     locations: ["scripts/lighthouse-a11y.mjs"],
   },
@@ -60,9 +65,11 @@ const rows = [
   {
     topic: "Runtime accessibility (manual)",
     applied:
-      "Skip link to `#main-content`, focus ring on `<main>`, dialogs from Headless UI, `motion-safe:` on gallery zoom, `aria-live` toast region.",
+      "Skip link to `#main-content`, focus ring on `<main>`, dialogs from Headless UI, " +
+      "`motion-safe:` on gallery zoom, `aria-live` toast region.",
     verify:
-      "Tab once from load: skip link appears; activate to move focus into main. Open cart drawer: labelled dialog. Add item: polite live region announces basket update.",
+      "Tab once from load: skip link appears; activate to move focus into main. " +
+      "Open cart drawer: labelled dialog. Add item: polite live region announces basket update.",
     locations: [
       "src/components/SkipToMain.tsx",
       "src/pages/ProductDetailPage.tsx",
@@ -84,7 +91,6 @@ const rows = [
     locations: ["tsconfig.app.json"],
   },
 ] as const satisfies readonly ReferenceRow[];
-
 function PathCell({ paths }: { paths: readonly string[] }): JSX.Element {
   return (
     <ul className="m-0 list-none space-y-1 p-0">
@@ -109,7 +115,7 @@ export function TestingReferencePage(): JSX.Element {
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4"
+        className="main-focus-ring"
       >
         <PageContainer className="pb-24 pt-8 sm:pt-10 lg:pb-36">
           <div className="mx-auto  space-y-6">
@@ -141,9 +147,14 @@ export function TestingReferencePage(): JSX.Element {
               </p>
             </header>
 
-            <div className="mx-auto w-[80vw] max-w-full overflow-x-auto rounded-md border border-neutral-200 shadow-sm">
-              <table className="w-full min-w-[720px] table-fixed border-collapse text-left text-[13px]">
-                <caption className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-left text-[13px] font-semibold text-neutral-900">
+            <div className={tableShellClass}>
+              <table className={tableBaseClass}>
+                <caption
+                  className={
+                    "border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-left " +
+                    "text-[13px] font-semibold text-neutral-900"
+                  }
+                >
                   Applied quality layers — how to rerun or spot-check them
                 </caption>
                 <colgroup>

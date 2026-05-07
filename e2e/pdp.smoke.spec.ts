@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 
+import { TASK_PRODUCT_SLUG } from '../src/api/product'
 import { clearClientStorage } from './helpers/clear-site-data'
 import { mockEasyOrdersProductPayload } from './helpers/mock-easyorders'
 
@@ -10,7 +11,7 @@ test.describe('PDP chrome', () => {
   })
 
   test('loads hero, validates add-to-cart, opens basket drawer', async ({ page }) => {
-    await page.goto('/')
+    await page.goto(`/${TASK_PRODUCT_SLUG}`)
 
     await expect(page.getByRole('heading', { level: 1, name: /Hybrid Trainer/i })).toBeVisible()
     await expect(page.getByRole('main')).toBeVisible()
@@ -26,7 +27,7 @@ test.describe('PDP chrome', () => {
   })
 
   test('keyboard: skip link is the first focus stop', async ({ page }) => {
-    await page.goto('/')
+    await page.goto(`/${TASK_PRODUCT_SLUG}`)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: /skip to main content/i })).toBeFocused()

@@ -1,123 +1,93 @@
-import { X } from "lucide-react";
 import { Fragment, type JSX } from "react";
-import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
 
 import { useLocale } from "../i18n/useLocale";
 import { formatMoney } from "../lib/money";
 import { useCartStore } from "../stores/cartStore";
+import { selectCartTotal } from "../stores/selectors";
+import { useShallow } from "zustand/react/shallow";
+import { DrawerShell } from "./primitives/DrawerShell";
+import { Button } from "./ui/Button";
 
 export function CartDrawer(): JSX.Element {
   const { t } = useLocale();
-  const open = useCartStore((state) => state.drawerOpen);
-  const close = useCartStore((state) => state.closeDrawer);
-  const lines = useCartStore((state) => state.lines);
-  const changeQuantity = useCartStore((state) => state.setQuantity);
-  const remove = useCartStore((state) => state.removeLine);
-
-  const grandTotal = lines.reduce(
-    (total, line) => total + line.unitPrice * line.quantity,
-    0,
+  const { open, close, lines, changeQuantity, remove } = useCartStore(
+    useShallow((state) => ({
+      open: state.drawerOpen,
+      close: state.closeDrawer,
+      lines: state.lines,
+      changeQuantity: state.setQuantity,
+      remove: state.removeLine,
+    })),
   );
 
+  const grandTotal = useCartStore(selectCartTotal);
+
   return (
-    <Dialog open={open} onClose={() => close()} className="relative z-[70]">
-      <DialogBackdrop transition className="fixed inset-0 bg-black/40" />
-      <div className="fixed inset-0 z-[80] flex justify-end rtl:justify-start">
-        <DialogPanel
-          transition
-          className="flex h-full w-full max-w-xl flex-col gap-6 border-s border-neutral-900 bg-white px-6 py-8 shadow-2xl data-[closed]:ltr:translate-x-6 data-[closed]:rtl:-translate-x-6 data-[closed]:opacity-0"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="font-serif text-[28px] font-medium">
-              {t("cart.title")}
-            </DialogTitle>
-            <button
-              type="button"
-              aria-label={t("cart.close")}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-black text-black transition hover:bg-neutral-100"
-              onClick={close}
-            >
-              <X className="h-5 w-5" strokeWidth={1.65} aria-hidden />
-            </button>
+    <DrawerShell
+      open={open}
+      onClose={close}
+      title={t("cart.title")}
+      closeLabel={t("cart.close")}
+    >
+      {lines.length === 0 ? (
+        <p className="text-[15px] text-neutral-600">{t("cart.empty")}</p>
+      ) : (
+        <>
+          <div className="flex-1 overflow-y-auto pe-1">
+            <ul className="space-y-5">
+              {lines.map((line) => (
+                <li
+                  key={line.id}
+                  className="flex gap-5 border-b border-neutral-900/10 pb-6"
+                >
+                  <img
+                    src={line.image}
+                    alt=""
+                    className="h-24 w-24 border border-neutral-900/10 bg-jl-gray object-cover"
+                  />
+
+                  <div className="flex flex-1 flex-col gap-4 text-[13px] font-semibold uppercase tracking-[0.35em]">
+                    <div>
+                      <p className="normal-case text-neutral-600">{t("brand.anyday")}</p>
+                      <p className="normal-case text-[15px]">{line.name}</p>
+                    </div>
+                    <VariationChips selections={line.selections} />
+                    <div className="flex items-center justify-between text-[12px] uppercase">
+                      <QuantityControl
+                        value={line.quantity}
+                        onIncrease={() => changeQuantity(line.id, line.quantity + 1)}
+                        onDecrease={() => changeQuantity(line.id, line.quantity - 1)}
+                      />
+                      <div className="text-end text-[16px] tracking-tight normal-case">
+                        {formatMoney(line.unitPrice * line.quantity)}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => remove(line.id)}
+                      className="self-start text-[12px] underline underline-offset-[6px]"
+                    >
+                      {t("cart.remove")}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {lines.length === 0 ? (
-            <p className="text-[15px] text-neutral-600">{t("cart.empty")}</p>
-          ) : (
-            <>
-              <div className="flex-1 overflow-y-auto pe-1">
-                <ul className="space-y-5">
-                  {lines.map((line) => (
-                    <li
-                      key={line.id}
-                      className="flex gap-5 border-b border-neutral-900/10 pb-6"
-                    >
-                      <img
-                        src={line.image}
-                        alt=""
-                        className="h-24 w-24 border border-neutral-900/10 bg-jl-gray object-cover"
-                      />
-
-                      <div className="flex flex-1 flex-col gap-4 text-[13px] font-semibold uppercase tracking-[0.35em]">
-                        <div>
-                          <p className="normal-case text-neutral-600">
-                            John Lewis ANYDAY
-                          </p>
-                          <p className="normal-case text-[15px]">{line.name}</p>
-                        </div>
-                        <VariationChips selections={line.selections} />
-                        <div className="flex items-center justify-between text-[12px] uppercase">
-                          <QuantityControl
-                            value={line.quantity}
-                            onIncrease={() =>
-                              changeQuantity(line.id, line.quantity + 1)
-                            }
-                            onDecrease={() =>
-                              changeQuantity(line.id, line.quantity - 1)
-                            }
-                          />
-                          <div className="text-end text-[16px] tracking-tight normal-case">
-                            {formatMoney(line.unitPrice * line.quantity)}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => remove(line.id)}
-                          className="self-start text-[12px] underline underline-offset-[6px]"
-                        >
-                          {t("cart.remove")}
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-6 border-t border-neutral-900 pt-6 text-[15px]">
-                <div className="flex items-center justify-between text-[18px] font-semibold">
-                  <span>{t("cart.subtotal")}</span>
-                  <span>{formatMoney(grandTotal)}</span>
-                </div>
-                <p className="text-[13px] text-neutral-600">
-                  {t("cart.checkoutNote")}
-                </p>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center bg-black py-4 text-[12px] font-semibold uppercase tracking-[0.42em] text-white"
-                >
-                  {t("cart.checkoutButton")}
-                </button>
-              </div>
-            </>
-          )}
-        </DialogPanel>
-      </div>
-    </Dialog>
+          <div className="space-y-6 border-t border-neutral-900 pt-6 text-[15px]">
+            <div className="flex items-center justify-between text-[18px] font-semibold">
+              <span>{t("cart.subtotal")}</span>
+              <span>{formatMoney(grandTotal)}</span>
+            </div>
+            <p className="text-[13px] text-neutral-600">{t("cart.checkoutNote")}</p>
+            <Button type="button" className="w-full justify-center rounded-none py-4">
+              {t("cart.checkoutButton")}
+            </Button>
+          </div>
+        </>
+      )}
+    </DrawerShell>
   );
 }
 

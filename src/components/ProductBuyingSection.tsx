@@ -1,8 +1,6 @@
+import DOMPurify from "dompurify";
 import { Star } from "lucide-react";
-import {
-  useState,
-  type JSX,
-} from "react";
+import { useMemo, useState, type JSX } from "react";
 
 import type { Product, Variation } from "../types/product";
 import { formatMoney } from "../lib/money";
@@ -14,8 +12,18 @@ import { STORE_STAR_HEX } from "./Stars";
 import { cn } from "../lib/cn";
 import { useLocale } from "../i18n/useLocale";
 import type { Locale } from "../i18n/messages";
-import { useProductStore } from "../stores/productStore";
-import { useCartStore } from "../stores/cartStore";
+import { Button } from "./ui/Button";
+import { useProductPurchaseController } from "../hooks/useProductPurchaseController";
+import {
+  deliveryButtonClass,
+  descriptionVariants,
+  pdpPopoverPanelClass,
+  seeMoreButtonClass,
+  sizeGuideButtonClass,
+  sizeOptionButtonVariants,
+  swatchCellClass,
+  tooltipRevealTailVariants,
+} from "./variants/productBuying.variants";
 /** Figma PDP header defaults when API omits social-proof fields */
 const HEADER_DEFAULTS = { sold_count: 1238, rating_avg: 4.5 } as const;
 
@@ -60,67 +68,31 @@ function VariationHeading({ label, value }: { label: string; value: string }) {
 
 type BuyingProps = {
   product: Product;
+  selectedVariations: Record<string, string>;
+  onSelectVariation: (variationType: string, value: string) => void;
 };
 
-export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
+export function ProductBuyingSection({
+  product,
+  selectedVariations,
+  onSelectVariation,
+}: BuyingProps): JSX.Element {
   const { t, locale } = useLocale();
-  const selectedVariations = useProductStore(
-    (state) => state.selectedVariations,
+  const {
+    selectedVariant,
+    catalogue,
+    payable,
+    validationMessage,
+    clearValidationAndSetVariation,
+    handleAddToCart,
+    openDrawer,
+  } = useProductPurchaseController(
+    product,
+    t,
+    selectedVariations,
+    onSelectVariation,
   );
-  const selectedVariant = useProductStore((state) => state.selectedVariant);
-  const combosAvailable = useProductStore((state) =>
-    state.isVariantAvailable(),
-  );
-
-  const setVariation = useProductStore((state) => state.setSelectedVariation);
-  const addLine = useCartStore((state) => state.addItem);
-  const openDrawer = useCartStore((state) => state.openDrawer);
-
-  const catalogue = useProductStore((state) => state.getCurrentPrice());
-  const payable = useProductStore((state) => state.getCurrentSalePrice());
   const showDiscount = payable < catalogue;
-
-  const [validationMessage, setValidationMessage] = useState<string | null>(
-    null,
-  );
-
-  const heroImageSelection = (): string => {
-    const colorKey = variationKeyNormalize("color");
-    const colorVar = product.variations.find(
-      (v) => variationKeyNormalize(v.name) === colorKey,
-    );
-    const selectedColour = selectedVariations[colorKey];
-    const match = colorVar?.props.find((prop) => prop.name === selectedColour);
-    if (match?.value) return match.value;
-    return product.thumb;
-  };
-
-  const handleAddToCart = () => {
-    if (!combosAvailable || !selectedVariant) {
-      setValidationMessage(t("pdp.validationIncomplete"));
-      return;
-    }
-
-    const stockIssues =
-      product.track_stock && (selectedVariant.quantity ?? 0) <= 0;
-    if (stockIssues) {
-      setValidationMessage(t("pdp.validationRestock"));
-      return;
-    }
-
-    setValidationMessage(null);
-
-    addLine({
-      productId: product.id,
-      slug: product.slug,
-      name: product.name,
-      image: heroImageSelection(),
-      selections: { ...selectedVariations },
-      variantId: selectedVariant.id,
-      unitPrice: payable,
-      quantity: 1,
-    });
-  };
 
   const soldCount = product.sold_count ?? HEADER_DEFAULTS.sold_count;
   const ratingAvg = product.rating_avg ?? HEADER_DEFAULTS.rating_avg;
@@ -142,7 +114,12 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
           >
             {product.categories.map((category) => (
               <li key={category.id}>
-                <span className="inline-flex rounded-full border border-[#BBBBBB] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]">
+                <span
+                  className={
+                    "inline-flex rounded-full border border-[#BBBBBB] bg-white px-3 py-1 " +
+                    "text-[11px] font-semibold uppercase tracking-[0.12em] text-[#505050]"
+                  }
+                >
                   {category.name}
                 </span>
               </li>
@@ -213,20 +190,18 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
                 variation={variation}
                 selections={selectedVariations}
                 product={product}
-                select={(value) => {
-                  setValidationMessage(null);
-                  setVariation(variation.name, value);
-                }}
+                select={(value) =>
+                  clearValidationAndSetVariation(variation.name, value)
+                }
               />
             ) : (
               <SizeButtons
                 variation={variation}
                 selections={selectedVariations}
                 product={product}
-                select={(value) => {
-                  setValidationMessage(null);
-                  setVariation(variation.name, value);
-                }}
+                select={(value) =>
+                  clearValidationAndSetVariation(variation.name, value)
+                }
               />
             )}
           </div>
@@ -239,28 +214,30 @@ export function ProductBuyingSection({ product }: BuyingProps): JSX.Element {
         </p>
       )}
 
-      <div className="flex gap-6 pt-4">
-        <button
+      <div className="flex flex-col gap-[18px] pt-4 sm:flex-row sm:gap-6">
+        <Button
           type="button"
           disabled={Boolean(
             product.track_stock && (selectedVariant?.quantity ?? 0) <= 0,
           )}
           onClick={handleAddToCart}
-          className="min-h-[58px] min-w-0 flex-[3] rounded-md bg-black px-5 text-[20px] font-semibold leading-tight text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full max-w-[80vw] sm:max-w-none sm:min-w-0 sm:flex-[3]"
         >
           {t("pdp.addToCart")}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={() => openDrawer()}
-          className="min-h-[58px] min-w-0 flex-[2] rounded-md border border-[#BBBBBB] bg-white px-5 text-[20px] font-medium leading-tight text-black transition hover:border-[#B0B0B0]"
+          intent="secondary"
+          weight="medium"
+          className="w-full max-w-[220px] sm:max-w-none sm:min-w-0 sm:flex-[2]"
         >
           {t("pdp.checkoutNow")}
-        </button>
+        </Button>
       </div>
 
-      <div className=" pt-2">
+      <div className="hidden pt-2 sm:block">
         <DeliveryTermsTooltip />
       </div>
     </div>
@@ -276,8 +253,6 @@ type SelectorProps = {
 
 /** Figma: ~48×48 thumb; selected = same inner image (+ 48) inside 60 frame = 5px white + 1px black per side */
 const SWATCH_GAP = "gap-[14px]";
-const swatchCell =
-  "flex h-[40px] min-h-[40px] w-[75px] min-w-[75px] shrink-0 items-center justify-center";
 
 function ColorSwatches({
   variation,
@@ -305,14 +280,15 @@ function ColorSwatches({
           : undefined;
 
         return (
-          <div key={prop.id} className={cn(swatchCell)}>
+          <div key={prop.id} className={cn(swatchCellClass)}>
             <button
               type="button"
               disabled={!available}
               onClick={() => select(prop.name)}
               aria-pressed={selectedValue}
               className={cn(
-                "relative shrink-0 overflow-hidden rounded-[10px] transition outline-none ring-0 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
+                "relative shrink-0 overflow-hidden rounded-[10px] transition outline-none ring-0",
+                "focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
                 selectedValue
                   ? "h-[40px] w-[75px] border border-black bg-white shadow-none"
                   : "h-[40px] w-[75px] border-0 shadow-none hover:opacity-95",
@@ -364,12 +340,10 @@ function SizeButtons({
             key={prop.id}
             onClick={() => select(prop.name)}
             className={cn(
-              "inline-flex h-[40px] min-h-[40px] w-[75px] min-w-[75px] shrink-0 items-center justify-center rounded-[8px] px-0 text-[20px] font-semibold tabular-nums tracking-tight transition outline-none",
-              "focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
-              selectedValue
-                ? "border-2 border-black bg-jl-gray text-black"
-                : "border border-[#BBBBBB] bg-white text-black hover:border-[#B0B0B0]",
-              !available && "cursor-not-allowed opacity-35",
+              sizeOptionButtonVariants({
+                selected: selectedValue,
+                available,
+              }),
             )}
             aria-pressed={selectedValue}
           >
@@ -381,23 +355,14 @@ function SizeButtons({
   );
 }
 
-const descriptionCopyClass =
-  "text-[16px] font-normal leading-[1.5ch] tracking-[0] text-[#8F8F8F] [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0" +
-  " [&_ul]:my-2 [&_ul]:list-none [&_ul]:space-y-2 [&_ul]:ps-0 [&_ul]:leading-[1.65]" +
-  " [&_li]:relative [&_li]:my-0 [&_li]:py-0 [&_li]:ps-[18px]" +
-  " [&_li]:before:pointer-events-none [&_li]:before:absolute [&_li]:before:start-0 [&_li]:before:top-[10px]" +
-  " [&_li]:before:h-[5px] [&_li]:before:w-[5px] [&_li]:before:rounded-full [&_li]:before:bg-[#CCCCCC]" +
-  " [&_ol]:my-2 [&_ol]:list-none [&_ol]:space-y-2 [&_ol]:ps-0 [&_ol]:leading-[1.65]" +
-  " [&_ol>li]:relative [&_ol>li]:ps-[18px]" +
-  " [&_ol>li]:before:pointer-events-none [&_ol>li]:before:absolute [&_ol>li]:before:start-0 [&_ol>li]:before:top-[10px]" +
-  " [&_ol>li]:before:h-[5px] [&_ol>li]:before:w-[5px] [&_ol>li]:before:rounded-full [&_ol>li]:before:bg-[#CCCCCC]" +
-  " [&_strong]:font-medium [&_strong]:text-[#444444]" +
-  " [&_a]:font-medium [&_a]:text-black";
-
 function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
   const { t } = useLocale();
   const [expanded, setExpanded] = useState(false);
-  if (!html) return <></>;
+  const sanitizedHtml = useMemo(
+    () => DOMPurify.sanitize(html, { USE_PROFILES: { html: true } }),
+    [html],
+  );
+  if (!sanitizedHtml.trim()) return <></>;
 
   return (
     <section className="mb-10">
@@ -405,15 +370,15 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
         {t("pdp.descriptionHeading")}
       </h2>
       <div className="relative mt-1">
-        <div
-          className={cn(descriptionCopyClass, !expanded && "line-clamp-4")}
-          dangerouslySetInnerHTML={{ __html: html }}
+        <article
+          className={descriptionVariants({ expanded })}
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />
         {!expanded ? (
           <button
             type="button"
             onClick={() => setExpanded(true)}
-            className="mt-1 inline-flex text-[16px] font-medium leading-[1.5ch] tracking-[0] text-black underline decoration-black underline-offset-2 hover:text-neutral-800"
+            className={cn("mt-1", seeMoreButtonClass)}
           >
             {t("pdp.seeMore")}
           </button>
@@ -421,7 +386,7 @@ function ExpandableRichDescription({ html }: { html: string }): JSX.Element {
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="mt-2 inline-flex text-[16px] font-medium leading-[1.5ch] tracking-[0] text-black underline decoration-black underline-offset-2 hover:text-neutral-800"
+            className={cn("mt-2", seeMoreButtonClass)}
           >
             {t("pdp.showLess")}
           </button>
@@ -490,13 +455,10 @@ const SIZE_GUIDE_ROWS: ReadonlyArray<{
   },
 ] as const;
 
-const pdpPopoverPanelClass =
-  "relative overflow-hidden rounded-md border border-neutral-200/95 bg-white px-4 py-3.5 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.2),0_8px_24px_-8px_rgba(0,0,0,0.1)]";
-
 /** Shared hover/reveal tooltip shell (delivery uses group, size guide uses group/sizeguide). */
 function pdpPopoverRevealClass(extra: string) {
   return cn(
-    "pointer-events-none invisible absolute top-full z-[60] mt-2.5 origin-top translate-y-1 scale-[0.98]",
+    "pointer-events-none invisible absolute bottom-full z-[220] mb-2.5 origin-bottom translate-y-1 scale-[0.98]",
     "opacity-0 transition-all duration-200 ease-out",
     extra,
   );
@@ -504,19 +466,12 @@ function pdpPopoverRevealClass(extra: string) {
 
 function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
   const { t } = useLocale();
-  const revealTail =
-    "group-hover/sizeguide:pointer-events-auto group-hover/sizeguide:visible group-hover/sizeguide:translate-y-0 group-hover/sizeguide:scale-100 group-hover/sizeguide:opacity-100 group-focus-within/sizeguide:pointer-events-auto group-focus-within/sizeguide:visible group-focus-within/sizeguide:translate-y-0 group-focus-within/sizeguide:scale-100 group-focus-within/sizeguide:opacity-100";
 
   return (
-    <div className={cn("group/sizeguide relative isolate", className)}>
+    <div className={cn("group/sizeguide relative z-[200] isolate", className)}>
       <button
         type="button"
-        className={cn(
-          "bg-transparent px-0 py-0 text-end font-sans text-[16px] font-normal tracking-normal text-black",
-          "underline decoration-black decoration-1 underline-offset-[2px]",
-          "transition hover:text-neutral-700 hover:decoration-neutral-700",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
-        )}
+        className={sizeGuideButtonClass}
         aria-describedby="size-guide-tooltip-panel"
       >
         {t("pdp.sizeChart")}
@@ -527,7 +482,7 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
         role="tooltip"
         className={cn(
           pdpPopoverRevealClass("end-0 w-[min(calc(100vw-2rem),380px)]"),
-          revealTail,
+          tooltipRevealTailVariants({ scope: "sizeguide" }),
         )}
       >
         <div className={pdpPopoverPanelClass}>
@@ -587,19 +542,11 @@ function DeliveryTermsTooltip(): JSX.Element {
     t("pdp.deliveryBullets.point1"),
     t("pdp.deliveryBullets.point2"),
   ] as const;
-  const revealTail =
-    "group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100";
-
   return (
-    <div className="group relative isolate inline-flex">
+    <div className="group relative z-[200] isolate inline-flex">
       <button
         type="button"
-        className={cn(
-          "bg-transparent px-0 py-0 text-start font-sans text-[16px] font-medium leading-snug tracking-normal text-[#7A7A7A]",
-          "underline decoration-[#7A7A7A] decoration-1 underline-offset-[3px]",
-          "transition hover:text-[#555555] hover:decoration-[#555555]",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
-        )}
+        className={deliveryButtonClass}
         aria-describedby="delivery-tooltip-panel"
       >
         {t("pdp.deliveryTc")}
@@ -610,7 +557,7 @@ function DeliveryTermsTooltip(): JSX.Element {
         role="tooltip"
         className={cn(
           pdpPopoverRevealClass("start-0 w-[min(calc(100vw-2rem),288px)]"),
-          revealTail,
+          tooltipRevealTailVariants({ scope: "default" }),
         )}
       >
         <div className={pdpPopoverPanelClass}>

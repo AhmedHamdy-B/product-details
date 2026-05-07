@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type JSX, type ReactNode } from "react";
 
 import { useLocale } from "../i18n/useLocale";
+import { Button } from "./ui/Button";
 
 type Props = {
   children: ReactNode;
@@ -36,20 +37,19 @@ function ErrorFallbackUI({
           {message ?? t("fatal.genericMessage")}
         </p>
         <div className="flex flex-wrap gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-full bg-black px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-          >
+          <Button type="button" onClick={onRetry} size="sm" rounded="full">
             {t("fatal.tryAgain")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={onReload}
-            className="rounded-full border border-neutral-900/30 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-neutral-900 transition hover:border-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+            intent="secondary"
+            size="sm"
+            rounded="full"
+            className="border-neutral-900/30 tracking-[0.2em] text-neutral-900 hover:border-neutral-900"
           >
             {t("fatal.reload")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

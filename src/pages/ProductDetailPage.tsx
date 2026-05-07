@@ -1,77 +1,73 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, type JSX } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState, type JSX } from "react";
+import { useParams } from "react-router-dom";
 
-import { TASK_PRODUCT_SLUG, fetchProductBySlug } from "../api/product";
+import { TASK_PRODUCT_SLUG } from "../api/product";
+import { productDetailQuery } from "../api/product.queries";
 import { CartDrawer } from "../components/CartDrawer";
 import { ProductBuyingSection } from "../components/ProductBuyingSection";
 import { ProductGallery } from "../components/ProductGallery";
-import { ProductRails } from "../components/ProductRails";
 import { Reveal } from "../components/Reveal";
-import { ReviewsSection } from "../components/ReviewsSection";
 import { PageContainer } from "../components/PageContainer";
-import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
 import { ToastBanner } from "../components/ToastBanner";
-import { popularShowcase, relatedShowcase } from "../data/mocks";
-import { buildGallery } from "../lib/variants";
 import type { Product } from "../types/product";
 import { FavoritesDrawer } from "../components/FavoritesDrawer";
-import { useProductStore } from "../stores/productStore";
+import {
+  buildProductGallery,
+  getInitialSelectionsForProduct,
+} from "../stores/productStore";
+import { variationKey } from "../lib/variants";
 import { useFavoritesStore } from "../stores/favoritesStore";
+import { selectIsFavoriteByProductId } from "../stores/selectors";
 import { useLocale } from "../i18n/useLocale";
 import type { MessageKey } from "../i18n/messages";
+import { Button } from "../components/ui/Button";
+import {
+  pdpBuyingColClass,
+  pdpGalleryColClass,
+  pdpLayoutRowClass,
+} from "./variants/productDetailPage.variants";
+
+const ProductDetailBelowFold = lazy(async () => {
+  const mod = await import("../components/ProductDetailBelowFold");
+  return { default: mod.ProductDetailBelowFold };
+});
+
+const SiteFooter = lazy(async () => {
+  const mod = await import("../components/SiteFooter");
+  return { default: mod.SiteFooter };
+});
 
 export function ProductDetailPage(): JSX.Element {
   const { t } = useLocale();
-  const product = useProductStore((state) => state.product);
-  const loading = useProductStore((state) => state.loading);
-  const errorMessage = useProductStore((state) => state.error);
-  const selections = useProductStore((state) => state.selectedVariations);
-  const ingestProduct = useProductStore((state) => state.ingestProduct);
-  const ingestError = useProductStore((state) => state.ingestError);
-  const setLoadingFlag = useProductStore((state) => state.setLoadingFlag);
+  const { slug: rawSlug } = useParams<{ slug: string }>();
+  const slug = rawSlug ?? TASK_PRODUCT_SLUG;
+  const [selectedVariations, setSelectedVariations] = useState<
+    Record<string, string>
+  >({});
 
-  const slug = TASK_PRODUCT_SLUG;
-  const productQuery = useQuery({
-    queryKey: ["easyorders-product", slug],
-    queryFn: () => fetchProductBySlug(slug),
-    staleTime: 60_000,
-  });
-
-  /** Keep Zustand in sync with React Query without a flash of “error” while data awaits ingest. */
+  const productQuery = useQuery(productDetailQuery(slug));
   useEffect(() => {
-    if (productQuery.data) {
-      ingestProduct(productQuery.data);
-      return;
-    }
-    if (productQuery.isError) {
-      const msg =
-        productQuery.error instanceof Error
-          ? productQuery.error.message
-          : "Something went wrong while loading product";
-      ingestError(msg);
-      return;
-    }
-    if (productQuery.isPending) {
-      setLoadingFlag(true);
-    }
-  }, [
-    productQuery.data,
-    productQuery.isError,
-    productQuery.isPending,
-    productQuery.error,
-    ingestProduct,
-    ingestError,
-    setLoadingFlag,
-  ]);
+    if (!productQuery.data) return;
+    setSelectedVariations(getInitialSelectionsForProduct(productQuery.data));
+  }, [productQuery.data?.id]);
+
+  const product = productQuery.data ?? null;
+  const loading = productQuery.isPending;
+  const errorMessage = productQuery.isError
+    ? productQuery.error instanceof Error
+      ? productQuery.error.message
+      : t("error.productNotFound")
+    : null;
 
   const gallery = useMemo(() => {
     if (!product) return [];
-    return buildGallery(product, selections);
-  }, [product, selections]);
+    return buildProductGallery(product, selectedVariations);
+  }, [product, selectedVariations]);
 
-  const wishlistedGallery = useFavoritesStore((s) =>
-    product?.id ? s.isFavorite(product.id) : false,
+  const wishlistedGallery = useFavoritesStore(
+    product?.id ? selectIsFavoriteByProductId(product.id) : () => false,
   );
   const toggleFavoriteProduct = useFavoritesStore((s) => s.toggleProduct);
 
@@ -99,8 +95,8 @@ export function ProductDetailPage(): JSX.Element {
       <>
         <Reveal delayMs={50}>
           <section className="border-y border-transparent bg-white">
-            <div className="flex flex-col gap-12 pb-16 md:gap-14 xl:flex-row xl:items-start xl:gap-16 min-[1300px]:max-[1620px]:gap-[135px] 2xl:gap-[135px]">
-              <div className="w-full min-[1300px]:max-[1620px]:w-[545px] min-[1300px]:max-[1620px]:max-w-[545px] min-[1300px]:max-[1620px]:shrink-0 2xl:w-[545px] 2xl:max-w-[545px] 2xl:shrink-0 min-[1601px]:w-[620px] min-[1601px]:max-w-[620px]">
+            <div className={pdpLayoutRowClass}>
+              <div className={pdpGalleryColClass}>
                 <ProductGallery
                   images={gallery}
                   productTitle={product.name}
@@ -115,36 +111,29 @@ export function ProductDetailPage(): JSX.Element {
                   }
                 />
               </div>
-              <div className="w-full space-y-[26px] xl:flex-1 min-[1300px]:max-[1620px]:w-[520px] min-[1300px]:max-[1620px]:max-w-[520px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[520px] 2xl:max-w-[520px] 2xl:flex-none 2xl:shrink-0">
-                <ProductBuyingSection product={product} />
+              <div className={pdpBuyingColClass}>
+                <ProductBuyingSection
+                  product={product}
+                  selectedVariations={selectedVariations}
+                  onSelectVariation={(variationType, value) => {
+                    setSelectedVariations((current) => ({
+                      ...current,
+                      [variationKey(variationType)]: value,
+                    }));
+                  }}
+                />
               </div>
             </div>
           </section>
         </Reveal>
 
         <div className="bg-white">
-          <Reveal>
-            <ProductRails
-              variant="related"
-              headline={t("rails.relatedProduct")}
-              items={relatedShowcase}
-              anchorId="related"
+          <Suspense fallback={null}>
+            <ProductDetailBelowFold
+              relatedHeadline={t("rails.relatedProduct")}
+              popularHeadline={t("rails.popularThisWeek")}
             />
-          </Reveal>
-
-          <Reveal>
-            <ReviewsSection />
-          </Reveal>
-
-          <Reveal>
-            <ProductRails
-              variant="related"
-              popularWeek
-              headline={t("rails.popularThisWeek")}
-              items={popularShowcase}
-              anchorId="popular-week"
-            />
-          </Reveal>
+          </Suspense>
         </div>
       </>
     );
@@ -159,14 +148,16 @@ export function ProductDetailPage(): JSX.Element {
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-4"
+        className="main-focus-ring"
       >
         <PageContainer className="pb-24">{bodyContent}</PageContainer>
       </main>
 
-      <Reveal>
-        <SiteFooter />
-      </Reveal>
+      <Suspense fallback={null}>
+        <Reveal>
+          <SiteFooter />
+        </Reveal>
+      </Suspense>
 
       <CartDrawer />
       <FavoritesDrawer />
@@ -226,13 +217,9 @@ function ErrorPanels({
         <p className="text-[15px] leading-relaxed text-neutral-600">
           {t("error.feedUnreachableBody")}
         </p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="inline-flex rounded-full border border-transparent bg-black px-16 py-4 text-[12px] font-semibold uppercase tracking-[0.43em] text-white"
-        >
+        <Button type="button" onClick={onRetry} size="sm" rounded="full">
           {t("error.retryButton")}
-        </button>
+        </Button>
       </div>
     </div>
   );

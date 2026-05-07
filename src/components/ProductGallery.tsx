@@ -12,12 +12,20 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 
 import { useLocale } from "../i18n/useLocale";
 import { cn } from "../lib/cn";
-
-const galleryIcon = "h-5 w-5";
+import { getResponsiveImageAttrs } from "../lib/image";
+import {
+  galleryIcon,
+  heroZoomDesktopButtonClass,
+  galleryMainRowClass,
+  galleryMediaColumnClass,
+  galleryThumbRowClass,
+  heroFrameClass,
+  railBtn,
+  thumbOverlayBaseClass,
+  thumbButtonClass,
+  zoomPanelClass,
+} from "./variants/productGallery.variants";
 const galleryStroke = 1.5;
-
-const railBtn =
-  "inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[8px]  bg-[#F2F2F2] text-black transition active:scale-[0.97] hover:bg-[#ebebeb]";
 
 type Props = {
   images: string[];
@@ -79,6 +87,10 @@ function GalleryInterior({
   const [zoomOpen, setZoomOpen] = useState(false);
   const [hoverPulse, setHoverPulse] = useState(false);
   const current = urls[Math.min(selectedIndex, urls.length - 1)];
+  const heroImageAttrs = getResponsiveImageAttrs(current, {
+    widths: [540, 720, 960, 1280],
+    sizes: "(max-width: 1279px) 100vw, 620px",
+  });
 
   const goto = (direction: -1 | 1) => {
     const nextIndex = selectedIndex + direction;
@@ -107,10 +119,10 @@ function GalleryInterior({
         Thumbnails sit below in a second row, width-matched to the image (spacer under the rail).
         Fullscreen: phone = top-right on image; md+ = centered on hover/focus.
       */}
-      <div className="flex items-stretch gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4 min-[1300px]:max-[1620px]:gap-[31px] 2xl:gap-[31px]">
-        <div className="min-w-0 flex-1 min-[1300px]:max-[1620px]:w-[458px] min-[1300px]:max-[1620px]:max-w-[458px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[458px] 2xl:max-w-[458px] 2xl:flex-none 2xl:shrink-0">
+      <div className={galleryMainRowClass}>
+        <div className={galleryMediaColumnClass}>
           <div
-            className="group relative isolate aspect-[3/5] w-full overflow-hidden rounded-xl bg-jl-gray min-[1300px]:max-[1620px]:aspect-auto min-[1300px]:max-[1620px]:h-[610px] min-[1300px]:max-[1620px]:max-w-[458px] 2xl:aspect-auto 2xl:h-[610px] 2xl:max-w-[458px]"
+            className={heroFrameClass}
             onMouseEnter={() => setHoverPulse(true)}
             onMouseLeave={() => setHoverPulse(false)}
           >
@@ -122,9 +134,12 @@ function GalleryInterior({
             >
               <img
                 key={current}
-                src={current}
+                src={heroImageAttrs.src}
+                srcSet={heroImageAttrs.srcSet}
+                sizes={heroImageAttrs.sizes}
                 alt={title}
                 loading={selectedIndex === 0 ? "eager" : "lazy"}
+                fetchPriority={selectedIndex === 0 ? "high" : "auto"}
                 decoding="async"
                 className="h-full w-full select-none object-contain"
               />
@@ -133,26 +148,7 @@ function GalleryInterior({
             <button
               type="button"
               onClick={() => setZoomOpen(true)}
-              className={cn(railBtn, "absolute end-3 top-3 z-20 md:hidden")}
-              aria-label={t("gallery.enlarge")}
-            >
-              <Maximize2
-                className={galleryIcon}
-                strokeWidth={galleryStroke}
-                aria-hidden
-              />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setZoomOpen(true)}
-              className={cn(
-                railBtn,
-                "pointer-events-none absolute left-1/2 top-1/2 z-20 hidden -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-200 md:flex",
-                "group-hover:pointer-events-auto group-hover:opacity-100",
-                "group-focus-within:pointer-events-auto group-focus-within:opacity-100",
-                "focus-visible:pointer-events-auto focus-visible:opacity-100",
-              )}
+              className={cn(railBtn, heroZoomDesktopButtonClass)}
               aria-label={t("gallery.enlarge")}
             >
               <Maximize2
@@ -216,8 +212,8 @@ function GalleryInterior({
       </div>
 
       {urls.length > 1 ? (
-        <div className="flex gap-2.5 sm:gap-3 md:gap-3.5 lg:gap-4 min-[1300px]:max-[1620px]:gap-[31px] 2xl:gap-[31px]">
-          <div className="min-w-0 flex-1 min-[1300px]:max-[1620px]:w-[458px] min-[1300px]:max-[1620px]:max-w-[458px] min-[1300px]:max-[1620px]:flex-none min-[1300px]:max-[1620px]:shrink-0 2xl:w-[458px] 2xl:max-w-[458px] 2xl:flex-none 2xl:shrink-0">
+        <div className={galleryThumbRowClass}>
+          <div className={galleryMediaColumnClass}>
             <ThumbnailStrip
               urls={urls}
               selectedIndex={selectedIndex}
@@ -237,7 +233,7 @@ function GalleryInterior({
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-6">
           <DialogPanel
             transition
-            className="relative w-full max-w-4xl overflow-hidden bg-white px-4 py-12 shadow-2xl outline-none data-[closed]:opacity-0 lg:rounded-sm"
+            className={zoomPanelClass}
           >
             <button
               type="button"
@@ -248,7 +244,9 @@ function GalleryInterior({
               <X className="h-7 w-7" strokeWidth={1.75} aria-hidden />
             </button>
             <img
-              src={current}
+              src={heroImageAttrs.src}
+              srcSet={heroImageAttrs.srcSet}
+              sizes={heroImageAttrs.sizes}
               alt={`${title}${t("gallery.enlargedAltSuffix")}`}
               decoding="async"
               className="mx-auto max-h-[70vh] w-auto object-contain"
@@ -308,16 +306,22 @@ function ThumbnailStrip({
       <div className="flex gap-2 md:gap-2.5">
         {urls.map((thumb, idx) => {
           const selected = idx === selectedIndex;
+          const thumbAttrs = getResponsiveImageAttrs(thumb, {
+            widths: [120, 180, 240],
+            sizes: "76px",
+          });
           return (
             <button
               type="button"
               key={`${thumb}-${idx}`}
               onClick={() => onSelect(idx)}
-              className="group relative h-[84px] w-[66px] shrink-0 overflow-hidden rounded-md bg-jl-gray sm:h-[104px] sm:w-[76px]"
+              className={thumbButtonClass}
               aria-current={selected}
             >
               <img
-                src={thumb}
+                src={thumbAttrs.src}
+                srcSet={thumbAttrs.srcSet}
+                sizes={thumbAttrs.sizes}
                 alt=""
                 decoding="async"
                 loading="lazy"
@@ -325,7 +329,7 @@ function ThumbnailStrip({
               />
               <span
                 className={clsx(
-                  "pointer-events-none absolute inset-[2px] rounded-md border border-transparent transition-colors group-hover:border-black/55",
+                  thumbOverlayBaseClass,
                   selected &&
                     "border border-black shadow-[inset_0_0_0_1px_rgba(255,255,255,1)]",
                 )}

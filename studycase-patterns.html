@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Architecture Study Case</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b1020;
+        --panel: #111833;
+        --text: #e7ecff;
+        --muted: #9fb0e8;
+        --accent: #7aa2ff;
+        --border: #2a3568;
+        --code: #0a0f24;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+        background: linear-gradient(180deg, #080c1a, var(--bg));
+        color: var(--text);
+        line-height: 1.5;
+      }
+      main {
+        width: min(980px, 92vw);
+        margin: 40px auto;
+      }
+      h1 {
+        margin-bottom: 8px;
+      }
+      .lead {
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+      details {
+        background: color-mix(in oklab, var(--panel) 85%, black);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .meta {
+        margin: 8px 0 12px;
+        color: var(--muted);
+      }
+      a {
+        color: #98b8ff;
+      }
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        background: var(--code);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      @media (min-width: 860px) {
+        .split {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+        background: color-mix(in oklab, var(--panel) 92%, black);
+      }
+      .bad {
+        color: #ff9ca2;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      .good {
+        color: #9ff7c2;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+      .small {
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Modern Patterns Study Case</h1>
+      <p class="lead">
+        This page summarizes the architecture patterns applied in your project refactor,
+        with a practical snippet from your codebase for each one.
+      </p>
+
+      <details open>
+        <summary>Pattern: Query Key Factory (TanStack Query)</summary>
+        <p class="meta">
+          <strong>Pattern Name:</strong> Query Key Factory<br />
+          <strong>Docs:</strong>
+          <a href="https://tanstack.com/query/latest/docs/framework/react/guides/query-keys" target="_blank" rel="noreferrer">
+            TanStack Query Keys
+          </a>
+        </p>
+        <p>
+          Instead of using inline arrays across files, query keys are centralized in one
+          factory. This makes invalidation and cache consistency predictable.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Wrong (No Key Factory)</p>
+            <pre><code>// scattered across app
+useQuery({
+  queryKey: ['easyorders-product', slug],
+  queryFn: () => fetchProductBySlug(slug),
+})
+
+// somewhere else typo/inconsistency
+queryClient.invalidateQueries({
+  queryKey: ['easy-order-product', slug], // typo bug
+})</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">Right (Key Factory Applied)</p>
+            <pre><code>// src/api/product.keys.ts
+export const productKeys = {
+  all: ['product'] as const,
+  detail: (slug: string) => [...productKeys.all, 'detail', slug] as const,
+}
+
+// src/pages/ProductDetailPage.tsx
+const productQuery = useQuery(productDetailQuery(slug));
+
+// anywhere else
+queryClient.invalidateQueries({
+  queryKey: productKeys.detail(slug),
+})</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Pattern: Atomic Selector + Shallow Selection (Zustand)</summary>
+        <p class="meta">
+          <strong>Pattern Name:</strong> Atomic Selector Pattern<br />
+          <strong>Docs:</strong>
+          <a href="https://docs.pmnd.rs/zustand/guides/prevent-rerenders-with-use-shallow" target="_blank" rel="noreferrer">
+            Zustand useShallow guide
+          </a>
+        </p>
+        <p>
+          Components subscribe only to the exact state they need. Grouping with
+          <code>useShallow</code> prevents unnecessary rerenders when other store fields change.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Wrong (Broad / Multiple Subscriptions)</p>
+            <pre><code>// broad subscribe can rerender too often
+const store = useCartStore();
+const count = store.getUniqueCount();
+
+// or many independent subscriptions in one component
+const lines = useCartStore((s) => s.lines);
+const openDrawer = useCartStore((s) => s.openDrawer);</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">Right (Atomic + useShallow)</p>
+            <pre><code>// src/components/SiteHeader.tsx
+const { basketCount, openBasket } = useCartStore(
+  useShallow((state) => ({
+    basketCount: state.lines.reduce((sum, line) => sum + line.quantity, 0),
+    openBasket: state.openDrawer,
+  })),
+);</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Pattern: Route-Level Code Splitting (React Router lazy)</summary>
+        <p class="meta">
+          <strong>Pattern Name:</strong> Code-Splitting with Lazy Routes<br />
+          <strong>Docs:</strong>
+          <a href="https://reactrouter.com/en/main/route/lazy" target="_blank" rel="noreferrer">
+            React Router lazy routes
+          </a>
+        </p>
+        <p>
+          Pages are loaded on demand via route <code>lazy</code>, reducing initial bundle
+          size and improving startup performance.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Wrong (Eager Imports)</p>
+            <pre><code>// App.tsx
+import { ProductDetailPage } from './pages/ProductDetailPage'
+import { TestingReferencePage } from './pages/TestingReferencePage'
+
+&lt;Routes&gt;
+  &lt;Route path="/" element={&lt;ProductDetailPage /&gt;} /&gt;
+  &lt;Route path="/testing" element={&lt;TestingReferencePage /&gt;} /&gt;
+&lt;/Routes&gt;</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">Right (Lazy Routes)</p>
+            <pre><code>// src/router.tsx
+{
+  path: 'testing',
+  lazy: async () => {
+    const { TestingReferencePage } = await import('./pages/TestingReferencePage')
+    return { Component: TestingReferencePage }
+  },
+}</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Pattern: CVA Variant Schema (Design System Styling)</summary>
+        <p class="meta">
+          <strong>Pattern Name:</strong> Class Variance Authority (CVA)<br />
+          <strong>Docs:</strong>
+          <a href="https://cva.style/docs" target="_blank" rel="noreferrer">
+            CVA Documentation
+          </a>
+        </p>
+        <p>
+          Styling decisions (intent, size, shape, weight) are encoded in a typed variant
+          schema instead of spread nested class conditions inside JSX.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Wrong (Repeated Inline Class Strings)</p>
+            <pre><code>// repeated in many files
+&lt;button className="min-h-[58px] rounded-md bg-black text-white ..." /&gt;
+&lt;button className="min-h-[58px] rounded-md border bg-white text-black ..." /&gt;
+&lt;button className="px-16 py-4 rounded-full bg-black text-white ..." /&gt;</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">Right (CVA Variants)</p>
+            <pre><code>// src/components/ui/Button.tsx
+const buttonVariants = cva('inline-flex items-center justify-center', {
+  variants: {
+    intent: { primary: 'bg-black text-white', secondary: 'border bg-white text-black' },
+    size: { md: 'min-h-[58px] px-5', sm: 'px-16 py-4' },
+  },
+  defaultVariants: { intent: 'primary', size: 'md' },
+})
+
+// usage
+&lt;Button intent="secondary" weight="medium"&gt;Checkout Now&lt;/Button&gt;</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Pattern: Type-Safe i18n Resource Augmentation</summary>
+        <p class="meta">
+          <strong>Pattern Name:</strong> i18next Resource Augmentation<br />
+          <strong>Docs:</strong>
+          <a href="https://www.i18next.com/overview/typescript" target="_blank" rel="noreferrer">
+            i18next TypeScript support
+          </a>
+        </p>
+        <p>
+          i18next types are augmented with your resource shape so translation keys are
+          validated at compile-time.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Wrong (Raw String Keys Everywhere)</p>
+            <pre><code>// typo passes silently until runtime
+t('toats.addedTitle')
+t('header.saveditems')
+// missing key may render blank/fallback in production</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">Right (Augmented Resource Typing)</p>
+            <pre><code>// src/i18n/i18next.d.ts
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    defaultNS: 'translation'
+    resources: { translation: typeof messagesEn }
+  }
+}
+
+// now typed usage catches key mistakes during development</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Refinement: React Query Owns Server State</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Removed duplicated server state ownership between React Query and Zustand.<br />
+          <strong>Applied in:</strong> <code>src/pages/ProductDetailPage.tsx</code>, <code>src/stores/productStore.ts</code>
+        </p>
+        <p>
+          Product API data now lives in React Query only. Zustand is focused on UI state
+          (selection behavior), which prevents stale sync bugs and reduces complexity.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Before (Dual Source of Truth)</p>
+            <pre><code>// query fetches data, then page ingests into store
+if (productQuery.data) ingestProduct(productQuery.data)
+if (productQuery.isError) ingestError(message)
+if (productQuery.isPending) setLoadingFlag(true)</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">After (Single Owner)</p>
+            <pre><code>const productQuery = useQuery(productDetailQuery(slug))
+const product = productQuery.data ?? null
+const loading = productQuery.isPending
+const errorMessage = productQuery.isError ? readableError : null</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Refinement: Slug Routing + Config-Driven API</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Scalable dynamic routes and environment-backed API config.<br />
+          <strong>Applied in:</strong> <code>src/router.tsx</code>, <code>src/config/appConfig.ts</code>, <code>src/api/product.ts</code>
+        </p>
+        <p>
+          The app moved from a hardcoded product route to slug routes (<code>/:slug</code>) and
+          from hardcoded API/store constants to typed config sourced from env vars.
+        </p>
+        <pre><code>// src/router.tsx
+{ index: true, element: &lt;Navigate to={`/${TASK_PRODUCT_SLUG}`} replace /&gt; }
+{ path: ':slug', lazy: async () => ({ Component: ProductDetailPage }) }
+
+// src/config/appConfig.ts
+export const appConfig = {
+  apiBaseUrl: readStringEnv(import.meta.env.VITE_API_BASE_URL, '...'),
+  storeKey: readStringEnv(import.meta.env.VITE_STORE_KEY, 'clear-theme'),
+  defaultProductSlug: readStringEnv(import.meta.env.VITE_DEFAULT_PRODUCT_SLUG, 'Sneakers12'),
+}</code></pre>
+      </details>
+
+      <details>
+        <summary>Refinement: Deterministic Cart Identity + Persistence Migrations</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Stable cart matching logic and safer persisted-store upgrades.<br />
+          <strong>Applied in:</strong> <code>src/stores/cartStore.ts</code>, <code>src/stores/favoritesStore.ts</code>
+        </p>
+        <p>
+          Cart line merge now uses normalized selections instead of object stringify order.
+          Persisted stores now include <code>version</code> + <code>migrate</code> to stay robust across schema changes.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Before (Brittle)</p>
+            <pre><code>JSON.stringify(line.selections) === JSON.stringify(payload.selections)</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">After (Stable)</p>
+            <pre><code>const incomingIdentity = lineIdentity(payload)
+const match = draft.lines.find((line) => lineIdentity(line) === incomingIdentity)
+
+persist({ ..., version: 2, migrate: (...) => (...) })</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Refinement: Composition via DrawerShell + IconButton</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Shared UI composition primitives replacing repeated drawer/button markup.<br />
+          <strong>Applied in:</strong> <code>src/components/primitives/DrawerShell.tsx</code>, <code>src/components/primitives/IconButton.tsx</code>, <code>CartDrawer/FavoritesDrawer/SiteHeader</code>
+        </p>
+        <p>
+          Repeated Headless UI drawer structures and icon-button class strings were replaced
+          by reusable primitives. This improves consistency and lowers maintenance cost.
+        </p>
+        <pre><code>// Drawer usage
+&lt;DrawerShell open={open} onClose={close} title={t('cart.title')} closeLabel={t('cart.close')}&gt;
+  {...content}
+&lt;/DrawerShell&gt;
+
+// Icon button usage
+&lt;IconButton tone="outlined" radius="full" aria-label={closeLabel}&gt;...&lt;/IconButton&gt;</code></pre>
+      </details>
+
+      <details>
+        <summary>Refinement: Rich Text Best Practices (Typography + CVA + Sanitization)</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Replaced brittle rich-text styling and secured HTML rendering.<br />
+          <strong>Applied in:</strong> <code>src/components/ProductBuyingSection.tsx</code>
+        </p>
+        <p>
+          Rich description now uses Tailwind Typography (<code>prose</code>), CVA for expanded state,
+          semantic <code>article</code>, and DOMPurify sanitization before rendering HTML.
+        </p>
+        <div class="split">
+          <div class="card">
+            <p class="bad">Before</p>
+            <pre><code>const descriptionCopyClass = "... long [&_tag] chain ..."
+&lt;div className={cn(descriptionCopyClass, !expanded && 'line-clamp-4')}
+     dangerouslySetInnerHTML={{ __html: html }} /&gt;</code></pre>
+          </div>
+          <div class="card">
+            <p class="good">After</p>
+            <pre><code>const descriptionVariants = cva('prose prose-neutral max-w-none ...', {
+  variants: { expanded: { true: '', false: 'line-clamp-4' } }
+})
+const sanitizedHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
+
+&lt;article className={descriptionVariants({ expanded })}
+         dangerouslySetInnerHTML={{ __html: sanitizedHtml }} /&gt;</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Refinement: Selective @apply (Without Overusing It)</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Introduced <code>@apply</code> only for high-repetition field styles.<br />
+          <strong>Applied in:</strong> <code>src/index.css</code>, <code>src/components/SiteFooter.tsx</code>
+        </p>
+        <p>
+          Instead of over-abstracting all utility classes, <code>@apply</code> is used only for the newsletter
+          input/submit classes where repetition was very high and hard to read.
+        </p>
+        <pre><code>/* src/index.css */
+.footer-newsletter-input { @apply min-h-0 min-w-0 flex-1 ... }
+.footer-newsletter-submit { @apply inline-flex h-[36px] w-[52px] ... }
+
+// src/components/SiteFooter.tsx
+&lt;input className="footer-newsletter-input" /&gt;
+&lt;button className="footer-newsletter-submit" /&gt;</code></pre>
+      </details>
+
+      <details>
+        <summary>Refinement: i18n Completeness + Resource Organization</summary>
+        <p class="meta">
+          <strong>What was improved:</strong> Removed hardcoded UI strings and centralized i18n resources.<br />
+          <strong>Applied in:</strong> <code>src/i18n/messages.ts</code>, <code>src/i18n/resources.ts</code>, <code>src/i18n/i18n.ts</code>, <code>src/i18n/I18nDocumentSync.tsx</code>, <code>src/components/Breadcrumbs.tsx</code>
+        </p>
+        <p>
+          Added missing keys for accessibility/meta labels, moved i18n resources to a dedicated
+          module, and removed hardcoded breadcrumb/document-title strings.
+        </p>
+        <pre><code>// src/i18n/resources.ts
+export const i18nResources = {
+  en: { translation: messagesEn },
+  ar: { translation: messagesAr },
+} as const
+
+// src/components/Breadcrumbs.tsx
+aria-label={t('a11y.breadcrumbNav')}</code></pre>
+      </details>
+
+      <p class="small">
+        File generated for your study case: <code>studycase-patterns.html</code>
+      </p>
+    </main>
+  </body>
+</html>

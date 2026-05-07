@@ -1,16 +1,27 @@
 import { CircleCheck, CreditCard } from "lucide-react";
 import { useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import { useLocale } from "../i18n/useLocale";
 import { useCartStore } from "../stores/cartStore";
+import { selectCartItemsCount } from "../stores/selectors";
 import { cn } from "../lib/cn";
+import {
+  toastCardClass,
+  toastCheckoutButtonClass,
+  toastCheckoutTooltipClass,
+} from "./variants/toastBanner.variants";
 
 export function ToastBanner() {
   const { t, tf } = useLocale();
-  const toast = useCartStore((state) => state.toast);
-  const dismiss = useCartStore((state) => state.dismissToast);
-  const openDrawer = useCartStore((state) => state.openDrawer);
-  const itemCount = useCartStore((state) => state.getUniqueCount());
+  const { toast, dismiss, openDrawer, itemCount } = useCartStore(
+    useShallow((state) => ({
+      toast: state.toast,
+      dismiss: state.dismissToast,
+      openDrawer: state.openDrawer,
+      itemCount: selectCartItemsCount(state),
+    })),
+  );
 
   useEffect(() => {
     if (!toast) return;
@@ -40,11 +51,7 @@ export function ToastBanner() {
       aria-live="polite"
     >
       <div
-        className={cn(
-          "pointer-events-auto mx-4 flex w-[min(calc(100vw-2rem),420px)] items-center gap-4",
-          "rounded-full border border-neutral-200/90 bg-white ps-5 pe-2 py-2.5 shadow-[0_22px_50px_-12px_rgba(0,0,0,0.18),0_10px_30px_-10px_rgba(0,0,0,0.12)]",
-          "motion-safe:animate-toast-rise motion-reduce:animate-none",
-        )}
+        className={toastCardClass}
       >
         <CircleCheck
           className="h-[22px] w-[22px] shrink-0 text-emerald-600"
@@ -64,11 +71,7 @@ export function ToastBanner() {
           <button
             type="button"
             onClick={handleCheckout}
-            className={cn(
-              "relative flex h-11 w-11 items-center justify-center rounded-full bg-black text-white",
-              "transition hover:bg-neutral-900",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
-            )}
+            className={toastCheckoutButtonClass}
             aria-describedby="toast-checkout-tip"
           >
             <CreditCard
@@ -80,13 +83,7 @@ export function ToastBanner() {
           <span
             id="toast-checkout-tip"
             role="tooltip"
-            className={cn(
-              "pointer-events-none invisible absolute bottom-full end-0 z-10 mb-2 whitespace-nowrap",
-              "rounded-md bg-neutral-900 px-2.5 py-1.5 text-[11px] font-semibold tracking-tight text-white",
-              "shadow-lg opacity-0 transition-[opacity,visibility] duration-150",
-              "group-hover/checkout:visible group-hover/checkout:opacity-100",
-              "group-focus-within/checkout:visible group-focus-within/checkout:opacity-100",
-            )}
+            className={toastCheckoutTooltipClass}
           >
             {t("toast.checkoutShortcut")}
           </span>

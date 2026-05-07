@@ -11,60 +11,32 @@ import {
 
 import johnLewisLogo from "../assets/john_lewis.png";
 import { useLocale } from "../i18n/useLocale";
-import type { MessageKey } from "../i18n/messages";
 import { cn } from "../lib/cn";
 import { useCartStore } from "../stores/cartStore";
 import { useFavoritesStore } from "../stores/favoritesStore";
+import {
+  selectCartItemsCount,
+  selectFavoritesCount,
+} from "../stores/selectors";
 import { Breadcrumbs } from "./Breadcrumbs";
+import {
+  DESKTOP_MOBILE_ENTRIES,
+  navClusters,
+} from "./config/siteHeader.config";
 import { PageContainer } from "./PageContainer";
+import { IconButton } from "./primitives/IconButton";
+import { useShallow } from "zustand/react/shallow";
+import {
+  badgeClass,
+  mobileMenuPanelClass,
+  promoClockClass,
+  promoTextClass,
+  utilIcon,
+  utilityLabelClass,
+  utilityWideButtonClass,
+} from "./variants/siteHeader.variants";
 
-const utilIcon = "h-[22px] w-[22px] shrink-0 text-current";
 const utilStroke = 1.5;
-
-const utilityLabelClass =
-  "font-sans text-[13px] font-medium leading-none tracking-normal text-black antialiased";
-
-const DESKTOP_MOBILE_ENTRIES: MessageKey[] = [
-  "header.link.womenNav",
-  "header.link.beauty",
-  "header.link.homeGarden",
-  "header.link.babyChild",
-  "header.link.menNav",
-  "header.link.offers",
-];
-
-const navClusters: ReadonlyArray<{
-  headingKey: MessageKey;
-  links: readonly MessageKey[];
-}> = [
-  {
-    headingKey: "header.nav.shopHeading",
-    links: [
-      "headerCLUSTER.shop.links.women",
-      "headerCLUSTER.shop.links.men",
-      "headerCLUSTER.shop.links.kids",
-      "headerCLUSTER.shop.links.home",
-    ],
-  },
-  {
-    headingKey: "header.nav.informationHeading",
-    links: [
-      "header.footerLink.delivery",
-      "header.footerLink.returns",
-      "header.footerLink.contact",
-      "header.footerLink.trackOrder",
-    ],
-  },
-  {
-    headingKey: "header.nav.companyHeading",
-    links: [
-      "header.footerLink.about",
-      "header.footerLink.careers",
-      "header.footerLink.press",
-      "header.footerLink.sustainability",
-    ],
-  },
-] as const;
 
 function formatClockHM(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -84,12 +56,18 @@ function useClockHM(locale: "en" | "ar"): string {
 
 function HeaderUtilities({ className }: { className?: string }): JSX.Element {
   const { t } = useLocale();
-  const basketCount = useCartStore((state) =>
-    state.lines.reduce((sum, line) => sum + line.quantity, 0),
+  const { basketCount, openBasket } = useCartStore(
+    useShallow((state) => ({
+      basketCount: selectCartItemsCount(state),
+      openBasket: state.openDrawer,
+    })),
   );
-  const openBasket = useCartStore((state) => state.openDrawer);
-  const favCount = useFavoritesStore((state) => state.items.length);
-  const openSaved = useFavoritesStore((state) => state.openDrawer);
+  const { favCount, openSaved } = useFavoritesStore(
+    useShallow((state) => ({
+      favCount: selectFavoritesCount(state),
+      openSaved: state.openDrawer,
+    })),
+  );
 
   const favLabel =
     favCount > 0
@@ -103,17 +81,13 @@ function HeaderUtilities({ className }: { className?: string }): JSX.Element {
         className,
       )}
     >
-      <button
-        type="button"
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-black transition hover:bg-neutral-100/80"
-        aria-label={t("header.search")}
-      >
+      <IconButton type="button" aria-label={t("header.search")}>
         <Search className={utilIcon} strokeWidth={utilStroke} aria-hidden />
-      </button>
+      </IconButton>
 
       <button
         type="button"
-        className="inline-flex h-10 shrink-0 items-center gap-[5px] rounded-sm ps-1 pe-2 text-black transition hover:bg-neutral-100/80"
+        className={cn(utilityWideButtonClass, "gap-[5px] ps-1 pe-2")}
         aria-label={t("header.categories")}
         aria-haspopup="true"
       >
@@ -127,17 +101,17 @@ function HeaderUtilities({ className }: { className?: string }): JSX.Element {
 
       <button
         type="button"
-        className="inline-flex h-10 shrink-0 items-center gap-[7px] rounded-sm px-2 text-black transition hover:bg-neutral-100/80"
+        className={cn(utilityWideButtonClass, "gap-[7px] px-2")}
         aria-label={t("header.signIn")}
       >
         <User className={utilIcon} strokeWidth={utilStroke} aria-hidden />
         <span className={utilityLabelClass}>{t("header.signIn")}</span>
       </button>
 
-      <button
+      <IconButton
         type="button"
         onClick={() => openSaved()}
-        className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-black transition hover:bg-neutral-100/80"
+        className="relative"
         aria-label={favLabel}
       >
         <Heart
@@ -147,16 +121,14 @@ function HeaderUtilities({ className }: { className?: string }): JSX.Element {
           aria-hidden
         />
         {favCount > 0 && (
-          <span className="absolute -top-[3px] end-[-2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-black px-[5px] text-[9px] font-semibold leading-none text-white">
-            {Math.min(favCount, 99)}
-          </span>
+          <span className={badgeClass}>{Math.min(favCount, 99)}</span>
         )}
-      </button>
+      </IconButton>
 
-      <button
+      <IconButton
         type="button"
         onClick={() => openBasket()}
-        className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-black transition hover:bg-neutral-100/80"
+        className="relative"
         aria-label={
           basketCount > 0
             ? `${t("header.basket")}, ${basketCount}`
@@ -169,11 +141,66 @@ function HeaderUtilities({ className }: { className?: string }): JSX.Element {
           aria-hidden
         />
         {basketCount > 0 && (
-          <span className="absolute -top-[3px] end-[-2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-black px-[5px] text-[9px] font-semibold leading-none text-white">
-            {Math.min(basketCount, 99)}
-          </span>
+          <span className={badgeClass}>{Math.min(basketCount, 99)}</span>
         )}
-      </button>
+      </IconButton>
+    </div>
+  );
+}
+
+function MobileHeaderActions({
+  mobileOpen,
+  onToggleMenu,
+}: {
+  mobileOpen: boolean;
+  onToggleMenu: () => void;
+}): JSX.Element {
+  const { t } = useLocale();
+  const { basketCount, openBasket } = useCartStore(
+    useShallow((state) => ({
+      basketCount: selectCartItemsCount(state),
+      openBasket: state.openDrawer,
+    })),
+  );
+
+  return (
+    <div className="flex shrink-0 items-center gap-1.5">
+      <IconButton type="button" aria-label={t("header.search")}>
+        <Search className={utilIcon} strokeWidth={utilStroke} aria-hidden />
+      </IconButton>
+
+      <IconButton
+        type="button"
+        onClick={() => openBasket()}
+        className="relative"
+        aria-label={
+          basketCount > 0
+            ? `${t("header.basket")}, ${basketCount}`
+            : t("header.basket")
+        }
+      >
+        <ShoppingBag
+          className={utilIcon}
+          strokeWidth={utilStroke}
+          aria-hidden
+        />
+        {basketCount > 0 && (
+          <span className={badgeClass}>{Math.min(basketCount, 99)}</span>
+        )}
+      </IconButton>
+
+      <IconButton
+        type="button"
+        tone="subtle"
+        aria-label={mobileOpen ? t("header.menuClose") : t("header.menuOpen")}
+        onClick={onToggleMenu}
+      >
+        {mobileOpen ? (
+          <X className="h-5 w-5" strokeWidth={1.65} aria-hidden />
+        ) : (
+          <Menu className="h-5 w-5" strokeWidth={1.65} aria-hidden />
+        )}
+      </IconButton>
     </div>
   );
 }
@@ -213,21 +240,33 @@ export function SiteHeader({
   const { locale, t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const promoClock = useClockHM(locale);
+  const promoText = t("header.promo");
+  const promoSplitAfterTenPercent = promoText.split("10%");
+  const canSplitAfterTenPercent = promoSplitAfterTenPercent.length === 2;
 
   return (
     <header className={cn("sticky top-0 z-40 bg-white", className)}>
       <div className="bg-black text-white">
-        <PageContainer className="py-2.5">
-          <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-center sm:gap-x-3">
-            <p className="max-w-[min(100%,36rem)] text-[11px] font-medium leading-snug tracking-[0.01em] text-white sm:max-w-none sm:text-xs md:text-[13px]">
-              {t("header.promo")}
+        <PageContainer className="py-3 sm:py-2.5">
+          <div className="flex items-end justify-center gap-2 text-start">
+            <p className={promoTextClass}>
+              {canSplitAfterTenPercent ? (
+                <>
+                  {promoSplitAfterTenPercent[0]}
+                  10%
+                  <br className="sm:hidden" />
+                  {promoSplitAfterTenPercent[1].trimStart()}
+                </>
+              ) : (
+                promoText
+              )}{" "}
+              <span
+                className={promoClockClass}
+                aria-label={`${t("header.localTimeAria")} ${promoClock}`}
+              >
+                {promoClock}
+              </span>
             </p>
-            <span
-              className="inline-flex shrink-0 items-center rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium tabular-nums tracking-normal text-white shadow-inner ring-1 ring-white/10 sm:px-3 sm:text-xs"
-              aria-label={`${t("header.localTimeAria")} ${promoClock}`}
-            >
-              {promoClock}
-            </span>
           </div>
         </PageContainer>
       </div>
@@ -242,33 +281,11 @@ export function SiteHeader({
 
             <div className="flex flex-col gap-3 lg:hidden">
               <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
-                  <button
-                    type="button"
-                    className="-ms-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-black hover:bg-neutral-100"
-                    aria-label={
-                      mobileOpen ? t("header.menuClose") : t("header.menuOpen")
-                    }
-                    onClick={() => setMobileOpen((open) => !open)}
-                  >
-                    {mobileOpen ? (
-                      <X className="h-5 w-5" strokeWidth={1.65} aria-hidden />
-                    ) : (
-                      <Menu
-                        className="h-5 w-5"
-                        strokeWidth={1.65}
-                        aria-hidden
-                      />
-                    )}
-                  </button>
-                  <LogoLockup compact />
-                </div>
-                <div className="hidden shrink-0 sm:block">
-                  <HeaderUtilities />
-                </div>
-              </div>
-              <div className="flex justify-center sm:hidden">
-                <HeaderUtilities />
+                <LogoLockup compact />
+                <MobileHeaderActions
+                  mobileOpen={mobileOpen}
+                  onToggleMenu={() => setMobileOpen((open) => !open)}
+                />
               </div>
             </div>
           </div>
@@ -282,7 +299,7 @@ export function SiteHeader({
       </div>
 
       {mobileOpen && (
-        <div className="fixed inset-x-0 top-0 z-50 max-h-[100dvh] overflow-y-auto border-b border-black/10 bg-white pb-8 pt-[72px] shadow-lg lg:hidden">
+        <div className={mobileMenuPanelClass}>
           <PageContainer>
             <nav
               className="space-y-5 text-[14px]"

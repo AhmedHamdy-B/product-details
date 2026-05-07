@@ -6,41 +6,18 @@ import { SiFacebook, SiInstagram, SiTiktok, SiYoutube } from "react-icons/si";
 import johnLewisLogo from "../assets/john_lewis.png";
 import { cn } from "../lib/cn";
 import { useLocale } from "../i18n/useLocale";
-import type { MessageKey } from "../i18n/messages";
 import { PageContainer } from "./PageContainer";
-
-const footerColumns: ReadonlyArray<{
-  headingKey: MessageKey;
-  links: ReadonlyArray<MessageKey>;
-}> = [
-  {
-    headingKey: "footer.col.shop",
-    links: [
-      "footer.link.myAccount",
-      "footer.link.login",
-      "footer.link.wishlist",
-      "footer.link.cart",
-    ],
-  },
-  {
-    headingKey: "footer.col.information",
-    links: [
-      "footer.link.shippingPolicy",
-      "footer.link.returnsRefunds",
-      "footer.link.cookiesPolicy",
-      "footer.link.frequentlyAsked",
-    ],
-  },
-  {
-    headingKey: "footer.col.company",
-    links: [
-      "footer.link.aboutUs",
-      "footer.link.privacyPolicy",
-      "footer.link.termsConditions",
-      "footer.link.contactUs",
-    ],
-  },
-] as const;
+import { footerColumns } from "./config/siteFooter.config";
+import {
+  currencyButtonClass,
+  footerBottomClass,
+  footerGridClass,
+  footerLinkButtonClass,
+  langMenuButtonClass,
+  languageMenuItemsClass,
+  newsletterRowClass,
+  socialCircleClass,
+} from "./variants/siteFooter.variants";
 
 function NewsletterField(): JSX.Element {
   const { t } = useLocale();
@@ -54,7 +31,7 @@ function NewsletterField(): JSX.Element {
         <label htmlFor="jl-footer-email" className="sr-only">
           {t("footer.newsletterLabel")}
         </label>
-        <div className="flex w-full flex-nowrap items-center gap-0 border-b border-solid border-neutral-950 pb-0 transition-colors duration-150 ease-out focus-within:border-black">
+        <div className={newsletterRowClass}>
           <input
             id="jl-footer-email"
             data-jl-newsletter-input=""
@@ -63,36 +40,12 @@ function NewsletterField(): JSX.Element {
             inputMode="email"
             autoComplete="email"
             placeholder={t("footer.newsletterPlaceholder")}
-            className="
-              min-h-0 min-w-0 flex-1
-              rounded-none bg-transparent px-0 !pb-0 pt-[6px] text-[16px] font-normal !leading-[1.6]
-              tracking-[0] text-neutral-900 antialiased caret-neutral-950
-              [appearance:textfield]
-              [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:appearance-none
-              border-0
-              outline-none outline-0 [outline-offset:0px]
-              ring-0 ring-offset-0
-              placeholder:text-[#737D8A] placeholder:font-medium placeholder:tracking-[0.01em]
-              shadow-none
-              shadow-[inset_0_0_0_9999px_transparent]
-              focus:border-0
-              focus:!shadow-none focus:!ring-0 focus:!ring-offset-0
-              focus:!outline-none focus:!outline-offset-0 focus:[outline-offset:0px]
-              focus-visible:!shadow-none focus-visible:!ring-0 focus-visible:!outline-none
-              [&:-webkit-autofill]:shadow-[inset_0_0_0_32px_rgb(243,243,243)]
-              [&:-webkit-autofill:focus]:shadow-[inset_0_0_0_32px_rgb(243,243,243)]
-            "
+            className="footer-newsletter-input"
           />
           <button
             type="submit"
             aria-label={t("footer.newsletterSubmit")}
-            className="
-              ms-0 inline-flex h-[36px] w-[52px] shrink-0 cursor-pointer
-              items-center justify-center rounded-[8px]
-              bg-black text-white outline-none ring-0
-              transition-colors hover:bg-neutral-900
-              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-950
-            "
+            className="footer-newsletter-submit"
           >
             <FooterNewsletterArrow />
           </button>
@@ -152,7 +105,7 @@ function LanguageMenu(): JSX.Element {
       <MenuButton
         type="button"
         aria-label={t("footer.langMenu")}
-        className="inline-flex h-10 items-center gap-1 px-0 text-[16px] font-medium leading-[1.6] tracking-[0] text-black transition hover:underline hover:underline-offset-4"
+        className={langMenuButtonClass}
       >
         {locale === "ar" ? (
           <EgyptFlagSvg className="h-[14px] w-[18px] shrink-0 rounded-[2px] ring-[0.5px] ring-black/12" />
@@ -167,11 +120,7 @@ function LanguageMenu(): JSX.Element {
         transition
         modal={false}
         anchor="bottom end"
-        className={cn(
-          "z-[100] mt-1 w-44 rounded-md border border-neutral-200 bg-white py-1 shadow-lg [--anchor-gap:4px]",
-          "outline-none ring-1 ring-black/5 transition [--anchor-gap:4px]",
-          "data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:duration-150 data-[enter]:duration-150",
-        )}
+        className={languageMenuItemsClass}
       >
         <MenuItem>
           {({ close, focus }) => (
@@ -237,7 +186,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
   return (
     <footer className={cn("bg-[#f3f3f3] font-sans text-black", className)}>
       <PageContainer className="pb-10 pt-10 md:pb-11 md:pt-11 xl:pb-12 xl:pt-12">
-        <div className="grid grid-cols-1 gap-x-10 gap-y-11 md:gap-x-12 lg:grid-cols-12 lg:gap-x-8 lg:gap-y-12 xl:gap-x-10">
+        <div className={footerGridClass}>
           <div className="min-w-0 space-y-[22px] lg:col-span-6">
             <div className="flex items-center">
               <img
@@ -282,7 +231,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
           ))}
         </div>
 
-        <div className="dash-top dash-color-c7 mt-[72px] flex flex-col gap-5 pt-[24px] sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:gap-8">
+        <div className={footerBottomClass}>
           <p className="order-2 text-[14px] font-normal leading-[22px] tracking-[0] text-[#3E3E59] sm:order-1">
             {copyrightLine}
           </p>
@@ -291,7 +240,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
             <LanguageMenu />
             <button
               type="button"
-              className="inline-flex h-10 items-center gap-1 px-2 text-[14px] text-[#121212] font-medium leading-[1.6] tracking-[0] transition hover:underline hover:underline-offset-4"
+              className={currencyButtonClass}
               disabled
               aria-disabled
             >
@@ -322,7 +271,7 @@ function FooterLinkColumn({
           <li key={label}>
             <button
               type="button"
-              className="w-full py-px text-start text-black transition hover:opacity-70 hover:underline hover:underline-offset-[5px]"
+              className={footerLinkButtonClass}
             >
               {label}
             </button>
@@ -346,7 +295,7 @@ function SocialCircle({
     <a
       href={href}
       aria-label={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-50"
+      className={socialCircleClass}
     >
       <span className="flex items-center justify-center">{children}</span>
     </a>

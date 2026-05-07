@@ -1,38 +1,42 @@
 import type { JSX } from "react";
+import { useLocale } from "../i18n/useLocale";
 
 type BreadcrumbsProps = {
   crumbs: string[];
 };
 
 export function Breadcrumbs({ crumbs }: BreadcrumbsProps): JSX.Element {
+  const { t } = useLocale();
+  const activeCrumb = crumbs[crumbs.length - 1] ?? "";
+  const parentCrumbs = crumbs.slice(0, -1);
+
   return (
     <nav
       className="text-start text-[16px] leading-relaxed text-[#8F8F8F]"
-      aria-label="Breadcrumb"
+      aria-label={t("a11y.breadcrumbNav")}
     >
-      <ol className="flex flex-wrap items-center justify-start gap-x-1 gap-y-1">
-        {crumbs.map((crumb, index) => {
-          const active = index === crumbs.length - 1;
-          return (
-            <li key={`${crumb}-${index}`} className="flex items-center gap-x-1">
+      {parentCrumbs.length > 0 && (
+        <ol className="flex flex-wrap items-center justify-start gap-x-1.5 gap-y-1">
+          {parentCrumbs.map((crumb, index) => (
+            <li key={`${crumb}-${index}`} className="flex items-center gap-x-1.5">
               {index !== 0 && (
-                <span aria-hidden className="select-none px-1.5 text-[#8F8F8F]">
+                <span aria-hidden className="select-none text-[#8F8F8F]">
                   &gt;
                 </span>
               )}
-              <span
-                className={
-                  active
-                    ? "max-w-[min(760px,_88vw)] truncate font-medium  text-[#292929]"
-                    : "font-medium  underline-offset-[5px] hover: text-[#8F8F8F] hover:underline"
-                }
-              >
-                {crumb}
-              </span>
+              <span className="font-medium">{crumb}</span>
             </li>
-          );
-        })}
-      </ol>
+          ))}
+          <li aria-hidden className="select-none text-[#8F8F8F]">
+            &gt;
+          </li>
+        </ol>
+      )}
+      {activeCrumb && (
+        <p className="mt-1 font-medium text-[#292929] sm:truncate sm:max-w-[min(760px,_88vw)]">
+          {activeCrumb}
+        </p>
+      )}
     </nav>
   );
 }

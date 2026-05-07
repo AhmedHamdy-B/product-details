@@ -1,10 +1,11 @@
 import type { Product } from '../types/product'
+import { appConfig } from '../config/appConfig'
 
-/** Task reference slug from the ElegantSoft readme (EasyOrders “clear-theme” store). */
-export const TASK_PRODUCT_SLUG = 'Sneakers12'
+/** Backwards-compatible default slug used when route param is missing. */
+export const TASK_PRODUCT_SLUG = appConfig.defaultProductSlug
 
-const EASY_ORDERS_API_BASE = 'https://api.easy-orders.net/api/v1/products/slug'
-const TASK_STORE_KEY = 'clear-theme'
+const EASY_ORDERS_API_BASE = appConfig.apiBaseUrl
+const TASK_STORE_KEY = appConfig.storeKey
 
 export function productUrlForSlug(slug: string, joinReviews = true): string {
   const qs = joinReviews ? '?join=reviews' : ''
@@ -14,12 +15,15 @@ export function productUrlForSlug(slug: string, joinReviews = true): string {
 /** Backwards-compatible full URL for the task product. */
 export const PRODUCT_ENDPOINT = productUrlForSlug(TASK_PRODUCT_SLUG)
 
-export async function fetchProductBySlug(slug: string): Promise<Product> {
-  return fetchProductByUrl(productUrlForSlug(slug))
+export async function fetchProductBySlug(slug: string, signal?: AbortSignal): Promise<Product> {
+  return fetchProductByUrl(productUrlForSlug(slug), signal)
 }
 
-export async function fetchProductByUrl(url: string = PRODUCT_ENDPOINT): Promise<Product> {
-  const response = await fetch(url)
+export async function fetchProductByUrl(
+  url: string = PRODUCT_ENDPOINT,
+  signal?: AbortSignal,
+): Promise<Product> {
+  const response = await fetch(url, { signal })
   if (!response.ok) {
     throw new Error(`Unable to load product (${response.status})`)
   }

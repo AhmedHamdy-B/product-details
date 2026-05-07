@@ -2,7 +2,7 @@ import { ChevronUp } from 'lucide-react';
 import { useEffect, useState, type JSX } from 'react';
 
 import { useLocale } from '../i18n/useLocale';
-import { cn } from '../lib/cn';
+import { goToTopButtonClass } from './variants/goToTopButton.variants';
 
 /** Past promo + sticky header fold — hides control while still in top “landing” scroll band */
 const SHOW_AFTER_SCROLL_Y = 120;
@@ -35,19 +35,7 @@ export function GoToTopButton(): JSX.Element {
           behavior: reduceMotion ? 'auto' : 'smooth',
         });
       }}
-      className={cn(
-        'fixed bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))]',
-        'end-[max(1.25rem,env(safe-area-inset-right,0px))] z-[45]',
-        'md:bottom-8 md:end-8',
-        'inline-flex size-12 shrink-0 items-center justify-center',
-        'rounded-[10px] border border-[#E0E0E0] bg-jl-white',
-        'text-jl-black shadow-card',
-        'transition-[background-color,border-color,opacity,transform] duration-200 motion-reduce:transition-colors motion-reduce:duration-0 hover:border-[#BDBDBD] hover:bg-jl-gray',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-jl-white',
-        visible
-          ? 'pointer-events-auto translate-y-0 opacity-100 active:translate-y-px'
-          : 'pointer-events-none translate-y-2 opacity-0 motion-reduce:translate-y-0',
-      )}
+      className={goToTopButtonClass({ visible })}
     >
       <ChevronUp className="size-5 shrink-0" strokeWidth={1.5} aria-hidden />
     </button>
