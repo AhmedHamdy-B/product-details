@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Suspense, lazy, useMemo, useState, type JSX } from "react";
-import { useParams } from "react-router-dom";
 
 import { TASK_PRODUCT_SLUG } from "../api/product";
 import { productDetailQuery } from "../api/product.queries";
@@ -41,8 +40,6 @@ const SiteFooter = lazy(async () => {
 
 export function ProductDetailPage(): JSX.Element {
   const { t } = useLocale();
-  const { slug: rawSlug } = useParams<{ slug: string }>();
-  const slug = rawSlug ?? TASK_PRODUCT_SLUG;
   const [selectionState, setSelectionState] = useState<{
     productId: null | string;
     overrides: Record<string, string>;
@@ -51,7 +48,7 @@ export function ProductDetailPage(): JSX.Element {
     overrides: {},
   });
 
-  const productQuery = useQuery(productDetailQuery(slug));
+  const productQuery = useQuery(productDetailQuery(TASK_PRODUCT_SLUG));
 
   const product = productQuery.data ?? null;
   const productId = product?.id ?? null;
