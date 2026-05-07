@@ -207,6 +207,7 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
   const favTip = saved ? t("rails.favTipSaved") : t("rails.favTipAdd");
 
   const stopCard = (e: MouseEvent) => {
+    // Action buttons live inside a clickable card surface; stop bubbling to prevent accidental navigation.
     e.preventDefault();
     e.stopPropagation();
   };
@@ -265,6 +266,7 @@ function RelatedImageHoverTray({ item }: { item: ShowcaseItem }): JSX.Element {
                 slug,
                 name: displayName,
                 image: item.image,
+                // Rail cards are SKU-agnostic promos, so we add a generic line identity.
                 selections: {},
                 variantId: null,
                 unitPrice: item.price,

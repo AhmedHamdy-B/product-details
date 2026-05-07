@@ -14,10 +14,12 @@ export function findVariantForSelections(
   product: Product,
   selections: Record<string, string>,
 ): ProductVariant | null {
+  // A variant is considered resolvable only when all required variation axes are chosen.
   const required = product.variations.map((v) => variationKey(v.name))
   const complete = required.every((key) => Boolean(selections[key]))
   if (!complete) return null
 
+  // Matching contract: every required key must equal the variant map value.
   const match =
     product.variants.find((v) => {
       const map = variantToMap(v)
@@ -33,6 +35,8 @@ export function isOptionSelectable(
   optionValue: string,
   currentSelections: Record<string, string>,
 ): boolean {
+  // Build a candidate selection map by overriding one axis, then ask:
+  // "does any variant still satisfy all chosen pairs?".
   const key = variationKey(variationKeyName)
   const candidate = { ...currentSelections, [key]: optionValue }
   return product.variants.some((v) => {
@@ -43,6 +47,7 @@ export function isOptionSelectable(
 
 export function buildGallery(product: Product, selections: Record<string, string>): string[] {
   const colorKey = variationKey('color')
+  // Base ordering: explicit thumb first, then extra gallery images, de-duplicated.
   const urls = [...new Set([product.thumb, ...product.images].filter(Boolean))]
   const colorVar = product.variations.find((v) => variationKey(v.name) === colorKey)
 
@@ -53,6 +58,7 @@ export function buildGallery(product: Product, selections: Record<string, string
   const colorImage = prop?.value
 
   if (colorImage) {
+    // Promote the selected color image to first position while preserving the rest order.
     const rest = urls.filter((u) => u !== colorImage)
     return [colorImage, ...rest]
   }

@@ -5,6 +5,10 @@ import { initReactI18next } from 'react-i18next'
 import { LOCALE_STORAGE_KEY } from './localeStorage'
 import { i18nResources } from './resources'
 
+// Locale strategy:
+// - read/write from project-owned localStorage key first
+// - fallback to browser navigator language
+// - normalize region variants (e.g. en-GB -> en) via `load: languageOnly`.
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)

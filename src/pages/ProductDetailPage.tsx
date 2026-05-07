@@ -50,6 +50,8 @@ export function ProductDetailPage(): JSX.Element {
   const productQuery = useQuery(productDetailQuery(slug));
   useEffect(() => {
     if (!productQuery.data) return;
+    // Reset selection seed only when product identity changes.
+    // Depending on the full object would re-seed on cache refreshes and override user picks.
     setSelectedVariations(getInitialSelectionsForProduct(productQuery.data));
   }, [productQuery.data?.id]);
 
@@ -63,6 +65,7 @@ export function ProductDetailPage(): JSX.Element {
 
   const gallery = useMemo(() => {
     if (!product) return [];
+    // Gallery is derived from product + current choices (e.g. selected color first).
     return buildProductGallery(product, selectedVariations);
   }, [product, selectedVariations]);
 
@@ -170,6 +173,8 @@ function buildCrumbs(
   product: Product | null,
   t: (key: MessageKey) => string,
 ): string[] {
+  // We intentionally take the first category with a usable slug as the branch label.
+  // Fallbacks keep breadcrumb UX stable for partial API payloads.
   const trail = [t("crumb.homepage"), t("crumb.women")];
   const categorySlug = product?.categories?.find((category) =>
     Boolean(category.slug),

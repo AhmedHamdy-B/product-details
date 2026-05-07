@@ -43,6 +43,8 @@ export function useProductPurchaseController(
   const colorKey = variationKey("color");
   const colorVar = product.variations.find((variation) => variationKey(variation.name) === colorKey);
 
+  // Prefer color swatch media for cart preview so the drawer reflects the chosen variant;
+  // fallback to product thumb for products without color media.
   const heroImageSelection = (): string => {
     const selectedColour = selectedVariations[colorKey];
     const match = colorVar?.props.find((prop) => prop.name === selectedColour);
@@ -56,6 +58,9 @@ export function useProductPurchaseController(
   };
 
   const handleAddToCart = () => {
+    // Validation order matters:
+    // 1) block incomplete option selection first
+    // 2) then apply stock checks for the resolved variant.
     if (!combosAvailable || !selectedVariant) {
       setValidationMessage(t("pdp.validationIncomplete"));
       return;
@@ -75,9 +80,11 @@ export function useProductPurchaseController(
       image: heroImageSelection(),
       selections: { ...selectedVariations },
       variantId: selectedVariant.id,
+      // Persist the payable unit price (after discount), not catalog price.
       unitPrice: payable,
       quantity: 1,
     });
+    // Keep product query observers in sync after local cart mutations.
     void queryClient.invalidateQueries({ queryKey: productKeys.detail(product.slug) });
   };
 

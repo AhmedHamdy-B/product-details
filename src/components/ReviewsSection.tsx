@@ -92,6 +92,9 @@ export function ReviewsSection(): JSX.Element {
   const fadeMs = reduceMotion ? 0 : REVIEW_TAB_FADE_MS;
 
   useEffect(() => {
+    // Two-phase tab transition:
+    // - `activeTab` updates immediately (button state),
+    // - `displayTab` swaps after fade-out so list content cross-fades instead of snapping.
     if (activeTab === displayTab) {
       queueMicrotask(() => {
         setListFadeIn(true);
@@ -118,6 +121,10 @@ export function ReviewsSection(): JSX.Element {
   }, [activeTab, displayTab, fadeMs]);
 
   useEffect(() => {
+    // Mobile sheet contract:
+    // - expose open state on body dataset for cross-component styling hooks
+    // - lock body scroll while sheet is open
+    // - always restore previous overflow on cleanup.
     document.body.dataset.reviewsFilterOpen = mobileFiltersOpen
       ? "true"
       : "false";
@@ -654,11 +661,13 @@ function applyReviewFilters(
   topicSelections: ReadonlyMap<string, boolean>,
   hasTopicFacets: boolean,
 ): UiReview[] {
+  // Filter precedence: tab subset -> selected star buckets -> selected topics.
   let list = filterReviews(tab, reviews);
 
   const activeGrades = [5, 4, 3, 2, 1].filter((grade) =>
     starSelections.get(grade),
   );
+  // Explicitly selecting no stars means "show nothing", not "show all".
   if (activeGrades.length === 0) return [];
 
   list = list.filter((review) =>
