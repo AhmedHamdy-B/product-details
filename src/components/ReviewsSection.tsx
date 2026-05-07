@@ -56,6 +56,9 @@ const REVIEW_TAB_MESSAGE: Record<
   desc: "reviews.tab.desc",
 };
 
+const VOTE_LIKE_ACTIVE_HEX = "#1D9E34" as const;
+const VOTE_DISLIKE_ACTIVE_HEX = "#DC2626" as const;
+
 const REVIEW_TAB_FADE_MS = 220;
 
 function subscribePrefersReducedMotion(onStoreChange: () => void): () => void {
@@ -115,11 +118,15 @@ export function ReviewsSection(): JSX.Element {
   }, [activeTab, displayTab, fadeMs]);
 
   useEffect(() => {
+    document.body.dataset.reviewsFilterOpen = mobileFiltersOpen
+      ? "true"
+      : "false";
     if (!mobileFiltersOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.body.dataset.reviewsFilterOpen = "false";
     };
   }, [mobileFiltersOpen]);
 
@@ -182,36 +189,40 @@ export function ReviewsSection(): JSX.Element {
 
         <div className="min-w-0">
           <div>
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
-                {t("reviews.listsHeading")}
-              </p>
+            <p className="font-sans text-[20px] font-semibold tracking-tight text-black">
+              {t("reviews.listsHeading")}
+            </p>
+            <div className="mt-5 flex items-start justify-between gap-3">
+              <div className="flex flex-wrap gap-3">
+                {REVIEW_TAB_IDS.map((tabId) => (
+                  <button
+                    key={tabId}
+                    type="button"
+                    onClick={() => setActiveTab(tabId)}
+                    className={cn(
+                      "rounded-[9px] border border-[#E6E6E6] px-5 py-2.5 font-sans text-[14px] font-medium tracking-tight transition",
+                      tabId === activeTab
+                        ? "border-[#333333] bg-neutral-200 text-black"
+                        : "border-[#E6E6E6] bg-white text-black hover:bg-neutral-50",
+                    )}
+                  >
+                    {t(REVIEW_TAB_MESSAGE[tabId])}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
-                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] border border-[#E4E9EE] bg-white text-black transition hover:bg-neutral-50 lg:hidden"
+                className="inline-flex h-[43px] w-[43px] p-[6px] shrink-0 items-center justify-center rounded-[11px] border border-[#E4E9EE] bg-white text-black transition hover:bg-neutral-50 lg:hidden"
                 aria-label={t("reviews.filterHeading")}
                 aria-expanded={mobileFiltersOpen}
                 onClick={() => setMobileFiltersOpen((open) => !open)}
               >
-                <Funnel className="h-[25px] w-[25px]" strokeWidth={1.9} aria-hidden />
+                <Funnel
+                  className="h-[22px] w-[22px]"
+                  strokeWidth={1.9}
+                  aria-hidden
+                />
               </button>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {REVIEW_TAB_IDS.map((tabId) => (
-                <button
-                  key={tabId}
-                  type="button"
-                  onClick={() => setActiveTab(tabId)}
-                  className={cn(
-                    "rounded-[9px] border border-[#E6E6E6] px-5 py-2.5 font-sans text-[14px] font-medium tracking-tight transition",
-                    tabId === activeTab
-                      ? "border-[#333333] bg-neutral-200 text-black"
-                      : "border-[#E6E6E6] bg-white text-black hover:bg-neutral-50",
-                  )}
-                >
-                  {t(REVIEW_TAB_MESSAGE[tabId])}
-                </button>
-              ))}
             </div>
             <div className="lg:hidden">
               <div
@@ -239,7 +250,7 @@ export function ReviewsSection(): JSX.Element {
                     type="button"
                     className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-neutral-200 text-black transition hover:bg-neutral-50"
                     onClick={() => setMobileFiltersOpen(false)}
-                    aria-label={t("reviews.filterHeading")}
+                    aria-label={t("reviews.closeFilters")}
                   >
                     <X className="h-5 w-5" strokeWidth={1.9} aria-hidden />
                   </button>
@@ -410,14 +421,24 @@ function ReviewsSummaryBanner({
   const histogramNumLoc = locale === "ar" ? "ar-SA" : "en-US";
 
   return (
-    <div className="dash-border dash-color-bbb mt-5 rounded-xl bg-white px-5 py-6 sm:px-7 sm:py-8 lg:px-4 lg:py-6">
+    <div className="dash-border dash-color-bbb mt-5 rounded-xl bg-white px-[23px] md:px-[12px] py-6 sm:py-8 lg:py-6">
       <div className="flex flex-col gap-10 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-[125px]">
         <div className="flex items-center justify-start gap-5 lg:justify-center">
-          <AvgScoreRing score={average} label={avgLabel} />
-          <div className="flex flex-col items-start gap-2 sm:gap-2.5">
+          <span className="sm:hidden">
+            <AvgScoreRing score={average} label={avgLabel} strokeWidth={6} />
+          </span>
+          <span className="hidden sm:inline-flex">
+            <AvgScoreRing score={average} label={avgLabel} strokeWidth={4} />
+          </span>
+          <div className="flex flex-col items-start gap-0 sm:gap-2.5">
             {/* Figma: five solid orange stars (decorative row next to ring) */}
-            <Stars variant="review" value={5} starSizePx={20} />
-            <p className="text-start font-sans text-[16px] font-medium sm:text-regular leading-snug text-[#0B0F0E] sm:text-[#525252]">
+            <span className="sm:hidden">
+              <Stars variant="review" value={5} starSizePx={27} />
+            </span>
+            <span className="hidden sm:inline-flex">
+              <Stars variant="review" value={5} starSizePx={20} />
+            </span>
+            <p className="text-start font-sans text-[16px] font-medium leading-snug text-[#0B0F0E] sm:text-[#525252]">
               {formatSubtitleKReviews(subtitleReviewTotal, locale, tf)}
             </p>
           </div>
@@ -510,7 +531,7 @@ function AvgScoreRing({
       aria-label={tf("reviews.avgRingAria", { label })}
     >
       <svg
-        className="-rotate-70"
+        className="-rotate-[70deg]"
         width={sizePx}
         height={sizePx}
         viewBox={`0 0 ${sizePx} ${sizePx}`}
@@ -684,7 +705,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
           <h3 className="mt-[8px] font-sans text-[18px] font-semibold leading-[1.35] tracking-[-0.02em] text-black sm:text-[17px]">
             {review.title}
           </h3>
-          <p className="mt-1 font-sans text-[16px] font-regular leading-[1.5] text-[#818B9C]">
+          <p className="mt-1 font-sans text-[16px] font-normal leading-[1.5] text-[#818B9C]">
             {review.dateLabel}
           </p>
           {review.body.trim() ? (
@@ -699,7 +720,7 @@ function ReviewCard({ review }: ReviewProps): JSX.Element {
             {review.avatarSrc ? (
               <img
                 src={review.avatarSrc}
-                alt=""
+                alt={review.author}
                 className="size-[32px] shrink-0 rounded-full object-cover "
               />
             ) : (
@@ -783,8 +804,8 @@ function HelpfulVoteChips({
           <ThumbsUp
             className="size-4  shrink-0 transition-[fill,stroke-width] sm:size-[18px]"
             strokeWidth={upChosen ? 0 : 1.75}
-            fill={upChosen ? VOTE_ICON_HEX : "none"}
-            stroke={VOTE_ICON_HEX}
+            fill={upChosen ? VOTE_LIKE_ACTIVE_HEX : "none"}
+            stroke={upChosen ? VOTE_LIKE_ACTIVE_HEX : VOTE_ICON_HEX}
             aria-hidden
           />
           <span className={reviewVoteCountClass}>{yesCount}</span>
@@ -814,10 +835,10 @@ function HelpfulVoteChips({
           onClick={onDislike}
         >
           <ThumbsDown
-            className="size-4 shrink-0 transition-[fill,stroke-width] sm:size-[18px]"
+            className="size-4 shrink-0 scale-x-[-1] transition-[fill,stroke-width] sm:size-[18px]"
             strokeWidth={downChosen ? 0 : 1.75}
-            fill={downChosen ? VOTE_ICON_HEX : "none"}
-            stroke={VOTE_ICON_HEX}
+            fill={downChosen ? VOTE_DISLIKE_ACTIVE_HEX : "none"}
+            stroke={downChosen ? VOTE_DISLIKE_ACTIVE_HEX : VOTE_ICON_HEX}
             aria-hidden
           />
           <span className={reviewVoteCountClass}>{noCount}</span>

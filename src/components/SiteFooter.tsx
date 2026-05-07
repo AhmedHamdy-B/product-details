@@ -185,7 +185,7 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
 
   return (
     <footer className={cn("bg-[#f3f3f3] font-sans text-black", className)}>
-      <PageContainer className="pb-10 pt-10 md:pb-11 md:pt-11 xl:pb-12 xl:pt-12">
+      <PageContainer className="pt-[64px] pb-[22px] md:pt-[74px] md:pb-[29px]">
         <div className={footerGridClass}>
           <div className="min-w-0 space-y-[22px] lg:col-span-6">
             <div className="flex items-center">
@@ -217,26 +217,31 @@ export function SiteFooter({ className }: SiteFooterProps): JSX.Element {
             </div>
           </div>
 
-          {footerColumns.map((column) => (
-            <nav
-              key={column.headingKey}
-              aria-label={t(column.headingKey)}
-              className="min-w-0 lg:col-span-2"
-            >
-              <FooterLinkColumn
-                heading={t(column.headingKey)}
-                links={column.links.map((lk) => t(lk))}
-              />
-            </nav>
-          ))}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:contents">
+            {footerColumns.map((column, index) => (
+              <nav
+                key={column.headingKey}
+                aria-label={t(column.headingKey)}
+                className={cn(
+                  "min-w-0 lg:col-span-2",
+                  index === 2 && "col-span-2",
+                )}
+              >
+                <FooterLinkColumn
+                  heading={t(column.headingKey)}
+                  links={column.links.map((lk) => t(lk))}
+                />
+              </nav>
+            ))}
+          </div>
         </div>
 
         <div className={footerBottomClass}>
-          <p className="order-2 text-[14px] font-normal leading-[22px] tracking-[0] text-[#3E3E59] sm:order-1">
+          <p className="order-1 text-[14px] font-normal leading-[22px] tracking-[0] text-[#3E3E59] sm:order-1">
             {copyrightLine}
           </p>
 
-          <div className="order-1 flex flex-wrap items-center gap-6 sm:order-2 sm:justify-end sm:gap-8">
+          <div className="order-2 flex flex-wrap items-center justify-end gap-6 sm:order-2 sm:justify-end sm:gap-8">
             <LanguageMenu />
             <button
               type="button"
@@ -263,16 +268,13 @@ function FooterLinkColumn({
 }): JSX.Element {
   return (
     <div>
-      <p className="text-[14px] font-semibold leading-tight text-black">
+      <p className="text-[18px] font-semibold leading-tight text-black sm:text-[14px]">
         {heading}
       </p>
       <ul className="mt-3 space-y-2 text-[14px] font-normal leading-normal text-black">
         {links.map((label) => (
           <li key={label}>
-            <button
-              type="button"
-              className={footerLinkButtonClass}
-            >
+            <button type="button" className={footerLinkButtonClass}>
               {label}
             </button>
           </li>
@@ -292,11 +294,7 @@ function SocialCircle({
   href: string;
 }): JSX.Element {
   return (
-    <a
-      href={href}
-      aria-label={label}
-      className={socialCircleClass}
-    >
+    <a href={href} aria-label={label} className={socialCircleClass}>
       <span className="flex items-center justify-center">{children}</span>
     </a>
   );

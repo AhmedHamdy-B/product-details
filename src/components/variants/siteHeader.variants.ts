@@ -16,7 +16,7 @@ export const promoTextClass =
   "sm:text-xs sm:leading-snug md:text-[13px]";
 
 export const promoClockClass =
-  "h-4 min-w-[44px] shrink-0 items-center justify-center rounded-[23px] " +
+  "inline-flex h-4 min-w-[44px] shrink-0 items-center justify-center rounded-[23px] " +
   "bg-[#383838] px-[6.5px] py-[2px] ms-[7px] text-[11px] font-medium tabular-nums leading-none tracking-normal " +
   "text-white shadow-inner ring-1 ring-white/10";
 

@@ -38,7 +38,7 @@ export function FavoritesDrawer(): JSX.Element {
               <div className="h-28 w-24 shrink-0 overflow-hidden rounded-md bg-jl-gray">
                 <img
                   src={item.image}
-                  alt=""
+                  alt={item.name}
                   className="h-full w-full object-cover"
                   decoding="async"
                 />

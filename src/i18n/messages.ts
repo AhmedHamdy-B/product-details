@@ -173,6 +173,7 @@ export type MessageKey =
   | 'reviews.helpful.ariaNo'
   | 'reviews.helpful.ariaYesSelected'
   | 'reviews.helpful.ariaNoSelected'
+  | 'reviews.closeFilters'
   /** Skip link */
   | 'skipToMain'
   /** Accessibility/UI meta */
@@ -372,6 +373,7 @@ export const messagesEn: Record<MessageKey, string> = {
     'Helpful selected ({{count}}), press to remove',
   'reviews.helpful.ariaNoSelected':
     'Not helpful selected ({{count}}), press to remove',
+  'reviews.closeFilters': 'Close review filters',
 
   'skipToMain': 'Skip to main content',
   'a11y.breadcrumbNav': 'Breadcrumb',
@@ -570,6 +572,7 @@ export const messagesAr: Record<MessageKey, string> = {
   'reviews.helpful.ariaNo': 'تعليق غير مفيد ({{count}})',
   'reviews.helpful.ariaYesSelected': 'تم اختيار مفيد ({{count}})؛ اضغط للإلغاء',
   'reviews.helpful.ariaNoSelected': 'تم اختيار غير مفيد ({{count}})؛ اضغط للإلغاء',
+  'reviews.closeFilters': 'إغلاق تصفية المراجعات',
 
   'skipToMain': 'تخطّي إلى المحتوى الرئيسي',
   'a11y.breadcrumbNav': 'مسار التنقل',

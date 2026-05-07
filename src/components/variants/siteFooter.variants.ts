@@ -1,5 +1,5 @@
 export const newsletterRowClass =
-  "flex w-full flex-nowrap items-center gap-0 border-b border-solid border-neutral-950 " +
+  "flex w-[84%] sm:w-full flex-nowrap items-center gap-0 border-b border-solid border-neutral-950 " +
   "pb-0 transition-colors duration-150 ease-out focus-within:border-black";
 
 export const langMenuButtonClass =
@@ -7,7 +7,7 @@ export const langMenuButtonClass =
   "tracking-[0] text-black transition hover:underline hover:underline-offset-4";
 
 export const footerBottomClass =
-  "dash-top dash-color-c7 mt-[72px] flex flex-col gap-5 pt-[24px] sm:flex-row " +
+  "dash-top dash-color-c7 mt-[72px] flex flex-col gap-5 pt-[36px] md:pt-[24px] sm:flex-row " +
   "sm:items-center sm:justify-between sm:gap-6 md:gap-8";
 
 export const currencyButtonClass =

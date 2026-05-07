@@ -82,13 +82,10 @@ export function useProductPurchaseController(
   };
 
   return {
-    selectedVariations,
     selectedVariant,
-    combosAvailable,
     catalogue,
     payable,
     validationMessage,
-    setValidationMessage,
     clearValidationAndSetVariation,
     handleAddToCart,
     openDrawer,

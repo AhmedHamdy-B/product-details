@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import { Star } from "lucide-react";
-import { useMemo, useState, type JSX } from "react";
+import { useId, useMemo, useState, type JSX } from "react";
 
 import type { Product, Variation } from "../types/product";
 import { formatMoney } from "../lib/money";
@@ -466,19 +466,20 @@ function pdpPopoverRevealClass(extra: string) {
 
 function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
   const { t } = useLocale();
+  const tooltipId = useId();
 
   return (
     <div className={cn("group/sizeguide relative z-[200] isolate", className)}>
       <button
         type="button"
         className={sizeGuideButtonClass}
-        aria-describedby="size-guide-tooltip-panel"
+        aria-describedby={tooltipId}
       >
         {t("pdp.sizeChart")}
       </button>
 
       <div
-        id="size-guide-tooltip-panel"
+        id={tooltipId}
         role="tooltip"
         className={cn(
           pdpPopoverRevealClass("end-0 w-[min(calc(100vw-2rem),380px)]"),
@@ -538,6 +539,7 @@ function SizeGuideTooltip({ className }: { className?: string }): JSX.Element {
 
 function DeliveryTermsTooltip(): JSX.Element {
   const { t } = useLocale();
+  const tooltipId = useId();
   const deliveryBullets = [
     t("pdp.deliveryBullets.point1"),
     t("pdp.deliveryBullets.point2"),
@@ -547,13 +549,13 @@ function DeliveryTermsTooltip(): JSX.Element {
       <button
         type="button"
         className={deliveryButtonClass}
-        aria-describedby="delivery-tooltip-panel"
+        aria-describedby={tooltipId}
       >
         {t("pdp.deliveryTc")}
       </button>
 
       <div
-        id="delivery-tooltip-panel"
+        id={tooltipId}
         role="tooltip"
         className={cn(
           pdpPopoverRevealClass("start-0 w-[min(calc(100vw-2rem),288px)]"),

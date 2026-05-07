@@ -42,7 +42,7 @@ export function CartDrawer(): JSX.Element {
                 >
                   <img
                     src={line.image}
-                    alt=""
+                    alt={line.name}
                     className="h-24 w-24 border border-neutral-900/10 bg-jl-gray object-cover"
                   />
 

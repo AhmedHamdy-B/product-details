@@ -354,7 +354,7 @@ function RailCardBody({
           className="inline-block h-1 w-1 shrink-0 rounded-full bg-[#BBBBBB]"
           aria-hidden
         />
-        <span className="font-regular text-[#666666] text-[16px] tabular-nums">
+        <span className="font-normal text-[#666666] text-[16px] tabular-nums">
           {sold.toLocaleString("en-US")} {t("pdp.soldSuffix")}
         </span>
       </div>
