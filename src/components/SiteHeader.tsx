@@ -1,4 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
+import { createPortal } from "react-dom";
 import {
   ChevronDown,
   Heart,
@@ -243,6 +244,90 @@ export function SiteHeader({
   const promoText = t("header.promo");
   const promoSplitAfterTenPercent = promoText.split("10%");
   const canSplitAfterTenPercent = promoSplitAfterTenPercent.length === 2;
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
+  const mobileMenuOverlay =
+    mobileOpen && typeof document !== "undefined"
+      ? createPortal(
+          <div className="fixed inset-0 z-[260] lg:hidden">
+            <button
+              type="button"
+              aria-label={t("header.menuClose")}
+              className="absolute inset-0 z-[260] bg-black/35"
+              onClick={() => setMobileOpen(false)}
+            />
+            <aside className={mobileMenuPanelClass}>
+              <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-3">
+                <p className="text-[14px] font-semibold uppercase tracking-[0.16em] text-neutral-800">
+                  {t("header.mobilePrimaryNav")}
+                </p>
+                <IconButton
+                  type="button"
+                  tone="subtle"
+                  aria-label={t("header.menuClose")}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <X className="h-5 w-5" strokeWidth={1.65} aria-hidden />
+                </IconButton>
+              </div>
+              <nav
+                className="space-y-5 text-[14px]"
+                aria-label={t("header.mobilePrimaryNav")}
+              >
+                <div className="space-y-1 border-b border-neutral-200 pb-4">
+                  {DESKTOP_MOBILE_ENTRIES.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-[10px] px-2 py-3 text-[24px] font-semibold transition hover:bg-neutral-100"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {t(key)}
+                      <span aria-hidden>›</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="grid gap-5">
+                  {navClusters.map((cluster) => (
+                    <div key={cluster.headingKey}>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-neutral-600">
+                        {t(cluster.headingKey)}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {cluster.links.map((lk) => (
+                          <button
+                            key={lk}
+                            type="button"
+                            className="block rounded-[10px] px-2 py-2 text-neutral-900 transition hover:bg-neutral-100"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            {t(lk)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="mt-2 w-full rounded-[10px] border border-black py-3 text-sm font-semibold transition hover:bg-neutral-50"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("header.signInRegister")}
+                </button>
+              </nav>
+            </aside>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
     <header className={cn("sticky top-0 z-40 bg-white", className)}>
@@ -298,55 +383,7 @@ export function SiteHeader({
         </PageContainer>
       </div>
 
-      {mobileOpen && (
-        <div className={mobileMenuPanelClass}>
-          <PageContainer>
-            <nav
-              className="space-y-5 text-[14px]"
-              aria-label={t("header.mobilePrimaryNav")}
-            >
-              <div className="space-y-1 border-b border-neutral-200 pb-4">
-                {DESKTOP_MOBILE_ENTRIES.map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className="flex w-full items-center justify-between py-3 text-[15px] font-semibold"
-                  >
-                    {t(key)}
-                    <span aria-hidden>›</span>
-                  </button>
-                ))}
-              </div>
-              <div className="grid gap-5">
-                {navClusters.map((cluster) => (
-                  <div key={cluster.headingKey}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-neutral-600">
-                      {t(cluster.headingKey)}
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {cluster.links.map((lk) => (
-                        <button
-                          key={lk}
-                          type="button"
-                          className="block py-2 text-neutral-900"
-                        >
-                          {t(lk)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="mt-2 w-full border border-black py-3 text-sm font-semibold"
-              >
-                {t("header.signInRegister")}
-              </button>
-            </nav>
-          </PageContainer>
-        </div>
-      )}
+      {mobileMenuOverlay}
     </header>
   );
 }

@@ -21,5 +21,5 @@ export const promoClockClass =
   "text-white shadow-inner ring-1 ring-white/10";
 
 export const mobileMenuPanelClass =
-  "fixed inset-x-0 top-0 z-50 max-h-[100dvh] overflow-y-auto border-b border-black/10 " +
-  "bg-white pb-8 pt-[72px] shadow-lg lg:hidden";
+  "fixed inset-y-0 end-0 z-[270] w-full overflow-y-auto border-s border-neutral-200 " +
+  "bg-white px-5 pb-6 pt-5 shadow-2xl sm:w-[min(88vw,360px)]";
