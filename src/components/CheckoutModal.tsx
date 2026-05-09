@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { X } from "lucide-react";
-import { FormEvent, useEffect, useId, useState, type JSX } from "react";
+import { FormEvent, useId, useState, type JSX } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { useLocale } from "../i18n/useLocale";
@@ -53,15 +53,10 @@ export function CheckoutModal(): JSX.Element | null {
   const [success, setSuccess] = useState(false);
   const [orderRef, setOrderRef] = useState("");
 
-  useEffect(() => {
-    if (!checkoutOpen) {
-      setSuccess(false);
-      setOrderRef("");
-    }
-  }, [checkoutOpen]);
-
   const handleDialogClose = () => {
     if (success) clear();
+    setSuccess(false);
+    setOrderRef("");
     closeCheckout();
   };
 
@@ -73,6 +68,8 @@ export function CheckoutModal(): JSX.Element | null {
   };
 
   const handleEmptyViewBasket = () => {
+    setSuccess(false);
+    setOrderRef("");
     closeCheckout();
     openDrawer();
   };
