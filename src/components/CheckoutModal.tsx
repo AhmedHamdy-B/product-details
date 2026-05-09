@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { X } from "lucide-react";
-import { FormEvent, useId, useState, type JSX } from "react";
+import { useId, useState, type FormEvent, type JSX } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 import { useLocale } from "../i18n/useLocale";
