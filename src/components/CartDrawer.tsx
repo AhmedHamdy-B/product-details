@@ -10,13 +10,14 @@ import { Button } from "./ui/Button";
 
 export function CartDrawer(): JSX.Element {
   const { t } = useLocale();
-  const { open, close, lines, changeQuantity, remove } = useCartStore(
+  const { open, close, lines, changeQuantity, remove, beginCheckout } = useCartStore(
     useShallow((state) => ({
       open: state.drawerOpen,
       close: state.closeDrawer,
       lines: state.lines,
       changeQuantity: state.setQuantity,
       remove: state.removeLine,
+      beginCheckout: state.beginCheckout,
     })),
   );
 
@@ -81,7 +82,11 @@ export function CartDrawer(): JSX.Element {
               <span>{formatMoney(grandTotal)}</span>
             </div>
             <p className="text-[13px] text-neutral-600">{t("cart.checkoutNote")}</p>
-            <Button type="button" className="w-full justify-center rounded-none py-4">
+            <Button
+              type="button"
+              className="w-full justify-center rounded-none py-4"
+              onClick={() => beginCheckout()}
+            >
               {t("cart.checkoutButton")}
             </Button>
           </div>

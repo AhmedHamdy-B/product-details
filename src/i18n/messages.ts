@@ -19,6 +19,25 @@ export type MessageKey =
   | 'cart.checkoutButton'
   | 'cart.decLineQty'
   | 'cart.incLineQty'
+  /** Checkout modal (generic demo purchase flow) */
+  | 'checkout.title'
+  | 'checkout.closeAria'
+  | 'checkout.summaryHeading'
+  | 'checkout.contactHeading'
+  | 'checkout.labelFullName'
+  | 'checkout.labelEmail'
+  | 'checkout.labelAddress'
+  | 'checkout.labelCity'
+  | 'checkout.labelPostcode'
+  | 'checkout.demoDisclaimer'
+  | 'checkout.emptyTitle'
+  | 'checkout.emptyBody'
+  | 'checkout.backToBasket'
+  | 'checkout.placeOrder'
+  | 'checkout.successTitle'
+  | 'checkout.successBody'
+  | 'checkout.orderRef'
+  | 'checkout.done'
   /** PDP load error */
   | 'error.productNotFound'
   | 'error.feedUnreachableBody'
@@ -203,6 +222,27 @@ export const messagesEn: Record<MessageKey, string> = {
   'cart.checkoutButton': 'Secure checkout',
   'cart.decLineQty': 'Decrease line quantity',
   'cart.incLineQty': 'Increase line quantity',
+
+  'checkout.title': 'Checkout',
+  'checkout.closeAria': 'Close checkout',
+  'checkout.summaryHeading': 'Order summary',
+  'checkout.contactHeading': 'Shipping details',
+  'checkout.labelFullName': 'Full name',
+  'checkout.labelEmail': 'Email',
+  'checkout.labelAddress': 'Street address',
+  'checkout.labelCity': 'Town / City',
+  'checkout.labelPostcode': 'Postcode',
+  'checkout.demoDisclaimer':
+    'This checkout is for demonstration only. No card is charged and no orders are submitted.',
+  'checkout.emptyTitle': 'Your basket is empty',
+  'checkout.emptyBody': 'Add an item before completing checkout.',
+  'checkout.backToBasket': 'View basket',
+  'checkout.placeOrder': 'Pay now',
+  'checkout.successTitle': 'Thank you for your order',
+  'checkout.successBody':
+    "We've received your demo order. You'll get a confirmation email when a real storefront is connected.",
+  'checkout.orderRef': 'Order reference',
+  'checkout.done': 'Continue shopping',
 
   'error.productNotFound': 'We could not find that product anymore.',
   'error.feedUnreachableBody':
@@ -402,6 +442,27 @@ export const messagesAr: Record<MessageKey, string> = {
   'cart.checkoutButton': 'إتمام الدفع بأمان',
   'cart.decLineQty': 'تقليل كمية السطر',
   'cart.incLineQty': 'زيادة كمية السطر',
+
+  'checkout.title': 'الدفع',
+  'checkout.closeAria': 'إغلاق الدفع',
+  'checkout.summaryHeading': 'ملخص الطلب',
+  'checkout.contactHeading': 'تفاصيل الشحن',
+  'checkout.labelFullName': 'الاسم الكامل',
+  'checkout.labelEmail': 'البريد الإلكتروني',
+  'checkout.labelAddress': 'عنوان الشارع',
+  'checkout.labelCity': 'المدينة',
+  'checkout.labelPostcode': 'الرمز البريدي',
+  'checkout.demoDisclaimer':
+    'هذا نموذج توضيحي فقط. لا يتم خصم أي مبلغ ولا يُرسل طلب حقيقي.',
+  'checkout.emptyTitle': 'السلة فارغة',
+  'checkout.emptyBody': 'أضف منتجًا قبل إتمام الدفع.',
+  'checkout.backToBasket': 'عرض السلة',
+  'checkout.placeOrder': 'ادفع الآن',
+  'checkout.successTitle': 'شكرًا لطلبك',
+  'checkout.successBody':
+    'تلقّينا الطلب التجريبي. ستصل رسالة تأكيد عند ربط متجر حقيقي.',
+  'checkout.orderRef': 'رقم الطلب',
+  'checkout.done': 'متابعة التسوق',
 
   'error.productNotFound': 'تعذّر العثور على هذا المنتج.',
   'error.feedUnreachableBody':

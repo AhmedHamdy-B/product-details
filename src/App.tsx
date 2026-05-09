@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { JSX } from 'react'
 import { Outlet } from 'react-router-dom'
 
+import { CheckoutModal } from './components/CheckoutModal'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { GoToTopButton } from './components/GoToTopButton'
 import { SkipToMain } from './components/SkipToMain'
@@ -22,6 +23,7 @@ export default function App(): JSX.Element {
       <ErrorBoundary>
         <Outlet />
       </ErrorBoundary>
+      <CheckoutModal />
       <GoToTopButton />
     </QueryClientProvider>
   )

@@ -14,11 +14,11 @@ import {
 
 export function ToastBanner() {
   const { t, tf } = useLocale();
-  const { toast, dismiss, openDrawer, itemCount } = useCartStore(
+  const { toast, dismiss, beginCheckout, itemCount } = useCartStore(
     useShallow((state) => ({
       toast: state.toast,
       dismiss: state.dismissToast,
-      openDrawer: state.openDrawer,
+      beginCheckout: state.beginCheckout,
       itemCount: selectCartItemsCount(state),
     })),
   );
@@ -38,8 +38,7 @@ export function ToastBanner() {
       : tf("toast.multiItemsBasket", { count: itemCount });
 
   const handleCheckout = () => {
-    dismiss();
-    openDrawer();
+    beginCheckout();
   };
 
   return (

@@ -27,3 +27,6 @@ playwright-report/
 test-results/
 
 lighthouse-report*.html
+
+# Local study reference (not part of submission)
+studycase-patterns.html

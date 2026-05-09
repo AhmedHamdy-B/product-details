@@ -9,6 +9,7 @@ describe('cart store', () => {
     useCartStore.setState({
       lines: [],
       drawerOpen: false,
+      checkoutOpen: false,
       toast: null,
     })
   })

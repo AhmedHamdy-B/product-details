@@ -25,10 +25,9 @@ export function useProductPurchaseController(
 ) {
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { addLine, openDrawer } = useCartStore(
+  const { addLine } = useCartStore(
     useShallow((state) => ({
       addLine: state.addItem,
-      openDrawer: state.openDrawer,
     })),
   );
 
@@ -95,6 +94,5 @@ export function useProductPurchaseController(
     validationMessage,
     clearValidationAndSetVariation,
     handleAddToCart,
-    openDrawer,
   };
 }

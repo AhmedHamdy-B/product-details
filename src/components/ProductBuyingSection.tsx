@@ -1,6 +1,7 @@
 import DOMPurify from "dompurify";
 import { Star } from "lucide-react";
 import { useId, useMemo, useState, type JSX } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 import type { Product, Variation } from "../types/product";
 import { formatMoney } from "../lib/money";
@@ -14,6 +15,7 @@ import { useLocale } from "../i18n/useLocale";
 import type { Locale } from "../i18n/messages";
 import { Button } from "./ui/Button";
 import { useProductPurchaseController } from "../hooks/useProductPurchaseController";
+import { useCartStore } from "../stores/cartStore";
 import {
   deliveryButtonClass,
   descriptionVariants,
@@ -78,6 +80,13 @@ export function ProductBuyingSection({
   onSelectVariation,
 }: BuyingProps): JSX.Element {
   const { t, locale } = useLocale();
+  const { cartLineCount, beginCheckout, openDrawer } = useCartStore(
+    useShallow((s) => ({
+      cartLineCount: s.lines.length,
+      beginCheckout: s.beginCheckout,
+      openDrawer: s.openDrawer,
+    })),
+  );
   const {
     selectedVariant,
     catalogue,
@@ -85,7 +94,6 @@ export function ProductBuyingSection({
     validationMessage,
     clearValidationAndSetVariation,
     handleAddToCart,
-    openDrawer,
   } = useProductPurchaseController(
     product,
     t,
@@ -228,7 +236,9 @@ export function ProductBuyingSection({
 
         <Button
           type="button"
-          onClick={() => openDrawer()}
+          onClick={() =>
+            cartLineCount > 0 ? beginCheckout() : openDrawer()
+          }
           intent="secondary"
           weight="medium"
           className="w-full max-w-[220px] sm:max-w-none sm:min-w-0 sm:flex-[2]"

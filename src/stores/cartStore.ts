@@ -24,6 +24,8 @@ export type AddCartItemInput = Omit<CartLine, 'id' | 'quantity'> & { quantity?: 
 type CartSlice = {
   lines: CartLine[]
   drawerOpen: boolean
+  /** Ephemeral full-screen checkout; not persisted — avoids clashing with basket drawer. */
+  checkoutOpen: boolean
   toast: CartToastKind | null
 }
 
@@ -31,6 +33,11 @@ type CartActions = {
   openDrawer: () => void
   closeDrawer: () => void
   dismissToast: () => void
+
+  /** Close basket drawer and toast, then open checkout (single synchronous transition). */
+  beginCheckout: () => void
+  openCheckout: () => void
+  closeCheckout: () => void
 
   addItem: (payload: AddCartItemInput) => void
   setQuantity: (lineId: string, quantity: number) => void
@@ -135,6 +142,7 @@ export const useCartStore = create<CartStore>()(
     immer((set) => ({
       lines: [],
       drawerOpen: false,
+      checkoutOpen: false,
       toast: null,
 
       openDrawer: () =>
@@ -148,6 +156,23 @@ export const useCartStore = create<CartStore>()(
       dismissToast: () =>
         set((draft) => {
           draft.toast = null
+        }),
+
+      beginCheckout: () =>
+        set((draft) => {
+          draft.drawerOpen = false
+          draft.toast = null
+          draft.checkoutOpen = true
+        }),
+
+      openCheckout: () =>
+        set((draft) => {
+          draft.checkoutOpen = true
+        }),
+
+      closeCheckout: () =>
+        set((draft) => {
+          draft.checkoutOpen = false
         }),
 
       addItem: (payload) => {

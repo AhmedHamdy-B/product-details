@@ -7,7 +7,12 @@ import { useCartStore } from '../stores/cartStore'
 describe('CartDrawer', () => {
   beforeEach(() => {
     localStorage.clear()
-    useCartStore.setState({ lines: [], drawerOpen: false, toast: null })
+    useCartStore.setState({
+      lines: [],
+      drawerOpen: false,
+      checkoutOpen: false,
+      toast: null,
+    })
   })
 
   it('shows the empty-state copy while the drawer is open', () => {
